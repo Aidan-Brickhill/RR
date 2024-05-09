@@ -4,8 +4,7 @@ import mujoco
 import mujoco.viewer
 
 # m = mujoco.MjModel.from_xml_path('universal_robots_ur5e/scene.xml')
-m = mujoco.MjModel.from_xml_path('franka_emika_panda/scene.xml')
-
+m = mujoco.MjModel.from_xml_path('franka_emika_panda/handover_scene.xml')
 d = mujoco.MjData(m)
 
 with mujoco.viewer.launch_passive(m, d) as viewer:
@@ -29,3 +28,5 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
     time_until_next_step = m.opt.timestep - (time.time() - step_start)
     if time_until_next_step > 0:
       time.sleep(time_until_next_step)
+    break
+    
