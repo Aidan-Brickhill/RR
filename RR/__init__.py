@@ -1,7 +1,7 @@
 from gymnasium.envs.registration import register
 
 register(
-     id="RR/GridWorld-v0",
-     entry_point="RR.envs:handover",
+     id="RR/handover-v0",
+     entry_point="RR.envs.handover:handover",
      max_episode_steps=300,
 )

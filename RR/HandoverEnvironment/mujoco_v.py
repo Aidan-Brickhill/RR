@@ -4,13 +4,16 @@ import mujoco
 import mujoco.viewer
 
 # m = mujoco.MjModel.from_xml_path('universal_robots_ur5e/scene.xml')
-m = mujoco.MjModel.from_xml_path('franka_emika_panda/handover_scene.xml')
+# m = mujoco.MjModel.from_xml_path('franka_emika_panda/panda.xml')
+
+m = mujoco.MjModel.from_xml_path('/home/aidan/Ubuntu/RR/RR/HandoverEnvironment/franka_emika_panda/handover_scene.xml')
+
 d = mujoco.MjData(m)
 
 with mujoco.viewer.launch_passive(m, d) as viewer:
   # Close the viewer automatically after 30 wall-seconds.
   start = time.time()
-  while viewer.is_running() and time.time() - start < 200:
+  while viewer.is_running() and time.time() - start < 30:
     step_start = time.time()
 
     # mj_step can be replaced with code that also evaluates
@@ -28,5 +31,4 @@ with mujoco.viewer.launch_passive(m, d) as viewer:
     time_until_next_step = m.opt.timestep - (time.time() - step_start)
     if time_until_next_step > 0:
       time.sleep(time_until_next_step)
-    break
     

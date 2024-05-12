@@ -12,7 +12,7 @@ DEFAULT_CAMERA_CONFIG = {
 }
 
 
-class PusherEnv(MujocoEnv, utils.EzPickle):
+class handover(MujocoEnv, utils.EzPickle):
     metadata = {
         "render_modes": [
             "human",

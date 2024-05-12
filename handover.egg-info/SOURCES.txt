@@ -1,0 +1,7 @@
+README.md
+setup.py
+handover.egg-info/PKG-INFO
+handover.egg-info/SOURCES.txt
+handover.egg-info/dependency_links.txt
+handover.egg-info/requires.txt
+handover.egg-info/top_level.txt

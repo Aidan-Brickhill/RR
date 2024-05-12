@@ -1,6 +1,6 @@
 import RR 
 import gymnasium as gym
-env = gym.make("RR/handover_scene", render_mode="human")
+env = gym.make("RR/handover-v0", render_mode="human")
 observation, info = env.reset()
 
 for _ in range(1000):
