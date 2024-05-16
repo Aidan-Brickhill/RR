@@ -22,7 +22,7 @@ from gymnasium import spaces
 from gymnasium.utils.ezpickle import EzPickle
 
 from gymnasium_robotics.core import GoalEnv
-from gymnasium_robotics.envs.franka_kitchen.franka_env import FrankaRobot
+from franka_env import FrankaRobot
 
 OBS_ELEMENT_INDICES = {
     "kettle": np.array([23, 24, 25, 26, 27, 28, 29]),
@@ -108,8 +108,8 @@ class HandoverEnv(GoalEnv, EzPickle):
     | 4     | `robot:panda0_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint5                             | hinge      | angle (rad)                |
     | 5     | `robot:panda0_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint6                             | hinge      | angle (rad)                |
     | 6     | `robot:panda0_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint7                             | hinge      | angle (rad)                |
-    | 7     | `robot:r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:r_gripper_finger_joint                      | slide      | position (m)               |
-    | 8     | `robot:l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:l_gripper_finger_joint                      | slide      | position (m)               |
+    | 7     | `robot:panda0_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda0_r_gripper_finger_joint                      | slide      | position (m)               |
+    | 8     | `robot:panda0_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda0_l_gripper_finger_joint                      | slide      | position (m)               |
     | 9     | `robot:panda0_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint1                             | hinge      | angular velocity (rad/s)   |
     | 10    | `robot:panda0_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint2                             | hinge      | angular velocity (rad/s)   |
     | 11    | `robot:panda0_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint3                             | hinge      | angular velocity (rad/s)   |
@@ -117,49 +117,39 @@ class HandoverEnv(GoalEnv, EzPickle):
     | 13    | `robot:panda0_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint5                             | hinge      | angular velocity (rad/s)   |
     | 14    | `robot:panda0_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint6                             | hinge      | angular velocity (rad/s)   |
     | 15    | `robot:panda0_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint7                             | hinge      | angle (rad)                |
-    | 16    | `robot:r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 17    | `robot:l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 18    | Rotation of the knob for the bottom right burner      | -Inf     | Inf      | knob_Joint_1                             | hinge      | angle (rad)                |
-    | 19    | Joint opening of the bottom right burner              | -Inf     | Inf      | bottom_right_burner                      | slide      | position (m)               |
-    | 20    | Rotation of the knob for the bottom left burner       | -Inf     | Inf      | knob_Joint_2                             | hinge      | angle (rad)                |
-    | 21    | Joint opening of the bottom left burner               | -Inf     | Inf      | bottom_left_burner                       | slide      | position (m)               |
-    | 22    | Rotation of the knob for the top right burner         | -Inf     | Inf      | knob_Joint_3                             | hinge      | angle (rad)                |
-    | 23    | Joint opening of the top right burner                 | -Inf     | Inf      | top_right_burner                         | slide      | position (m)               |
-    | 24    | Rotation of the knob for the top left burner          | -Inf     | Inf      | knob_Joint_4                             | hinge      | angle (rad)                |
-    | 25    | Joint opening of the top left burner                  | -Inf     | Inf      | top_left_burner                          | slide      | position (m)               |
-    | 26    | Joint angle value of the overhead light switch        | -Inf     | Inf      | light_switch                             | slide      | position (m)               |
-    | 27    | Opening of the overhead light joint                   | -Inf     | Inf      | light_joint                              | hinge      | angle (rad)                |
-    | 28    | Translation of the slide cabinet joint                | -Inf     | Inf      | slide_cabinet                            | slide      | position (m)               |
-    | 29    | Rotation of the joint in the left hinge cabinet       | -Inf     | Inf      | left_hinge_cabinet                       | hinge      | angle (rad)                |
-    | 30    | Rotation of the joint in the right hinge cabinet      | -Inf     | Inf      | right_hinge_cabinet                      | hinge      | angle (rad)                |
-    | 31    | Rotation of the joint in the microwave door           | -Inf     | Inf      | microwave                                | hinge      | angle (rad)                |
-    | 32    | Kettle's x coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 33    | Kettle's y coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 34    | Kettle's z coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 35    | Kettle's x quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 36    | Kettle's y quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 37    | Kettle's z quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 38    | Kettle's w quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 39    | Bottom right burner knob angular velocity             | -Inf     | Inf      | knob_Joint_1                             | hinge      | angular velocity (rad/s)   |
-    | 40    | Opening linear velocity  of the bottom right burner   | -Inf     | Inf      | bottom_right_burner                      | slide      | velocity (m/s)             |
-    | 41    | Bottom left burner knob angular velocity              | -Inf     | Inf      | knob_Joint_2                             | hinge      | angular velocity (rad/s)   |
-    | 42    | Opening linear velocity of the bottom left burner     | -Inf     | Inf      | bottom_left_burner                       | slide      | velocity (m/s)             |
-    | 43    | Top right burner knob angular velocity                | -Inf     | Inf      | knob_Joint_3                             | hinge      | angular velocity (rad/s)   |
-    | 44    | Opening linear velocity of the top right burner       | -Inf     | Inf      | top_right_burner                         | slide      | velocity (m/s)             |
-    | 45    | Top left burner knob angular velocity                 | -Inf     | Inf      | knob_Joint_4                             | hinge      | angular velocity (rad/s)   |
-    | 46    | Opening linear velocity of the top left burner        | -Inf     | Inf      | top_left_burner                          | slide      | velocity (m/s)             |
-    | 47    | Angular velocity of the overhead light switch         | -Inf     | Inf      | light_switch                             | slide      | velocity (m/s)             |
-    | 48    | Opening linear velocity of the overhead light         | -Inf     | Inf      | light_joint                              | hinge      | angular velocity (rad/s)   |
-    | 49    | Linear velocity of the slide cabinet joint            | -Inf     | Inf      | slide_cabinet                            | slide      | velocity (m/s)             |
-    | 50    | Angular velocity of the left hinge cabinet joint      | -Inf     | Inf      | left_hinge_cabinet                       | hinge      | angular velocity (rad/s)   |
-    | 51    | Angular velocity of the right hinge cabinet joint     | -Inf     | Inf      | right_hinge_cabinet                      | hinge      | angular velocity (rad/s)   |
-    | 52    | Anular velocity of the microwave door joint           | -Inf     | Inf      | microwave                                | hinge      | angular velocity (rad/s)   |
-    | 53    | Kettle's x linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 54    | Kettle's y linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 55    | Kettle's z linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 56    | Kettle's x axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
-    | 57    | Kettle's y axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
-    | 58    | Kettle's z axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
+    | 16    | `robot:panda0_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda0_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 17    | `robot:panda0_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda0_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 18    | `robot:panda1_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint1                             | hinge      | angle (rad)                |
+    | 19    | `robot:panda1_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint2                             | hinge      | angle (rad)                |
+    | 20    | `robot:panda1_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint3                             | hinge      | angle (rad)                |
+    | 21    | `robot:panda1_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint4                             | hinge      | angle (rad)                |
+    | 22    | `robot:panda1_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint5                             | hinge      | angle (rad)                |
+    | 23    | `robot:panda1_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint6                             | hinge      | angle (rad)                |
+    | 24    | `robot:panda1_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint7                             | hinge      | angle (rad)                |
+    | 25    | `robot:panda1_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda1_r_gripper_finger_joint                      | slide      | position (m)               |
+    | 26    | `robot:panda1_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda1_l_gripper_finger_joint                      | slide      | position (m)               |
+    | 27    | `robot:panda1_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint1                             | hinge      | angular velocity (rad/s)   |
+    | 28    | `robot:panda1_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint2                             | hinge      | angular velocity (rad/s)   |
+    | 29    | `robot:panda1_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint3                             | hinge      | angular velocity (rad/s)   |
+    | 30    | `robot:panda1_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint4                             | hinge      | angular velocity (rad/s)   |
+    | 31    | `robot:panda1_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint5                             | hinge      | angular velocity (rad/s)   |
+    | 32    | `robot:panda1_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint6                             | hinge      | angular velocity (rad/s)   |
+    | 33    | `robot:panda1_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint7                             | hinge      | angle (rad)                |
+    | 34    | `robot:panda1_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda1_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 35    | `robot:panda1_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda1_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
+    | 36    | Kettle's x coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
+    | 37    | Kettle's y coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
+    | 38    | Kettle's z coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
+    | 39    | Kettle's x quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
+    | 40    | Kettle's y quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
+    | 41    | Kettle's z quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
+    | 42    | Kettle's w quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
+    | 43    | Kettle's x linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
+    | 44    | Kettle's y linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
+    | 45    | Kettle's z linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
+    | 46    | Kettle's x axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
+    | 47    | Kettle's y axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
+    | 48    | Kettle's z axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
 
     * `desired_goal`: this key represents the final goal to be achieved. The value is another `Dict` space with keys the tasks to be completed in the episode and values the joint
     goal configuration of each joint in the task as specified in the `Goal` section.
@@ -233,6 +223,37 @@ class HandoverEnv(GoalEnv, EzPickle):
 
         self.robot_env.init_qpos = np.array(
             [
+                1.48388023e-01,
+                -1.76848573e00,
+                1.84390296e00,
+                -2.47685760e00,
+                2.60252026e-01,
+                7.12533105e-01,
+                1.59515394e00,
+                4.79267505e-02,
+                3.71350919e-02,
+                -2.66279850e-04,
+                -5.18043486e-05,
+                3.12877220e-05,
+                -4.51199853e-05,
+                -3.90842156e-06,
+                -4.22629655e-05,
+                6.28065475e-05,
+                4.04984708e-05,
+                4.62730939e-04,
+                -2.26906415e-04,
+                -4.65501369e-04,
+                -6.44129196e-03,
+                -1.77048263e-03,
+                1.08009684e-03,
+                -2.69397440e-01,
+                3.50383255e-01,
+                1.61944683e00,
+                1.00618764e00,
+                4.06395120e-03,
+                -6.62095997e-03,
+                -2.68278933e-04,
+                # ASSUMING DUPLICATION (two robots)
                 1.48388023e-01,
                 -1.76848573e00,
                 1.84390296e00,
@@ -357,18 +378,18 @@ class HandoverEnv(GoalEnv, EzPickle):
         return float(len(self.step_task_completions))
 
     def _get_obs(self, robot_obs):
-        obj_qpos = self.data.qpos[9:].copy()
-        obj_qvel = self.data.qvel[9:].copy()
+        obj_qpos = self.data.qpos[18:].copy()
+        obj_qvel = self.data.qvel[18:].copy()
 
         # Simulate observation noise
         obj_qpos += (
             self.object_noise_ratio
-            * self.robot_env.robot_pos_noise_amp[8:]
+            * self.robot_env.robot_pos_noise_amp[16:]
             * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qpos.shape)
         )
         obj_qvel += (
             self.object_noise_ratio
-            * self.robot_env.robot_vel_noise_amp[9:]
+            * self.robot_env.robot_vel_noise_amp[18:]
             * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
         )
 

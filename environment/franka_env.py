@@ -21,10 +21,11 @@ import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
 
-from gymnasium_robotics.envs.franka_kitchen.utils import (
+from utils import (
     get_config_root_node,
     read_config_from_node,
 )
+
 from gymnasium_robotics.utils.mujoco_utils import MujocoModelNames, robot_get_obs
 
 MAX_CARTESIAN_DISPLACEMENT = 0.2
@@ -50,7 +51,8 @@ class FrankaRobot(MujocoEnv):
 
     def __init__(
         self,
-        model_path="../assets/kitchen_franka/franka_assets/franka_panda.xml",
+        # todo - check if this okay
+        model_path="../assets/franka_assets/chain.xml",
         frame_skip=40,
         robot_noise_ratio: float = 0.01,
         default_camera_config: dict = DEFAULT_CAMERA_CONFIG,
@@ -64,7 +66,7 @@ class FrankaRobot(MujocoEnv):
         self.robot_noise_ratio = robot_noise_ratio
 
         observation_space = (
-            spaces.Box(low=-np.inf, high=np.inf, shape=(9,), dtype=np.float32),
+            spaces.Box(low=-np.inf, high=np.inf, shape=(18,), dtype=np.float32),
         )
 
         super().__init__(
@@ -78,14 +80,14 @@ class FrankaRobot(MujocoEnv):
         self.init_qpos = self.data.qpos
         self.init_qvel = self.data.qvel
 
-        self.act_mid = np.zeros(9)
-        self.act_rng = np.ones(9) * 2
+        self.act_mid = np.zeros(18)
+        self.act_rng = np.ones(18) * 2
         config_path = path.join(
             path.dirname(__file__),
-            "../assets/kitchen_franka/franka_assets/franka_config.xml",
+            "../assets/franka_assets/franka_config.xml",
         )
 
-        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(9,), dtype=np.float64)
+        self.action_space = spaces.Box(low=-1.0, high=1.0, shape=(18,), dtype=np.float64)
         self._read_specs_from_config(config_path)
         self.model_names = MujocoModelNames(self.model)
 
@@ -117,12 +119,12 @@ class FrankaRobot(MujocoEnv):
         # Simulate observation noise
         robot_qpos += (
             self.robot_noise_ratio
-            * self.robot_pos_noise_amp[:9]
+            * self.robot_pos_noise_amp[:18]
             * self.np_random.uniform(low=-1.0, high=1.0, size=robot_qpos.shape)
         )
         robot_qvel += (
             self.robot_noise_ratio
-            * self.robot_vel_noise_amp[:9]
+            * self.robot_vel_noise_amp[:18]
             * self.np_random.uniform(low=-1.0, high=1.0, size=robot_qvel.shape)
         )
 
@@ -151,7 +153,7 @@ class FrankaRobot(MujocoEnv):
             ctrl_position (np.ndarray): input joint position given to the MuJoCo simulation actuators.
         """
         ctrl_feasible_vel = np.clip(
-            ctrl_velocity, self.robot_vel_bound[:9, 0], self.robot_vel_bound[:9, 1]
+            ctrl_velocity, self.robot_vel_bound[:18, 0], self.robot_vel_bound[:18, 1]
         )
         ctrl_feasible_position = self._last_robot_qpos + ctrl_feasible_vel * self.dt
         return ctrl_feasible_position
@@ -166,7 +168,7 @@ class FrankaRobot(MujocoEnv):
             ctrl_feasible_position (np.ndarray): clipped joint position control input.
         """
         ctrl_feasible_position = np.clip(
-            ctrl_position, self.robot_pos_bound[:9, 0], self.robot_pos_bound[:9, 1]
+            ctrl_position, self.robot_pos_bound[:18, 0], self.robot_pos_bound[:18, 1]
         )
         return ctrl_feasible_position
 
