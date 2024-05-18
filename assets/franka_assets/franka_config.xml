@@ -35,6 +35,28 @@
 	<qpos16 name='q16' pos_bound='00.0 0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos17 name='q17' pos_bound='0.0  0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 
+	<!-- tod - fix temp fills -->
+	<!-- <qpos23 name='q23' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
+	<qpos24 name='q24' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
+	<qpos25 name='q25' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
+	<qpos26 name='q26' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
+	<qpos27 name='q27' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
+	<qpos28 name='q28' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' /> -->
+	<!-- THE ABOVE ARE THE KETTLE INFO, USE THAT IN THE 
+		- the below should be the same as above
+	OBS_ELEMENT_INDICES = {
+		"kettle": np.array([23, 24, 25, 26, 27, 28, 29]),
+	}
+ -->
+	<qpos18 name='q18' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
+	<qpos19 name='q19' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
+	<qpos20 name='q20' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
+	<qpos21 name='q21' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1'/>
+	<qpos22 name='q22' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1'/>
+	<qpos23 name='q23' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1'/>
+	<qpos24 name='q24' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
+
+
 	<!-- Desk -->
 	<!-- <qpos9   name='deskSlideB' pos_bound='-.5 0.0' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
 	<qpos10  name='deskSlideT' pos_bound='-.5 0.0' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' /> -->

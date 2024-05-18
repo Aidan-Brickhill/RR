@@ -2,8 +2,8 @@
     <compiler inertiafromgeom="auto" inertiagrouprange="4 4" angle="radian"/>
 
     <asset>
-        <mesh file="../../kitchen_assets/meshes/kettle.stl" name="kettle"/>
-        <mesh file="../../kitchen_assets/meshes/kettlehandle.stl" name="kettlehandle"/>
+        <mesh file="../../handover_assets/meshes/kettle.stl" name="kettle"/>
+        <mesh file="../../handover_assets/meshes/kettlehandle.stl" name="kettlehandle"/>
 
         <texture name="T_kettle_metal" type="cube" height="1" width="1" file="metal1.png" />
         <texture name="T_kettle_wood" type="cube" height="1" width="1" file="wood1.png" />
