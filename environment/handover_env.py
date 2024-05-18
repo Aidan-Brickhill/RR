@@ -27,55 +27,50 @@ from franka_env import FrankaRobot
 OBS_ELEMENT_INDICES = {
     "kettle": np.array([18, 19, 20, 21, 22, 23, 24]),
 }
+# todo - goal position and quaternion
+# todo, set multiple goal:
+# robot 1 reaches kettle
+# robot 1 lifts kettle
+# robot 2 reaches kettle
+# robot 2 takes kettle
+# robot 2 places kettle
+
 OBS_ELEMENT_GOALS = {
-    "kettle": np.array([-0.23, 0.75, 1.62, 0.99, 0.0, 0.0, -0.06]),
-}
+    "kettle": np.array([-0.75, -0.4, 0.775, 1, 0.0, 0.0, 0]),
+} 
 BONUS_THRESH = 0.3
+STABILITY_THRESH = 0.3
+MAX_HEIGHT = 1.25
+MIN_HEIGHT = 0.7
+MIN_HANDOVER_HEIGHT = 0.85
+w1 = 0.1
+w2 = 0.1
+w3 = 0.1 
+w4 = 0.1
+w5 = 0.1
 
 
 class HandoverEnv(GoalEnv, EzPickle):
     """
     ## Description
 
-    This environment was introduced in ["Relay policy learning: Solving long-horizon tasks via imitation and reinforcement learning"](https://arxiv.org/abs/1910.11956)
-    by Abhishek Gupta, Vikash Kumar, Corey Lynch, Sergey Levine, Karol Hausman.
-
-    The environment is based on the 9 degrees of freedom [Franka robot](https://www.franka.de/). The Franka robot is placed in a kitchen environment containing several common
-    household items: a microwave, a kettle, an overhead light, cabinets, and an oven. The environment is a `multitask` goal in which the robot has to interact with the previously
-    mentioned items in order to reach a desired goal configuration. For example, one such state is to have the microwave and sliding cabinet door open with the kettle on the top burner
-    and the overhead light on. The goal tasks can be configured when the environment is created.
+    This environment is a used for a two robot arm handover.
 
     ## Goal
 
     The goal has a multitask configuration. The multiple tasks to be completed in an episode can be set by passing a list of tasks to the argument`tasks_to_complete`. For example, to open
     the microwave door and move the kettle create the environment as follows:
 
-    ```python
-    import gymnasium as gym
-    import gymnasium_robotics
-
-    gym.register_envs(gymnasium_robotics)
-
-    env = gym.make('FrankaKitchen-v1', tasks_to_complete=['microwave', 'kettle'])
-    ```
-
     The following is a table with all the possible tasks and their respective joint goal values:
 
     | Task             | Description                                                    | Joint Type | Goal                                     |
     | ---------------- | -------------------------------------------------------------- | ---------- | ---------------------------------------- |
-    | "bottom burner"  | Turn the oven knob that activates the bottom burner            | slide      | [-0.88, -0.01]                           |
-    | "top burner"     | Turn the oven knob that activates the top burner               | slide      | [-0.92, -0.01]                           |
-    | "light switch"   | Turn on the light switch                                       | slide      | [-0.69, -0.05]                           |
-    | "slide cabinet"  | Open the slide cabinet                                         | slide      | 0.37                                     |
-    | "hinge cabinet"  | Open the left hinge cabinet                                    | hinge      | [0.0, 1.45]                              |
-    | "microwave"      | Open the microwave door                                        | hinge      | 0.37                                     |
-    | "kettle"         | Move the kettle to the top left burner                         | free       | [-0.23, 0.75, 1.62, 0.99, 0., 0., -0.06] |
-
+    | "kettle"         | Move the kettle to the top left burner                         | free       | [ 0.75, -0.4, 0.775, 1, 0., 0., 0.] |
 
     ## Action Space
 
     The default joint actuators in the Franka MuJoCo model are position controlled. However, the action space of the environment are joint velocities clipped between -1 and 1 rad/s.
-    The space is a `Box(-1.0, 1.0, (9,), float32)`. The desired joint position control input is estimated in each time step with the current joint position values and the desired velocity
+    The space is a `Box(-1.0, 1.0, (18,), float32)`. The desired joint position control input is estimated in each time step with the current joint position values and the desired velocity
     action:
 
     | Num | Action                                         | Action Min  | Action Max  | Joint | Unit  |
@@ -87,15 +82,24 @@ class HandoverEnv(GoalEnv, EzPickle):
     | 4   | `robot:panda0_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
     | 5   | `robot:panda0_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
     | 6   | `robot:panda0_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 7   | `robot:r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
-    | 8   | `robot:l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 7   | `robot:panda0_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 8   | `robot:panda0_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 9   | `robot:panda1_joint1` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 10  | `robot:panda1_joint2` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 11  | `robot:panda1_joint3` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 12  | `robot:panda1_joint4` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 13  | `robot:panda1_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 14  | `robot:panda1_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 15  | `robot:panda1_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 16  | `robot:panda1_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 17  | `robot:panda1_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
 
     ## Observation Space
 
     The observation is a `goal-aware` observation space. The observation space contains the following keys:
 
-    * `observation`: this is a `Box(-inf, inf, shape=(59,), dtype="float64")` space and it is formed by the robot's joint positions and velocities, as well as
-        the pose and velocities of the kitchen items. An additional uniform noise of range `[-1,1]` is added to the observations. The noise is also scaled by a factor
+    * `observation`: this is a `Box(-inf, inf, shape=(49,), dtype="float64")` space and it is formed by the robot's joint positions and velocities, as well as
+        the pose and velocities of the kettle (object to be handed over). An additional uniform noise of range `[-1,1]` is added to the observations. The noise is also scaled by a factor
         of `robot_noise_ratio` and `object_noise_ratio` given in the environment arguments. The elements of the `observation` array are the following:
 
 
@@ -172,8 +176,7 @@ class HandoverEnv(GoalEnv, EzPickle):
 
     ## Starting State
 
-    The simulation starts with all of the joint position actuators of the Franka robot set to zero. The doors of the microwave and cabinets are closed, the burners turned off, and the light switch also off. The kettle
-    will be placed in the bottom left burner.
+    The simulation starts with all of the joint position actuators of the Franka robot set to zero. The kettle will be placed at the edge of the table.
 
     ## Episode End
 
@@ -193,10 +196,6 @@ class HandoverEnv(GoalEnv, EzPickle):
     | `robot_noise_ratio`            | **float**       | `0.01`                                      | Scaling factor applied to the uniform noise added to the robot joint observations   |
     | `max_episode_steps`            | **integer**     | `280`                                       | Maximum number of steps per episode                                                 |
 
-    ## Version History
-
-    * v1: updated version with most recent python MuJoCo bindings.
-    * v0: legacy versions in the [D4RL](https://github.com/Farama-Foundation/D4RL).
     """
 
     metadata = {
@@ -220,71 +219,6 @@ class HandoverEnv(GoalEnv, EzPickle):
             model_path="../assets/handover_assets/handover_env_model.xml",
             **kwargs,
         )
-        # self.robot_env.init_qpos = np.array(
-        #     [
-        #         1.48388023e-01,
-        #         -1.76848573e00,
-        #         1.84390296e00,
-        #         -2.47685760e00,
-        #         2.60252026e-01,
-        #         7.12533105e-01,
-        #         1.59515394e00,
-        #         4.79267505e-02,
-        #         3.71350919e-02,
-        #         -2.66279850e-04,
-        #         -5.18043486e-05,
-        #         3.12877220e-05,
-        #         -4.51199853e-05,
-        #         -3.90842156e-06,
-        #         -4.22629655e-05,
-        #         6.28065475e-05,
-        #         4.04984708e-05,
-        #         4.62730939e-04,
-        #         -2.26906415e-04,
-        #         -4.65501369e-04,
-        #         -6.44129196e-03,
-        #         -1.77048263e-03,
-        #         1.08009684e-03,
-        #         -2.69397440e-01,
-        #         3.50383255e-01,
-        #         1.61944683e00,
-        #         1.00618764e00,
-        #         4.06395120e-03,
-        #         -6.62095997e-03,
-        #         -2.68278933e-04,
-        #         # ASSUMING DUPLICATION (two robots)
-        #         # 1.48388023e-01,
-        #         # -1.76848573e00,
-        #         # 1.84390296e00,
-        #         # -2.47685760e00,
-        #         # 2.60252026e-01,
-        #         # 7.12533105e-01,
-        #         # 1.59515394e00,
-        #         # 4.79267505e-02,
-        #         # 3.71350919e-02,
-        #         # -2.66279850e-04,
-        #         # -5.18043486e-05,
-        #         # 3.12877220e-05,
-        #         # -4.51199853e-05,
-        #         # -3.90842156e-06,
-        #         # -4.22629655e-05,
-        #         # 6.28065475e-05,
-        #         # 4.04984708e-05,
-        #         # 4.62730939e-04,
-        #         # -2.26906415e-04,
-        #         # -4.65501369e-04,
-        #         # -6.44129196e-03,
-        #         # -1.77048263e-03,
-        #         # 1.08009684e-03,
-        #         # -2.69397440e-01,
-        #         # 3.50383255e-01,
-        #         # 1.61944683e00,
-        #         # 1.00618764e00,
-        #         # 4.06395120e-03,
-        #         # -6.62095997e-03,
-        #         # -2.68278933e-04,
-        #     ]
-        # )
 
         self.model = self.robot_env.model
         self.data = self.robot_env.data
@@ -367,14 +301,69 @@ class HandoverEnv(GoalEnv, EzPickle):
         desired_goal: "dict[str, np.ndarray]",
         info: "dict[str, Any]",
     ):
-        self.step_task_completions.clear()
-        for task in self.tasks_to_complete:
-            distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-            complete = distance < BONUS_THRESH
-            if complete:
-                self.step_task_completions.append(task)
+        # self.step_task_completions.clear()
+        # for task in self.tasks_to_complete:
+        #     distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+        #     complete = distance < BONUS_THRESH
+        #     if complete:
+        #         self.step_task_completions.append(task)
 
-        return float(len(self.step_task_completions))
+        # return float(len(self.step_task_completions))
+
+        # Initialize reward components
+        r_distance = 0
+        r_stability = 0
+        r_height = 0
+        r_collision = 0
+        r_drop = 0
+
+        # Distance reward
+        distance = np.linalg.norm(achieved_goal["kettle"][:3] - desired_goal["kettle"][:3])
+        if distance < BONUS_THRESH:
+            r_distance = 1.0
+        else:
+            r_distance = -1.0
+
+        # Stability reward
+        stability = np.abs(achieved_goal["kettle"][3:6] - desired_goal["kettle"][3:6]).sum()
+        if stability < STABILITY_THRESH:
+            r_stability = 1.0
+        else:
+            r_stability = -1.0
+
+        # Height reward
+        height = achieved_goal["kettle"][2]
+        if MIN_HANDOVER_HEIGHT < height < MAX_HEIGHT:
+            r_height = 1.0
+        else:
+            r_height = -1.0
+
+        # Collision penalty todo
+        # if self._check_collision():
+        #     r_collision = 10.0
+
+        # Drop penalty
+        if height < MIN_HEIGHT:
+            r_drop = 10.0
+
+
+        # Compute total reward
+        return (
+            w1 * r_distance
+            + w2 * r_stability
+            + w3 * r_height
+            - w4 * r_collision
+            - w5 * r_drop
+        )
+
+        # # Check if the kettle is within the desired goal threshold
+        # for task in self.tasks_to_complete:
+        #     distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+        #     complete = distance < BONUS_THRESH
+        #     if complete:
+        #         self.step_task_completions.append(task)
+
+        # return reward
 
     def _get_obs(self, robot_obs):
         obj_qpos = self.data.qpos[18:].copy()
@@ -450,10 +439,3 @@ class HandoverEnv(GoalEnv, EzPickle):
     def close(self):
         self.robot_env.close()
 
-from gymnasium.envs.registration import register
-
-register(
-    id="HandoverEnv-v0",
-    entry_point="handover_env:HandoverEnv",
-    max_episode_steps=280,
-)

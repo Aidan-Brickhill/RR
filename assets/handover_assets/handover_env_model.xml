@@ -56,12 +56,10 @@
             <geom type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
         </body>
         
-        <body name="kettle" pos="-0.75 0.4 0.775" >
+        <body name="kettle" pos="-0.75 0.4 0.775" quat="0 0 0 0.707">
             <freejoint name="kettle"/>
             <include file="item_assets/kettle_chain.xml" size='0.75 0.75 0.75'/>
         </body>
-
-
 
     </worldbody>
     

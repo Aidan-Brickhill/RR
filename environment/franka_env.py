@@ -17,10 +17,11 @@ This project is covered by the Apache 2.0 License.
 
 from os import path
 
+import mujoco._functions
 import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
-
+import mujoco._functions as mujoco_f
 from utils import (
     get_config_root_node,
     read_config_from_node,
@@ -32,10 +33,10 @@ MAX_CARTESIAN_DISPLACEMENT = 0.2
 MAX_ROTATION_DISPLACEMENT = 0.5
 
 DEFAULT_CAMERA_CONFIG = {
-    "distance": 2.2,
-    "azimuth": 70.0,
-    "elevation": -35.0,
-    "lookat": np.array([-0.2, 0.5, 2.0]),
+    "distance": 3.8,
+    "azimuth": 90.0,
+    "elevation": -40.0,
+    "lookat": np.array([0, 0, 0.7]),
 }
 
 
@@ -116,6 +117,8 @@ class FrankaRobot(MujocoEnv):
         robot_qpos, robot_qvel = robot_get_obs(
             self.model, self.data, self.model_names.joint_names
         )
+
+        # mujoco_f.mj_kinematics(self.model, self.data)
         # Simulate observation noise
         robot_qpos += (
             self.robot_noise_ratio

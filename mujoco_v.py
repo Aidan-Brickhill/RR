@@ -6,7 +6,7 @@ import mujoco.viewer
 # m = mujoco.MjModel.from_xml_path('universal_robots_ur5e/scene.xml')
 # m = mujoco.MjModel.from_xml_path('franka_emika_panda/panda.xml')
 
-m = mujoco.MjModel.from_xml_path('/home/aidan/00_Ubuntu_Honours/RR/kitch2/assets/kitchen_assets/kitchen_env_model.xml')
+m = mujoco.MjModel.from_xml_path('/home/aidan/00_Ubuntu_Honours/RR/RR/assets/handover_assets/handover_env_model.xml')
 
 d = mujoco.MjData(m)
 
