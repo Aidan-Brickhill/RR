@@ -1,20 +1,3 @@
-"""Environment using Gymnasium API and Multi-goal API for kitchen and Franka robot.
-
-The code is inspired by the D4RL repository hosted on GitHub (https://github.com/Farama-Foundation/D4RL), published in the paper
-'D4RL: Datasets for Deep Data-Driven Reinforcement Learning' by Justin Fu, Aviral Kumar, Ofir Nachum, George Tucker, Sergey Levine.
-
-This code was also implemented over the repository relay-policy-learning on GitHub (https://github.com/google-research/relay-policy-learning),
-published in Relay Policy Learning: Solving Long-Horizon Tasks via Imitation and Reinforcement Learning, by
-Abhishek Gupta, Vikash Kumar, Corey Lynch, Sergey Levine, Karol Hausman.
-
-Original Author of the code: Abhishek Gupta & Justin Fu
-
-The modifications made involve separatin the Kitchen environment from the Franka environment and addint support for compatibility with
-the Gymnasium and Multi-goal API's.
-
-This project is covered by the Apache 2.0 License.
-"""
-
 from typing import Any, Optional
 
 import numpy as np
@@ -25,36 +8,42 @@ from gymnasium_robotics.core import GoalEnv
 from franka_env import FrankaRobot
 
 OBS_ELEMENT_INDICES = {
-    "kettle": np.array([18, 19, 20, 21, 22, 23, 24]),
+    "panda_giver_fetch": np.array([9, 10, 11]),
+    "panda_giver_lift": np.array([9, 10, 11, 36, 37, 38]),
+    "panda_reciever_fetch": np.array([21, 22, 23]),
+    "panda_reciever_place": np.array([21, 22, 23, 36, 37, 38]),
 }
-# todo - goal position and quaternion
-# todo, set multiple goal:
-# robot 1 reaches kettle
-# robot 1 lifts kettle
-# robot 2 reaches kettle
-# robot 2 takes kettle
-# robot 2 places kettle
 
 OBS_ELEMENT_GOALS = {
-    "kettle": np.array([-0.75, -0.4, 0.775, 1, 0.0, 0.0, 0]),
+    "panda_giver_fetch": np.array([0.75, 0.4, 0.8]),
+    "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
+    "panda_reciever_fetch": np.array([0, 0, 0.85,]),
+    "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
-BONUS_THRESH = 0.3
-STABILITY_THRESH = 0.3
+
+PANDA_GIVER_FETCH_THRESH = 0.1
+PANDA_GIVER_LIFT_THRESH = 0.1
+OBJECT_LIFT_THRESH = 0.3
+
+PANDA_RECIEVER_FETCH_THRESH = 0.1
+PANDA_RECIEVER_PLACE_THRESH = 0.1
+OBJECT_PLACE_THRESH = 0.1
+
 MAX_HEIGHT = 1.25
 MIN_HEIGHT = 0.7
 MIN_HANDOVER_HEIGHT = 0.85
-w1 = 0.1
-w2 = 0.1
-w3 = 0.1 
-w4 = 0.1
-w5 = 0.1
+
+STABILITY_THRESH = 0.3
+END_EFFECTOR_DISTANCE_THRESH = 0.3
+
 
 
 class HandoverEnv(GoalEnv, EzPickle):
     """
     ## Description
 
-    This environment is a used for a two robot arm handover.
+    This environment has been created in order to learn a safe handover between two robot arms. It has been heavily inspired by the  
+    Frank Kitchen Environment. Their code (https://github.com/Farama-Foundation/Gymnasium-Robotics) was used as a base in order to implement this environment.
 
     ## Goal
 
@@ -65,7 +54,7 @@ class HandoverEnv(GoalEnv, EzPickle):
 
     | Task             | Description                                                    | Joint Type | Goal                                     |
     | ---------------- | -------------------------------------------------------------- | ---------- | ---------------------------------------- |
-    | "kettle"         | Move the kettle to the top left burner                         | free       | [ 0.75, -0.4, 0.775, 1, 0., 0., 0.] |
+    | "kettle"         | Move the kettle from one table to the next                     | free       | [ 0.75, -0.4, 0.775, 1, 0., 0., 0.] |
 
     ## Action Space
 
@@ -75,24 +64,24 @@ class HandoverEnv(GoalEnv, EzPickle):
 
     | Num | Action                                         | Action Min  | Action Max  | Joint | Unit  |
     | --- | ---------------------------------------------- | ----------- | ----------- | ----- | ----- |
-    | 0   | `robot:panda0_joint1` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 1   | `robot:panda0_joint2` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 2   | `robot:panda0_joint3` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 3   | `robot:panda0_joint4` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 4   | `robot:panda0_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 5   | `robot:panda0_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 6   | `robot:panda0_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 7   | `robot:panda0_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
-    | 8   | `robot:panda0_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
-    | 9   | `robot:panda1_joint1` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 10  | `robot:panda1_joint2` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 11  | `robot:panda1_joint3` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 12  | `robot:panda1_joint4` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 13  | `robot:panda1_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 14  | `robot:panda1_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 15  | `robot:panda1_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
-    | 16  | `robot:panda1_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
-    | 17  | `robot:panda1_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 0   | `robot:panda_giver_joint1` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 1   | `robot:panda_giver_joint2` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 2   | `robot:panda_giver_joint3` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 3   | `robot:panda_giver_joint4` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 4   | `robot:panda_giver_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 5   | `robot:panda_giver_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 6   | `robot:panda_giver_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 7   | `robot:panda_giver_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 8   | `robot:panda_giver_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 9   | `robot:panda_reciever_joint1` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 10  | `robot:panda_reciever_joint2` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 11  | `robot:panda_reciever_joint3` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 12  | `robot:panda_reciever_joint4` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 13  | `robot:panda_reciever_joint5` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 14  | `robot:panda_reciever_joint6` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 15  | `robot:panda_reciever_joint7` angular velocity         | -1          | 1           | hinge | rad/s |
+    | 16  | `robot:panda_reciever_r_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
+    | 17  | `robot:panda_reciever_l_gripper_finger_joint` linear velocity | -1          | 1           | slide | m/s   |
 
     ## Observation Space
 
@@ -105,42 +94,52 @@ class HandoverEnv(GoalEnv, EzPickle):
 
     | Num   | Observation                                           | Min      | Max      | Joint Name (in corresponding XML file)   | Joint Type | Unit                       |
     | ----- | ----------------------------------------------------- | -------- | -------- | ---------------------------------------- | ---------- | -------------------------- |
-    | 0     | `robot:panda0_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint1                             | hinge      | angle (rad)                |
-    | 1     | `robot:panda0_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint2                             | hinge      | angle (rad)                |
-    | 2     | `robot:panda0_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint3                             | hinge      | angle (rad)                |
-    | 3     | `robot:panda0_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint4                             | hinge      | angle (rad)                |
-    | 4     | `robot:panda0_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint5                             | hinge      | angle (rad)                |
-    | 5     | `robot:panda0_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint6                             | hinge      | angle (rad)                |
-    | 6     | `robot:panda0_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda0_joint7                             | hinge      | angle (rad)                |
-    | 7     | `robot:panda0_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda0_r_gripper_finger_joint                      | slide      | position (m)               |
-    | 8     | `robot:panda0_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda0_l_gripper_finger_joint                      | slide      | position (m)               |
-    | 9     | `robot:panda0_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint1                             | hinge      | angular velocity (rad/s)   |
-    | 10    | `robot:panda0_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint2                             | hinge      | angular velocity (rad/s)   |
-    | 11    | `robot:panda0_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint3                             | hinge      | angular velocity (rad/s)   |
-    | 12    | `robot:panda0_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint4                             | hinge      | angular velocity (rad/s)   |
-    | 13    | `robot:panda0_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint5                             | hinge      | angular velocity (rad/s)   |
-    | 14    | `robot:panda0_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint6                             | hinge      | angular velocity (rad/s)   |
-    | 15    | `robot:panda0_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda0_joint7                             | hinge      | angle (rad)                |
-    | 16    | `robot:panda0_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda0_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 17    | `robot:panda0_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda0_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 18    | `robot:panda1_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint1                             | hinge      | angle (rad)                |
-    | 19    | `robot:panda1_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint2                             | hinge      | angle (rad)                |
-    | 20    | `robot:panda1_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint3                             | hinge      | angle (rad)                |
-    | 21    | `robot:panda1_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint4                             | hinge      | angle (rad)                |
-    | 22    | `robot:panda1_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint5                             | hinge      | angle (rad)                |
-    | 23    | `robot:panda1_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint6                             | hinge      | angle (rad)                |
-    | 24    | `robot:panda1_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda1_joint7                             | hinge      | angle (rad)                |
-    | 25    | `robot:panda1_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda1_r_gripper_finger_joint                      | slide      | position (m)               |
-    | 26    | `robot:panda1_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda1_l_gripper_finger_joint                      | slide      | position (m)               |
-    | 27    | `robot:panda1_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint1                             | hinge      | angular velocity (rad/s)   |
-    | 28    | `robot:panda1_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint2                             | hinge      | angular velocity (rad/s)   |
-    | 29    | `robot:panda1_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint3                             | hinge      | angular velocity (rad/s)   |
-    | 30    | `robot:panda1_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint4                             | hinge      | angular velocity (rad/s)   |
-    | 31    | `robot:panda1_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint5                             | hinge      | angular velocity (rad/s)   |
-    | 32    | `robot:panda1_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint6                             | hinge      | angular velocity (rad/s)   |
-    | 33    | `robot:panda1_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda1_joint7                             | hinge      | angle (rad)                |
-    | 34    | `robot:panda1_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda1_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 35    | `robot:panda1_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda1_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
+    | 0     | `robot:panda_giver_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint1                             | hinge      | angle (rad)                |
+    | 1     | `robot:panda_giver_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint2                             | hinge      | angle (rad)                |
+    | 2     | `robot:panda_giver_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint3                             | hinge      | angle (rad)                |
+    | 3     | `robot:panda_giver_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint4                             | hinge      | angle (rad)                |
+    | 4     | `robot:panda_giver_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint5                             | hinge      | angle (rad)                |
+    | 5     | `robot:panda_giver_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint6                             | hinge      | angle (rad)                |
+    | 6     | `robot:panda_giver_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda_giver_joint7                             | hinge      | angle (rad)                |
+    | 7     | `robot:panda_giver_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_giver_r_gripper_finger_joint                      | slide      | position (m)               |
+    | 8     | `robot:panda_giver_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_giver_l_gripper_finger_joint                      | slide      | position (m)               |
+    9
+    10
+    11
+    +3+ x,y,z end effector pos robot 0
+    
+    | 9     | `robot:panda_giver_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint1                             | hinge      | angular velocity (rad/s)   |
+    | 10    | `robot:panda_giver_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint2                             | hinge      | angular velocity (rad/s)   |
+    | 11    | `robot:panda_giver_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint3                             | hinge      | angular velocity (rad/s)   |
+    | 12    | `robot:panda_giver_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint4                             | hinge      | angular velocity (rad/s)   |
+    | 13    | `robot:panda_giver_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint5                             | hinge      | angular velocity (rad/s)   |
+    | 14    | `robot:panda_giver_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint6                             | hinge      | angular velocity (rad/s)   |
+    | 15    | `robot:panda_giver_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint7                             | hinge      | angle (rad)                |
+    | 16    | `robot:panda_giver_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 17    | `robot:panda_giver_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    21
+    22
+    23
+    +3+ x,y,z end effector pos robot 1
+    
+    | 18    | `robot:panda_reciever_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angle (rad)                |
+    | 19    | `robot:panda_reciever_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angle (rad)                |
+    | 20    | `robot:panda_reciever_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angle (rad)                |
+    | 21    | `robot:panda_reciever_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angle (rad)                |
+    | 22    | `robot:panda_reciever_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angle (rad)                |
+    | 23    | `robot:panda_reciever_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angle (rad)                |
+    | 24    | `robot:panda_reciever_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
+    | 25    | `robot:panda_reciever_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | position (m)               |
+    | 26    | `robot:panda_reciever_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | position (m)               |
+    | 27    | `robot:panda_reciever_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angular velocity (rad/s)   |
+    | 28    | `robot:panda_reciever_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angular velocity (rad/s)   |
+    | 29    | `robot:panda_reciever_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angular velocity (rad/s)   |
+    | 30    | `robot:panda_reciever_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angular velocity (rad/s)   |
+    | 31    | `robot:panda_reciever_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angular velocity (rad/s)   |
+    | 32    | `robot:panda_reciever_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angular velocity (rad/s)   |
+    | 33    | `robot:panda_reciever_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
+    | 34    | `robot:panda_reciever_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 35    | `robot:panda_reciever_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
     | 36    | Kettle's x coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
     | 37    | Kettle's y coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
     | 38    | Kettle's z coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
@@ -301,69 +300,93 @@ class HandoverEnv(GoalEnv, EzPickle):
         desired_goal: "dict[str, np.ndarray]",
         info: "dict[str, Any]",
     ):
-        # self.step_task_completions.clear()
-        # for task in self.tasks_to_complete:
-        #     distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-        #     complete = distance < BONUS_THRESH
-        #     if complete:
-        #         self.step_task_completions.append(task)
 
-        # return float(len(self.step_task_completions))
+        self.step_task_completions.clear()
+        for task in self.tasks_to_complete:
 
-        # Initialize reward components
-        r_distance = 0
-        r_stability = 0
-        r_height = 0
-        r_collision = 0
-        r_drop = 0
+            if task == "panda_giver_fetch":
+                distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+                complete = distance < PANDA_GIVER_FETCH_THRESH
+                if complete:
+                    self.step_task_completions.append(task)
+                continue
 
-        # Distance reward
-        distance = np.linalg.norm(achieved_goal["kettle"][:3] - desired_goal["kettle"][:3])
-        if distance < BONUS_THRESH:
-            r_distance = 1.0
-        else:
-            r_distance = -1.0
+            if task == "panda_giver_lift":
+                robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
+                object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
+                complete = robot_distance < PANDA_GIVER_LIFT_THRESH and object_distance < OBJECT_LIFT_THRESH
+                if complete:
+                    self.step_task_completions.append(task)
+                continue
 
-        # Stability reward
-        stability = np.abs(achieved_goal["kettle"][3:6] - desired_goal["kettle"][3:6]).sum()
-        if stability < STABILITY_THRESH:
-            r_stability = 1.0
-        else:
-            r_stability = -1.0
+            if task == "panda_reciever_fetch":
+                distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+                complete = distance < PANDA_RECIEVER_FETCH_THRESH
+                if complete:
+                    self.step_task_completions.append(task)
+                continue
 
-        # Height reward
-        height = achieved_goal["kettle"][2]
-        if MIN_HANDOVER_HEIGHT < height < MAX_HEIGHT:
-            r_height = 1.0
-        else:
-            r_height = -1.0
+            if task == "panda_reciever_place":
+                robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
+                object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
+                complete = robot_distance < PANDA_RECIEVER_PLACE_THRESH and object_distance < OBJECT_PLACE_THRESH
+                if complete:
+                    self.step_task_completions.append(task)
+                continue
 
-        # Collision penalty todo
-        # if self._check_collision():
-        #     r_collision = 10.0
+        return float(len(self.step_task_completions))
 
-        # Drop penalty
-        if height < MIN_HEIGHT:
-            r_drop = 10.0
+        # # Initialize reward components
+        # r_distance = 0
+        # r_stability = 0
+        # r_height = 0
+        # r_collision = 0
+        # r_drop = 0
+
+        # w1 = 0.1
+        # w2 = 0.1
+        # w3 = 0.1 
+        # w4 = 0.1
+        # w5 = 0.1
+
+        # # Distance reward
+        # distance = np.linalg.norm(achieved_goal["kettle"][:3] - desired_goal["kettle"][:3])
+        # if distance < BONUS_THRESH:
+        #     r_distance = 1.0
+        # else:
+        #     r_distance = -1.0
+
+        # # Stability reward
+        # stability = np.abs(achieved_goal["kettle"][3:6] - desired_goal["kettle"][3:6]).sum()
+        # if stability < STABILITY_THRESH:
+        #     r_stability = 1.0
+        # else:
+        #     r_stability = -1.0
+
+        # # Height reward
+        # height = achieved_goal["kettle"][2]
+        # if MIN_HANDOVER_HEIGHT < height < MAX_HEIGHT:
+        #     r_height = 1.0
+        # else:
+        #     r_height = -1.0
+
+        # # Collision penalty todo
+        # # if self._check_collision():
+        # #     r_collision = 10.0
+
+        # # Drop penalty
+        # if height < MIN_HEIGHT:
+        #     r_drop = 10.0
 
 
-        # Compute total reward
-        return (
-            w1 * r_distance
-            + w2 * r_stability
-            + w3 * r_height
-            - w4 * r_collision
-            - w5 * r_drop
-        )
-
-        # # Check if the kettle is within the desired goal threshold
-        # for task in self.tasks_to_complete:
-        #     distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-        #     complete = distance < BONUS_THRESH
-        #     if complete:
-        #         self.step_task_completions.append(task)
-
-        # return reward
+        # # Compute total reward
+        # return (
+        #     w1 * r_distance
+        #     + w2 * r_stability
+        #     + w3 * r_height
+        #     - w4 * r_collision
+        #     - w5 * r_drop
+        # )
 
     def _get_obs(self, robot_obs):
         obj_qpos = self.data.qpos[18:].copy()
@@ -381,12 +404,13 @@ class HandoverEnv(GoalEnv, EzPickle):
             * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
         )
 
+        observations = np.concatenate((robot_obs, obj_qpos, obj_qvel))
         achieved_goal = {
-            task: self.data.qpos[OBS_ELEMENT_INDICES[task]] for task in self.goal.keys()
+            task: observations[OBS_ELEMENT_INDICES[task]] for task in self.goal.keys()
         }
 
         obs = {
-            "observation": np.concatenate((robot_obs, obj_qpos, obj_qvel)),
+            "observation": observations,
             "achieved_goal": achieved_goal,
             "desired_goal": self.goal,
         }

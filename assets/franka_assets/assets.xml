@@ -1,9 +1,6 @@
-<!-- Modified from the original source code at
-        1) https://github.com/vikashplus/franka
-    which was originally written by Vikash Kumar and licensed under the Apache License= -->
 <mujocoinclude>
-     <compiler angle="radian" meshdir="franka_assets/meshes"/>
-    <!-- <option timestep="0.002" noslip_iterations="20"/> -->
+    <compiler angle="radian" meshdir="franka_assets/meshes"/>
+    
     <option timestep="0.002"/>
     <size nuser_actuator="5"/>
 
@@ -60,4 +57,5 @@
             <geom contype="0" conaffinity="0" group="2" type="mesh" rgba=".42 0.42 0.42 .5"/>
         </default>
     </default>
+
 </mujocoinclude>

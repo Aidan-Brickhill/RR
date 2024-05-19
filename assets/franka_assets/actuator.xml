@@ -1,27 +1,23 @@
-<!-- Modified from the original source code at
-        1) https://github.com/vikashplus/franka
-    which was originally written by Vikash Kumar and licensed under the Apache License= -->
-
 <mujocoinclude>
 	<actuator>
-        <position name="panda0_joint1" joint="robot:panda0_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
-        <position name="panda0_joint2" joint="robot:panda0_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/> <!-- velocity="2.1750" -->
-        <position name="panda0_joint3" joint="robot:panda0_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
-        <position name="panda0_joint4" joint="robot:panda0_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/> <!-- velocity="2.1750" -->
-        <position name="panda0_joint5" joint="robot:panda0_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.6100" -->
-        <position name="panda0_joint6" joint="robot:panda0_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-3.7525 2.1817"/> <!-- velocity="2.6100" -->
-        <position name="panda0_joint7" joint="robot:panda0_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.9671" -->
-        <position name="panda0_r_gripper_finger_joint" joint="robot:panda0_finger_joint1" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
-        <position name="panda0_l_gripper_finger_joint" joint="robot:panda0_finger_joint2" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
+        <position name="panda_giver_joint1" joint="robot:panda_giver_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
+        <position name="panda_giver_joint2" joint="robot:panda_giver_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/> <!-- velocity="2.1750" -->
+        <position name="panda_giver_joint3" joint="robot:panda_giver_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
+        <position name="panda_giver_joint4" joint="robot:panda_giver_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/> <!-- velocity="2.1750" -->
+        <position name="panda_giver_joint5" joint="robot:panda_giver_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.6100" -->
+        <position name="panda_giver_joint6" joint="robot:panda_giver_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-3.7525 2.1817"/> <!-- velocity="2.6100" -->
+        <position name="panda_giver_joint7" joint="robot:panda_giver_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.9671" -->
+        <position name="panda_giver_r_gripper_finger_joint" joint="robot:panda_giver_finger_joint1" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
+        <position name="panda_giver_l_gripper_finger_joint" joint="robot:panda_giver_finger_joint2" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
         
-        <position name="panda1_joint1" joint="robot:panda1_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
-        <position name="panda1_joint2" joint="robot:panda1_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/> <!-- velocity="2.1750" -->
-        <position name="panda1_joint3" joint="robot:panda1_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
-        <position name="panda1_joint4" joint="robot:panda1_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/> <!-- velocity="2.1750" -->
-        <position name="panda1_joint5" joint="robot:panda1_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.6100" -->
-        <position name="panda1_joint6" joint="robot:panda1_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-3.7525 2.1817"/> <!-- velocity="2.6100" -->
-        <position name="panda1_joint7" joint="robot:panda1_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.9671" -->
-        <position name="panda1_r_gripper_finger_joint" joint="robot:panda1_finger_joint1" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
-        <position name="panda1_l_gripper_finger_joint" joint="robot:panda1_finger_joint2" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
+        <position name="panda_reciever_joint1" joint="robot:panda_reciever_joint1" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
+        <position name="panda_reciever_joint2" joint="robot:panda_reciever_joint2" class="panda" kp="870" forcerange="-87 87" ctrlrange="-1.8326 1.8326"/> <!-- velocity="2.1750" -->
+        <position name="panda_reciever_joint3" joint="robot:panda_reciever_joint3" class="panda" kp="870" forcerange="-87 87" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.1750" -->
+        <position name="panda_reciever_joint4" joint="robot:panda_reciever_joint4" class="panda" kp="870" forcerange="-87 87" ctrlrange="-3.1416 0.0"/> <!-- velocity="2.1750" -->
+        <position name="panda_reciever_joint5" joint="robot:panda_reciever_joint5" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.6100" -->
+        <position name="panda_reciever_joint6" joint="robot:panda_reciever_joint6" class="panda" kp="120" forcerange="-12 12" ctrlrange="-3.7525 2.1817"/> <!-- velocity="2.6100" -->
+        <position name="panda_reciever_joint7" joint="robot:panda_reciever_joint7" class="panda" kp="120" forcerange="-12 12" ctrlrange="-2.9671 2.9671"/> <!-- velocity="2.9671" -->
+        <position name="panda_reciever_r_gripper_finger_joint" joint="robot:panda_reciever_finger_joint1" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
+        <position name="panda_reciever_l_gripper_finger_joint" joint="robot:panda_reciever_finger_joint2" class="panda_finger" kp="500" forcerange="-70 70" ctrlrange="0 0.04"/> <!-- velocity=".2" -->
     </actuator>
 </mujocoinclude>

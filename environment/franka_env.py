@@ -92,6 +92,10 @@ class FrankaRobot(MujocoEnv):
         self._read_specs_from_config(config_path)
         self.model_names = MujocoModelNames(self.model)
 
+        self.handle_end_effector_giver_id = self.model_names.site_name2id["panda_giver_end_effector"]
+        self.handle_end_effector_receiver_id = self.model_names.site_name2id["panda_reciever_end_effector"]
+
+
     def step(self, action):
         action = np.clip(action, -1.0, 1.0)
 
@@ -118,7 +122,9 @@ class FrankaRobot(MujocoEnv):
             self.model, self.data, self.model_names.joint_names
         )
 
-        # mujoco_f.mj_kinematics(self.model, self.data)
+        robot_giver_end_effector_pos = self.data.site_xpos[self.handle_end_effector_giver_id].ravel()
+        robot_reciever_end_effector_pos = self.data.site_xpos[self.handle_end_effector_receiver_id].ravel()
+
         # Simulate observation noise
         robot_qpos += (
             self.robot_noise_ratio
@@ -133,7 +139,7 @@ class FrankaRobot(MujocoEnv):
 
         self._last_robot_qpos = robot_qpos
 
-        return np.concatenate((robot_qpos.copy(), robot_qvel.copy()))
+        return np.concatenate((robot_qpos[:9].copy(), robot_giver_end_effector_pos, robot_qvel[:9].copy(), robot_qpos[9:].copy(), robot_reciever_end_effector_pos, robot_qvel[9:].copy()))
 
     def reset_model(self):
         qpos = self.init_qpos

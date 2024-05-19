@@ -12,8 +12,7 @@
 <!--See the License for the specific language governing permissions and-->
 <!--limitations under the License.-->
 <config name='Franka'>
-
-	<!-- Franka 0 -->
+	<!-- robot giver -->
 	<qpos0 name='q0' pos_bound='-2.9 2.9' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos1 name='q1' pos_bound='-1.8 1.8' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos2 name='q2' pos_bound='-2.9 2.9' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
@@ -24,7 +23,7 @@
 	<qpos7 name='q7' pos_bound='00.0 0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos8 name='q8' pos_bound='0.0  0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 
-	<!-- Franka 1 -->
+	<!-- robot reviever -->
 	<qpos9 name='q9' pos_bound='-2.9 2.9' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos10 name='q10' pos_bound='-1.8 1.8' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos11 name='q11' pos_bound='-2.9 2.9' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
@@ -35,19 +34,7 @@
 	<qpos16 name='q16' pos_bound='00.0 0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 	<qpos17 name='q17' pos_bound='0.0  0.04' vel_bound='-10 10' pos_noise_amp='0.1' vel_noise_amp='0.1' />
 
-	<!-- tod - fix temp fills -->
-	<!-- <qpos23 name='q23' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos24 name='q24' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos25 name='q25' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos26 name='q26' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos27 name='q27' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos28 name='q28' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' /> -->
-	<!-- THE ABOVE ARE THE KETTLE INFO, USE THAT IN THE 
-		- the below should be the same as above
-	OBS_ELEMENT_INDICES = {
-		"kettle": np.array([23, 24, 25, 26, 27, 28, 29]),
-	}
- -->
+	<!-- kettle -->
 	<qpos18 name='q18' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
 	<qpos19 name='q19' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
 	<qpos20 name='q20' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005'/>
@@ -55,38 +42,4 @@
 	<qpos22 name='q22' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1'/>
 	<qpos23 name='q23' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1'/>
 	<qpos24 name='q24' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-
-
-	<!-- Desk -->
-	<!-- <qpos9   name='deskSlideB' pos_bound='-.5 0.0' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos10  name='deskSlideT' pos_bound='-.5 0.0' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' /> -->
-
-	<!-- Buttons -->
-	<!-- <qpos11  name='rBotton' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' />
-	<qpos12  name='gButton' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' />
-	<qpos13  name='bButton' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' />
-	<qpos14  name='rLight' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' />
-	<qpos15  name='bLight' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' />
-	<qpos16  name='gLight' pos_bound='-.005 0.0' vel_bound='-5 5' pos_noise_amp='0.0005' vel_noise_amp='0.005' /> -->
-
-	<!-- Blocks -->
-	<!-- <qpos17 name='q17' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos18 name='q18' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos19 name='q19' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos20 name='q20' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos21 name='q21' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos22 name='q22' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos23 name='q23' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos24 name='q24' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos25 name='q25' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos26 name='q26' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos27 name='q27' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos28 name='q28' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos29 name='q29' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos30 name='q30' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos31 name='q31' pos_bound='-1.5 1.5' vel_bound='-5 5' pos_noise_amp='0.005' vel_noise_amp='0.005' />
-	<qpos32 name='q32' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos33 name='q33' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' />
-	<qpos34 name='q34' pos_bound='-10.57 10.57' vel_bound='-.5 .5' pos_noise_amp='0.1' vel_noise_amp='0.1' /> -->
-
 </config>
