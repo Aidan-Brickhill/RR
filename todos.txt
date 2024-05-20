@@ -1,0 +1,5 @@
+- use 2 observations space for a asimple task (compare which is better)
+- setup weights and biases
+
+do i use stable baselines? or implement my own PPO - need safe PPO so
+do i have more of a continuous reward function or discrete (multi goal)
