@@ -1,4 +1,5 @@
 from typing import Any, Optional
+import gymnasium as gym
 
 import numpy as np
 from gymnasium import spaces
@@ -10,22 +11,22 @@ from franka_env import FrankaRobot
 OBS_ELEMENT_INDICES = {
     "panda_giver_fetch": np.array([9, 10, 11]),
     "panda_giver_lift": np.array([9, 10, 11, 36, 37, 38]),
-    "panda_reciever_fetch": np.array([21, 22, 23]),
-    "panda_reciever_place": np.array([21, 22, 23, 36, 37, 38]),
+    "panda_reciever_fetch": np.array([30, 31, 32]),
+    "panda_reciever_place": np.array([30, 31, 32, 36, 37, 38]),
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([0, 0, 0.8]),
+    "panda_giver_fetch": np.array([0, 0, 1.4]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
-    "panda_reciever_fetch": np.array([0, 0, 0.85,]),
+    "panda_reciever_fetch": np.array([0, 0, 0.8,]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.1
+PANDA_GIVER_FETCH_THRESH = 0.2
 PANDA_GIVER_LIFT_THRESH = 0.1
 OBJECT_LIFT_THRESH = 0.3
 
-PANDA_RECIEVER_FETCH_THRESH = 0.1
+PANDA_RECIEVER_FETCH_THRESH = 0.2
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
 
@@ -38,7 +39,7 @@ END_EFFECTOR_DISTANCE_THRESH = 0.3
 
 
 
-class HandoverEnv(EzPickle):
+class HandoverEnv(gym.Env, EzPickle):
     """
     ## Description
 
@@ -108,38 +109,38 @@ class HandoverEnv(EzPickle):
     11
     +3+ x,y,z end effector pos robot 0
     
-    | 9     | `robot:panda_giver_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint1                             | hinge      | angular velocity (rad/s)   |
-    | 10    | `robot:panda_giver_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint2                             | hinge      | angular velocity (rad/s)   |
-    | 11    | `robot:panda_giver_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint3                             | hinge      | angular velocity (rad/s)   |
-    | 12    | `robot:panda_giver_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint4                             | hinge      | angular velocity (rad/s)   |
-    | 13    | `robot:panda_giver_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint5                             | hinge      | angular velocity (rad/s)   |
-    | 14    | `robot:panda_giver_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint6                             | hinge      | angular velocity (rad/s)   |
-    | 15    | `robot:panda_giver_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint7                             | hinge      | angle (rad)                |
-    | 16    | `robot:panda_giver_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 17    | `robot:panda_giver_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    21
-    22
-    23
+    | 12     | `robot:panda_giver_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint1                             | hinge      | angular velocity (rad/s)   |
+    | 13    | `robot:panda_giver_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint2                             | hinge      | angular velocity (rad/s)   |
+    | 14    | `robot:panda_giver_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint3                             | hinge      | angular velocity (rad/s)   |
+    | 15    | `robot:panda_giver_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint4                             | hinge      | angular velocity (rad/s)   |
+    | 16    | `robot:panda_giver_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint5                             | hinge      | angular velocity (rad/s)   |
+    | 17    | `robot:panda_giver_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint6                             | hinge      | angular velocity (rad/s)   |
+    | 18    | `robot:panda_giver_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint7                             | hinge      | angle (rad)                |
+    | 19    | `robot:panda_giver_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 20    | `robot:panda_giver_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
+    | 21    | `robot:panda_reciever_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angle (rad)                |
+    | 22    | `robot:panda_reciever_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angle (rad)                |
+    | 23    | `robot:panda_reciever_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angle (rad)                |
+    | 24    | `robot:panda_reciever_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angle (rad)                |
+    | 25    | `robot:panda_reciever_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angle (rad)                |
+    | 26    | `robot:panda_reciever_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angle (rad)                |
+    | 27    | `robot:panda_reciever_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
+    | 28    | `robot:panda_reciever_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | position (m)               |
+    | 29    | `robot:panda_reciever_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | position (m)               |
+    30
+    31
+    32
     +3+ x,y,z end effector pos robot 1
+    | 33    | `robot:panda_reciever_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angular velocity (rad/s)   |
+    | 34    | `robot:panda_reciever_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angular velocity (rad/s)   |
+    | 35    | `robot:panda_reciever_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angular velocity (rad/s)   |
+    | 36    | `robot:panda_reciever_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angular velocity (rad/s)   |
+    | 37    | `robot:panda_reciever_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angular velocity (rad/s)   |
+    | 38    | `robot:panda_reciever_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angular velocity (rad/s)   |
+    | 39    | `robot:panda_reciever_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
+    | 40    | `robot:panda_reciever_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
+    | 41    | `robot:panda_reciever_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
     
-    | 18    | `robot:panda_reciever_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angle (rad)                |
-    | 19    | `robot:panda_reciever_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angle (rad)                |
-    | 20    | `robot:panda_reciever_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angle (rad)                |
-    | 21    | `robot:panda_reciever_joint4` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angle (rad)                |
-    | 22    | `robot:panda_reciever_joint5` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angle (rad)                |
-    | 23    | `robot:panda_reciever_joint6` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angle (rad)                |
-    | 24    | `robot:panda_reciever_joint7` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
-    | 25    | `robot:panda_reciever_r_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | position (m)               |
-    | 26    | `robot:panda_reciever_l_gripper_finger_joint` slide joint translation value   | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | position (m)               |
-    | 27    | `robot:panda_reciever_joint1` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angular velocity (rad/s)   |
-    | 28    | `robot:panda_reciever_joint2` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angular velocity (rad/s)   |
-    | 29    | `robot:panda_reciever_joint3` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angular velocity (rad/s)   |
-    | 30    | `robot:panda_reciever_joint4` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint4                             | hinge      | angular velocity (rad/s)   |
-    | 31    | `robot:panda_reciever_joint5` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint5                             | hinge      | angular velocity (rad/s)   |
-    | 32    | `robot:panda_reciever_joint6` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint6                             | hinge      | angular velocity (rad/s)   |
-    | 33    | `robot:panda_reciever_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_reciever_joint7                             | hinge      | angle (rad)                |
-    | 34    | `robot:panda_reciever_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
-    | 35    | `robot:panda_reciever_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
     | 36    | Kettle's x coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
     | 37    | Kettle's y coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
     | 38    | Kettle's z coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
@@ -271,101 +272,36 @@ class HandoverEnv(EzPickle):
     def calculate_reward(
         self,
         desired_goal: "dict[str, np.ndarray]",
+        achieved_goal: "dict[str, np.ndarray]",
     ):
-            distance = np.linalg.norm(self.achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
-            complete = distance < PANDA_GIVER_FETCH_THRESH
-            if complete:
-                self.step_task_completions.append("panda_giver_fetch")
+        combined_reward = 0
+        distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
+        distance_receiver = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
 
-            return distance
+        # Calculate rewards as inverse of distance, with a maximum cap
+        reward_giver = 1 - np.tanh(distance_giver)
+        reward_receiver = 1 - np.tanh(distance_receiver)
 
-        # self.step_task_completions.clear()
-        # for task in self.tasks_to_complete:
+        # Apply threshold to determine if tasks are completed
+        if distance_giver < PANDA_GIVER_FETCH_THRESH:
+            self.step_task_completions.append("panda_giver_fetch")
+            if "panda_giver_fetch" not in self.episode_task_completions:
+                self.episode_task_completions.append("panda_giver_fetch")
+            combined_reward += 5
+        if distance_receiver < PANDA_RECIEVER_FETCH_THRESH:
+            self.step_task_completions.append("panda_reciever_fetch")
+            if "panda_reciever_fetch" not in self.episode_task_completions:
+                self.episode_task_completions.append("panda_reciever_fetch")
+            combined_reward += 5
 
-        #     if task == "panda_giver_fetch":
-        #         distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-        #         complete = distance < PANDA_GIVER_FETCH_THRESH
-        #         if complete:
-        #             self.step_task_completions.append(task)
-        #         continue
+        if len(self.episode_task_completions) == len(self.goal.keys()):
+                combined_reward += 100
 
-        #     if task == "panda_giver_lift":
-        #         robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
-        #         object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
-        #         complete = robot_distance < PANDA_GIVER_LIFT_THRESH and object_distance < OBJECT_LIFT_THRESH
-        #         if complete:
-        #             self.step_task_completions.append(task)
-        #         continue
+        # Combine the rewards
+        combined_reward += (reward_giver + reward_receiver) / 2
 
-        #     if task == "panda_reciever_fetch":
-        #         distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-        #         complete = distance < PANDA_RECIEVER_FETCH_THRESH
-        #         if complete:
-        #             self.step_task_completions.append(task)
-        #         continue
-
-        #     if task == "panda_reciever_place":
-        #         robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
-        #         object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
-        #         complete = robot_distance < PANDA_RECIEVER_PLACE_THRESH and object_distance < OBJECT_PLACE_THRESH
-        #         if complete:
-        #             self.step_task_completions.append(task)
-        #         continue
-
-        # return float(len(self.step_task_completions))
-
-        # # Initialize reward components
-        # r_distance = 0
-        # r_stability = 0
-        # r_height = 0
-        # r_collision = 0
-        # r_drop = 0
-
-        # w1 = 0.1
-        # w2 = 0.1
-        # w3 = 0.1 
-        # w4 = 0.1
-        # w5 = 0.1
-
-        # # Distance reward
-        # distance = np.linalg.norm(achieved_goal["kettle"][:3] - desired_goal["kettle"][:3])
-        # if distance < BONUS_THRESH:
-        #     r_distance = 1.0
-        # else:
-        #     r_distance = -1.0
-
-        # # Stability reward
-        # stability = np.abs(achieved_goal["kettle"][3:6] - desired_goal["kettle"][3:6]).sum()
-        # if stability < STABILITY_THRESH:
-        #     r_stability = 1.0
-        # else:
-        #     r_stability = -1.0
-
-        # # Height reward
-        # height = achieved_goal["kettle"][2]
-        # if MIN_HANDOVER_HEIGHT < height < MAX_HEIGHT:
-        #     r_height = 1.0
-        # else:
-        #     r_height = -1.0
-
-        # # Collision penalty todo
-        # # if self._check_collision():
-        # #     r_collision = 10.0
-
-        # # Drop penalty
-        # if height < MIN_HEIGHT:
-        #     r_drop = 10.0
-
-
-        # # Compute total reward
-        # return (
-        #     w1 * r_distance
-        #     + w2 * r_stability
-        #     + w3 * r_height
-        #     - w4 * r_collision
-        #     - w5 * r_drop
-        # )
-
+        return combined_reward
+    
     def _get_obs(self, robot_obs):
         obj_qpos = self.data.qpos[18:].copy()
         obj_qvel = self.data.qvel[18:].copy()
@@ -387,26 +323,19 @@ class HandoverEnv(EzPickle):
             task: observations[OBS_ELEMENT_INDICES[task]] for task in self.goal.keys()
         }
 
-        # obs = {
-        #     "observation": observations,
-        #     "achieved_goal": achieved_goal,
-        #     "desired_goal": self.goal,
-        # }
-
         return observations
 
     def step(self, action):
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 
-        # reward = self.compute_reward(obs["achieved_goal"], self.goal, info)
-        reward = self.calculate_reward(self.goal)
+        reward = self.calculate_reward(self.goal, self.achieved_goal)
+       
+        # When the task is accomplished remove from the list of tasks to be completed
         if self.remove_task_when_completed:
-            # When the task is accomplished remove from the list of tasks to be completed
-            [
-                self.tasks_to_complete.remove(element)
-                for element in self.step_task_completions
-            ]
+            for element in self.episode_task_completions:
+                if element in self.tasks_to_complete:
+                    self.tasks_to_complete.remove(element)
 
         info = {"tasks_to_complete": list(self.tasks_to_complete)}
         info["step_task_completions"] = self.step_task_completions.copy()
@@ -418,7 +347,11 @@ class HandoverEnv(EzPickle):
         if self.terminate_on_tasks_completed:
             # terminate if there are no more tasks to complete
             terminated = len(self.episode_task_completions) == len(self.goal.keys())
+            # terminate if there are no more tasks to complete
+            
 
+        self.step_task_completions = []
+       
         return obs, reward, terminated, truncated, info
 
     def reset(self, *, seed: Optional[int] = None, **kwargs):

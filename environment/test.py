@@ -1,61 +1,22 @@
-import gymnasium as gym
+from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
-env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "panda_giver_lift", "panda_reciever_fetch", "panda_reciever_place"])
-observation, info = env.reset()
+models_dir = "models/PPO"
+model_path = f"{models_dir}/50000.zip"
 
-# environment_observations = observation['observation']
-# achieved_goal = observation['achieved_goal']
-# desired_goal = observation['desired_goal']
+env = HandoverEnv(render_mode="human", tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"])
+env.reset()
 
-# robot_observations = environment_observations[:42].copy()
-# giver_robot = robot_observations[:21].copy()
-# reciever_robot = robot_observations[21:].copy()
+model = PPO.load(model_path, env=env)
 
-# object_position = environment_observations[42:49].copy()
-# object_velocity = environment_observations[49:].copy()
 
-# tasks_to_complete = info['tasks_to_complete']
-# episode_task_completions = info['episode_task_completions']
-# step_task_completions = info['step_task_completions']
-print(observation)
+episodes = 10 
+for ep in range(episodes):
+    obs, info = env.reset()
+    done = False
 
-for _ in range(1000):
-    action = env.action_space.sample()  # agent policy that uses the observation and info
-    observation, reward, terminated, truncated, info = env.step(action)
-    if reward > 0:
-        print(reward)
-    # environment_observations = observation['observation']
-    # achieved_goal = observation['achieved_goal']
-    # desired_goal = observation['desired_goal']
-
-    # robot_observations = environment_observations[:36].copy()
-    # giver_robot = robot_observations[:21].copy()
-    # reciever_robot = robot_observations[21:].copy()
-    
-    # object_position = environment_observations[36:43].copy()
-    # object_velocity = environment_observations[43:].copy()
-
-    # tasks_to_complete = info['tasks_to_complete']
-    # episode_task_completions = info['episode_task_completions']
-    # step_task_completions = info['step_task_completions']
-
-    # print()
-    # print(robot_observations)
-
-    if terminated or truncated:
-        observation, info = env.reset()
+    while not done:
+        action, _states = model.predict(obs)
+        obs, reward, terminated, truncated, info = env.step(action)
 
 env.close()
-# env = HandoverEnv(render_mode="human")
-
-# observation, info = env.reset()
-# for _ in range(1000):
-#     action = env.action_space.sample()  # agent policy that uses the observation and info
-#     observation, reward, terminated, truncated, info = env.step(action)
-
-#     if terminated or truncated:
-#         observation, info = env.reset()
-
-# env.close()
-

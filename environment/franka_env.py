@@ -107,7 +107,7 @@ class FrankaRobot(MujocoEnv):
         # enforce position limits
         ctrl_feasible = self._ctrl_position_limits(ctrl_feasible)
 
-        self.do_simulation(ctrl_feasible, self.frame_skip)
+        self.do_simulation(action, self.frame_skip)
 
         if self.render_mode == "human":
             self.render()
@@ -138,7 +138,6 @@ class FrankaRobot(MujocoEnv):
         )
 
         self._last_robot_qpos = robot_qpos
-
         return np.concatenate((robot_qpos[:9].copy(), robot_giver_end_effector_pos, robot_qvel[:9].copy(), robot_qpos[9:].copy(), robot_reciever_end_effector_pos, robot_qvel[9:].copy()))
 
     def reset_model(self):
