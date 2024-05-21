@@ -15,7 +15,7 @@ OBS_ELEMENT_INDICES = {
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([0.75, 0.4, 0.8]),
+    "panda_giver_fetch": np.array([0, 0, 0.8]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
     "panda_reciever_fetch": np.array([0, 0, 0.85,]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
@@ -38,7 +38,7 @@ END_EFFECTOR_DISTANCE_THRESH = 0.3
 
 
 
-class HandoverEnv(GoalEnv, EzPickle):
+class HandoverEnv(EzPickle):
     """
     ## Description
 
@@ -255,34 +255,8 @@ class HandoverEnv(GoalEnv, EzPickle):
         ), f'Expected value: {int(np.round(1.0 / self.robot_env.dt))}, Actual value: {self.metadata["render_fps"]}'
 
         self.action_space = self.robot_env.action_space
-        self.observation_space = spaces.Dict(
-            dict(
-                desired_goal=spaces.Dict(
-                    {
-                        task: spaces.Box(
-                            -np.inf,
-                            np.inf,
-                            shape=goal.shape,
-                            dtype="float64",
-                        )
-                        for task, goal in obs["achieved_goal"].items()
-                    }
-                ),
-                achieved_goal=spaces.Dict(
-                    {
-                        task: spaces.Box(
-                            -np.inf,
-                            np.inf,
-                            shape=goal.shape,
-                            dtype="float64",
-                        )
-                        for task, goal in obs["achieved_goal"].items()
-                    }
-                ),
-                observation=spaces.Box(
-                    -np.inf, np.inf, shape=obs["observation"].shape, dtype="float64"
-                ),
-            )
+        self.observation_space = spaces.Box(
+            -np.inf, np.inf, shape=obs.shape, dtype="float64"
         )
 
         EzPickle.__init__(
@@ -294,47 +268,51 @@ class HandoverEnv(GoalEnv, EzPickle):
             **kwargs,
         )
 
-    def compute_reward(
+    def calculate_reward(
         self,
-        achieved_goal: "dict[str, np.ndarray]",
         desired_goal: "dict[str, np.ndarray]",
-        info: "dict[str, Any]",
     ):
+            distance = np.linalg.norm(self.achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
+            complete = distance < PANDA_GIVER_FETCH_THRESH
+            if complete:
+                self.step_task_completions.append("panda_giver_fetch")
 
-        self.step_task_completions.clear()
-        for task in self.tasks_to_complete:
+            return distance
 
-            if task == "panda_giver_fetch":
-                distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-                complete = distance < PANDA_GIVER_FETCH_THRESH
-                if complete:
-                    self.step_task_completions.append(task)
-                continue
+        # self.step_task_completions.clear()
+        # for task in self.tasks_to_complete:
 
-            if task == "panda_giver_lift":
-                robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
-                object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
-                complete = robot_distance < PANDA_GIVER_LIFT_THRESH and object_distance < OBJECT_LIFT_THRESH
-                if complete:
-                    self.step_task_completions.append(task)
-                continue
+        #     if task == "panda_giver_fetch":
+        #         distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+        #         complete = distance < PANDA_GIVER_FETCH_THRESH
+        #         if complete:
+        #             self.step_task_completions.append(task)
+        #         continue
 
-            if task == "panda_reciever_fetch":
-                distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
-                complete = distance < PANDA_RECIEVER_FETCH_THRESH
-                if complete:
-                    self.step_task_completions.append(task)
-                continue
+        #     if task == "panda_giver_lift":
+        #         robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
+        #         object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
+        #         complete = robot_distance < PANDA_GIVER_LIFT_THRESH and object_distance < OBJECT_LIFT_THRESH
+        #         if complete:
+        #             self.step_task_completions.append(task)
+        #         continue
 
-            if task == "panda_reciever_place":
-                robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
-                object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
-                complete = robot_distance < PANDA_RECIEVER_PLACE_THRESH and object_distance < OBJECT_PLACE_THRESH
-                if complete:
-                    self.step_task_completions.append(task)
-                continue
+        #     if task == "panda_reciever_fetch":
+        #         distance = np.linalg.norm(achieved_goal[task] - desired_goal[task])
+        #         complete = distance < PANDA_RECIEVER_FETCH_THRESH
+        #         if complete:
+        #             self.step_task_completions.append(task)
+        #         continue
 
-        return float(len(self.step_task_completions))
+        #     if task == "panda_reciever_place":
+        #         robot_distance = np.linalg.norm(achieved_goal[task][:3].copy() - desired_goal[task][:3].copy())
+        #         object_distance = np.linalg.norm(achieved_goal[task][3:].copy() - desired_goal[task][3:].copy())
+        #         complete = robot_distance < PANDA_RECIEVER_PLACE_THRESH and object_distance < OBJECT_PLACE_THRESH
+        #         if complete:
+        #             self.step_task_completions.append(task)
+        #         continue
+
+        # return float(len(self.step_task_completions))
 
         # # Initialize reward components
         # r_distance = 0
@@ -405,24 +383,24 @@ class HandoverEnv(GoalEnv, EzPickle):
         )
 
         observations = np.concatenate((robot_obs, obj_qpos, obj_qvel))
-        achieved_goal = {
+        self.achieved_goal = {
             task: observations[OBS_ELEMENT_INDICES[task]] for task in self.goal.keys()
         }
 
-        obs = {
-            "observation": observations,
-            "achieved_goal": achieved_goal,
-            "desired_goal": self.goal,
-        }
+        # obs = {
+        #     "observation": observations,
+        #     "achieved_goal": achieved_goal,
+        #     "desired_goal": self.goal,
+        # }
 
-        return obs
+        return observations
 
     def step(self, action):
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 
-        reward = self.compute_reward(obs["achieved_goal"], self.goal, info)
-
+        # reward = self.compute_reward(obs["achieved_goal"], self.goal, info)
+        reward = self.calculate_reward(self.goal)
         if self.remove_task_when_completed:
             # When the task is accomplished remove from the list of tasks to be completed
             [
@@ -444,7 +422,7 @@ class HandoverEnv(GoalEnv, EzPickle):
         return obs, reward, terminated, truncated, info
 
     def reset(self, *, seed: Optional[int] = None, **kwargs):
-        super().reset(seed=seed, **kwargs)
+        # super().reset(seed=seed, **kwargs)
         self.episode_task_completions.clear()
         robot_obs, _ = self.robot_env.reset(seed=seed)
         obs = self._get_obs(robot_obs)
