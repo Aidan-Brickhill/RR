@@ -1,7 +1,7 @@
 import gymnasium as gym
 from handover_env import HandoverEnv
 
-env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "panda_reciever_fetch"])
+env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 50)
 observation, info = env.reset()
 
 # environment_observations = observation['observation']
@@ -18,8 +18,8 @@ observation, info = env.reset()
 # tasks_to_complete = info['tasks_to_complete']
 # episode_task_completions = info['episode_task_completions']
 # step_task_completions = info['step_task_completions']
-
-for _ in range(1000):
+terminated = False
+while not terminated:
     action = env.action_space.sample()  # agent policy that uses the observation and info
     print(observation)
 

@@ -22,11 +22,11 @@ OBS_ELEMENT_GOALS = {
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.2
+PANDA_GIVER_FETCH_THRESH = 0.1
 PANDA_GIVER_LIFT_THRESH = 0.1
 OBJECT_LIFT_THRESH = 0.3
 
-PANDA_RECIEVER_FETCH_THRESH = 0.2
+PANDA_RECIEVER_FETCH_THRESH = 0.1
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
 
@@ -213,6 +213,7 @@ class HandoverEnv(gym.Env, EzPickle):
         terminate_on_tasks_completed: bool = True,
         remove_task_when_completed: bool = True,
         object_noise_ratio: float = 0.0005,
+        max_episode_steps: int = 200,
         **kwargs,
     ):
         self.robot_env = FrankaRobot(
@@ -259,6 +260,9 @@ class HandoverEnv(gym.Env, EzPickle):
         self.observation_space = spaces.Box(
             -np.inf, np.inf, shape=obs.shape, dtype="float64"
         )
+        
+        self.episode_step = 0
+        self.max_episode_steps = max_episode_steps
 
         EzPickle.__init__(
             self,
@@ -287,15 +291,18 @@ class HandoverEnv(gym.Env, EzPickle):
             self.step_task_completions.append("panda_giver_fetch")
             if "panda_giver_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_giver_fetch")
-            combined_reward += 5
+                combined_reward += 10
+            combined_reward += 2
+            
         if distance_receiver < PANDA_RECIEVER_FETCH_THRESH:
             self.step_task_completions.append("panda_reciever_fetch")
             if "panda_reciever_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_reciever_fetch")
-            combined_reward += 5
+                combined_reward += 10
+            combined_reward += 2
 
         if len(self.episode_task_completions) == len(self.goal.keys()):
-                combined_reward += 100
+                combined_reward += 10000
 
         # Combine the rewards
         combined_reward += (reward_giver + reward_receiver) / 2
@@ -329,6 +336,8 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 
+        self.episode_step += 1
+
         reward = self.calculate_reward(self.goal, self.achieved_goal)
        
         # When the task is accomplished remove from the list of tasks to be completed
@@ -348,7 +357,9 @@ class HandoverEnv(gym.Env, EzPickle):
             # terminate if there are no more tasks to complete
             terminated = len(self.episode_task_completions) == len(self.goal.keys())
             # terminate if there are no more tasks to complete
-            
+        
+        if self.episode_step >= self.max_episode_steps:
+            terminated = True
 
         self.step_task_completions = []
        
