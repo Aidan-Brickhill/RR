@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home-mscluster/abrickhill/RR/cluster/../environment/trainwandb.py", line 27, in <module>
+    env = VecVideoRecorder(
+  File "/home-mscluster/abrickhill/anaconda3/envs/handover/lib/python3.10/site-packages/stable_baselines3/common/vec_env/vec_video_recorder.py", line 52, in __init__
+    assert self.env.render_mode == "rgb_array", f"The render_mode must be 'rgb_array', not {self.env.render_mode}"
+AssertionError: The render_mode must be 'rgb_array', not None

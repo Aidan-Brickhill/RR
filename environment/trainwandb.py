@@ -8,7 +8,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 100000,
+    "total_timesteps": 1000000,
     "env_name": "HandoverEnv",
 }
 
@@ -21,7 +21,7 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 80))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 80))
 
 env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
