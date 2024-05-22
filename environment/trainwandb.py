@@ -8,7 +8,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 500000,
+    "total_timesteps": 100000,
     "env_name": "HandoverEnv",
 }
 
@@ -27,7 +27,7 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 20000 == 0,
+    record_video_trigger=lambda x: x % 50000 == 0,
     video_length=80,
 )
 

@@ -1,16 +1,11 @@
 #!/bin/bash
-#SBATCH --job-name=test
+#SBATCH --job-name=rl_train
 #SBATCH --output=/home-mscluster/abrickhill/result.txt
 #SBATCH --ntasks=1
 # increase the time here if you need more than 10 minutes to run your job.
-#SBATCH --time=120:00
+#SBATCH --time=240:00
 #SBATCH --partition=bigbatch
 
-python /path/to/file1.py &
-python /path/to/file2.py &
-python /path/to/file3.py &
-python /path/to/file4.py &
-python /path/to/file5.py &
-python /path/to/file6.py &
+python3 RR/environment/train.py
 
 wait;
