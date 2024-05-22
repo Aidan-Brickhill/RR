@@ -8,9 +8,11 @@ from gymnasium.utils.ezpickle import EzPickle
 from gymnasium_robotics.core import GoalEnv
 from franka_env import FrankaRobot
 
+
 OBS_ELEMENT_INDICES = {
     "panda_giver_fetch": np.array([9, 10, 11]),
     "panda_giver_lift": np.array([9, 10, 11, 36, 37, 38]),
+    "panda_reciever_wait": np.array([30, 31, 32]),
     "panda_reciever_fetch": np.array([30, 31, 32]),
     "panda_reciever_place": np.array([30, 31, 32, 36, 37, 38]),
 }
@@ -18,7 +20,8 @@ OBS_ELEMENT_INDICES = {
 OBS_ELEMENT_GOALS = {
     "panda_giver_fetch": np.array([0, 0, 1.4]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
-    "panda_reciever_fetch": np.array([0, 0, 0.8,]),
+    "panda_reciever_wait": np.array([-0.75, -0.4, 1.8]),
+    "panda_reciever_fetch": np.array([0, 0, 0.8]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
 
@@ -26,6 +29,7 @@ PANDA_GIVER_FETCH_THRESH = 0.1
 PANDA_GIVER_LIFT_THRESH = 0.1
 OBJECT_LIFT_THRESH = 0.3
 
+PANDA_RECIEVER_FETCH_WAIT= 0.1
 PANDA_RECIEVER_FETCH_THRESH = 0.1
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
@@ -118,6 +122,7 @@ class HandoverEnv(gym.Env, EzPickle):
     | 18    | `robot:panda_giver_joint7` hinge joint angular velocity           | -Inf     | Inf      | robot:panda_giver_joint7                             | hinge      | angle (rad)                |
     | 19    | `robot:panda_giver_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
     | 20    | `robot:panda_giver_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_giver_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
+    
     | 21    | `robot:panda_reciever_joint1` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint1                             | hinge      | angle (rad)                |
     | 22    | `robot:panda_reciever_joint2` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint2                             | hinge      | angle (rad)                |
     | 23    | `robot:panda_reciever_joint3` hinge joint angle value                | -Inf     | Inf      | robot:panda_reciever_joint3                             | hinge      | angle (rad)                |
@@ -264,6 +269,10 @@ class HandoverEnv(gym.Env, EzPickle):
         self.episode_step = 0
         self.max_episode_steps = max_episode_steps
 
+        self.prev_step_robot_qpos = np.array(18)
+        self.prev_step_robot_qvel = np.array(18)
+
+
         EzPickle.__init__(
             self,
             tasks_to_complete,
@@ -277,14 +286,28 @@ class HandoverEnv(gym.Env, EzPickle):
         self,
         desired_goal: "dict[str, np.ndarray]",
         achieved_goal: "dict[str, np.ndarray]",
-    ):
-        combined_reward = 0
-        distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
-        distance_receiver = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
+        robot_obs,
+    ):        
+        velocity_penalty_factor = 0.1
+        position_penalty_factor = 0.1
+        acceleration_penalty_factor = 0.1
 
-        # Calculate rewards as inverse of distance, with a maximum cap
+        # gets the previous qpos and qvels of the robot
+        giver_prev_pos = self.prev_step_robot_qpos[:9]
+        reciever_prev_pos = self.prev_step_robot_qpos[9:]
+        giver_prev_vel = self.prev_step_robot_qvel[:9]
+        reciever_prev_vel = self.prev_step_robot_qvel[9:]
+
+        # gets the current qpos and qvels of the robot
+        giver_current_pos = robot_obs[:9]
+        reciever_current_pos = robot_obs[21:30]
+        giver_current_vel = robot_obs[12:21]
+        reciever_current_vel = robot_obs[33:42]
+
+        combined_reward = 0
+
+        distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
         reward_giver = 1 - np.tanh(distance_giver)
-        reward_receiver = 1 - np.tanh(distance_receiver)
 
         # Apply threshold to determine if tasks are completed
         if distance_giver < PANDA_GIVER_FETCH_THRESH:
@@ -293,19 +316,39 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
                 combined_reward += 10
             combined_reward += 2
+
+            giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
+            combined_reward -= position_penalty_factor * giver_position_diff
+
+        distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
+        reward_reciever = 1 - np.tanh(distance_reciever)       
             
-        if distance_receiver < PANDA_RECIEVER_FETCH_THRESH:
+        if distance_reciever < PANDA_RECIEVER_FETCH_THRESH:
             self.step_task_completions.append("panda_reciever_fetch")
             if "panda_reciever_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_reciever_fetch")
                 combined_reward += 10
             combined_reward += 2
 
+            reciever_position_diff = np.sum(np.abs(reciever_current_pos - reciever_prev_pos))
+            combined_reward -= position_penalty_factor * reciever_position_diff
+
         if len(self.step_task_completions) == len(self.goal.keys()):
                 combined_reward += 10
 
+        giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
+        reciever_velocity_diff = np.sum(np.abs(reciever_current_vel - reciever_prev_vel))
+        velocity_penalty = velocity_penalty_factor * (giver_velocity_diff + reciever_velocity_diff)
+        combined_reward -= velocity_penalty
+
+        giver_acceleration = giver_current_vel - giver_prev_vel
+        reciever_acceleration = reciever_current_vel - reciever_prev_vel
+        giver_acceleration_penalty = np.sum(np.abs(giver_acceleration))
+        reciever_acceleration_penalty = np.sum(np.abs(reciever_acceleration))
+        combined_reward -= acceleration_penalty_factor * (giver_acceleration_penalty + reciever_acceleration_penalty)
+
         # Combine the rewards
-        combined_reward += (reward_giver + reward_receiver) / 2
+        combined_reward += (reward_giver + reward_reciever) / 2
 
         return combined_reward
     
@@ -338,7 +381,9 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.episode_step += 1
 
-        reward = self.calculate_reward(self.goal, self.achieved_goal)
+        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs)
+        self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
+        self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
        
         # When the task is accomplished remove from the list of tasks to be completed
         if self.remove_task_when_completed:
@@ -370,6 +415,9 @@ class HandoverEnv(gym.Env, EzPickle):
         self.episode_step = 0
         self.episode_task_completions.clear()
         robot_obs, _ = self.robot_env.reset(seed=seed)
+        self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
+        self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
+
         obs = self._get_obs(robot_obs)
         self.tasks_to_complete = set(self.goal.keys())
         info = {

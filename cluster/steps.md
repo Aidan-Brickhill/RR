@@ -90,8 +90,11 @@ conda activate handover
 
 git clone https://github.com/Aidan-Brickhill/RR.git
 
-pip install stable-baselines3[extra]
+ssh-keygen -t ed25519 -C "2427688@students.wits.ac.za"
+git clone git@github.com:Aidan-Brickhill/RR.git
 
+pip install stable-baselines3[extra]
+conda install python=3.10
 python3 train.py
 
 source ~/.handover

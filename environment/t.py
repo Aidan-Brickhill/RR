@@ -21,7 +21,6 @@ observation, info = env.reset()
 terminated = False
 while not terminated:
     action = env.action_space.sample()  # agent policy that uses the observation and info
-    print(observation)
 
     observation, reward, terminated, truncated, info = env.step(action)
 

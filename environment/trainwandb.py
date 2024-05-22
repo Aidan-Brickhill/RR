@@ -1,6 +1,5 @@
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
-import os
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from stable_baselines3.common.monitor import Monitor
 import wandb
@@ -8,7 +7,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 1000000,
+    "total_timesteps": 2000000,
     "env_name": "HandoverEnv",
 }
 
@@ -21,13 +20,13 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 80))
+    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 80))
 
 env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 50000 == 0,
+    record_video_trigger=lambda x: x % 100000 == 0,
     video_length=80,
 )
 
