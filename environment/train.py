@@ -23,7 +23,7 @@ vec_env= DummyVecEnv([make_env] * 4)
 model = PPO("MlpPolicy", vec_env, verbose=1, tensorboard_log=log_dir)
 
 TIMESTEPS = 10000
-for i in range(1,30):
+for i in range(1,15):
     model.learn(total_timesteps=TIMESTEPS, reset_num_timesteps=False, tb_log_name="PPO")
     model.save(f"{models_dir}/{TIMESTEPS*i}")
 

@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH --job-name=test
-#SBATCH --output=/home-mscluster/YOURUSERNAMEHERE/result.txt
+#SBATCH --output=/home-mscluster/abrickhill/result.txt
 #SBATCH --ntasks=1
 # increase the time here if you need more than 10 minutes to run your job.
-#SBATCH --time=10:00
+#SBATCH --time=120:00
 #SBATCH --partition=bigbatch
 
 python /path/to/file1.py &

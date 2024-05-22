@@ -3,9 +3,9 @@ from handover_env import HandoverEnv
 
 models_dir = "models/PPO"
 
-model_path = f"{models_dir}/80000.zip"
+model_path = f"{models_dir}/100000.zip"
 
-env = HandoverEnv(render_mode="human", tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"])
+env = HandoverEnv(render_mode="human", tasks_to_complete=["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps=80)
 env.reset()
 
 model = PPO.load(model_path, env=env)

@@ -213,7 +213,7 @@ class HandoverEnv(gym.Env, EzPickle):
         terminate_on_tasks_completed: bool = True,
         remove_task_when_completed: bool = True,
         object_noise_ratio: float = 0.0005,
-        max_episode_steps: int = 200,
+        max_episode_steps: int = 80,
         **kwargs,
     ):
         self.robot_env = FrankaRobot(
@@ -301,8 +301,8 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward += 10
             combined_reward += 2
 
-        if len(self.episode_task_completions) == len(self.goal.keys()):
-                combined_reward += 10000
+        if len(self.step_task_completions) == len(self.goal.keys()):
+                combined_reward += 10
 
         # Combine the rewards
         combined_reward += (reward_giver + reward_receiver) / 2
@@ -353,9 +353,9 @@ class HandoverEnv(gym.Env, EzPickle):
             if task not in self.episode_task_completions:
                 self.episode_task_completions.append(task)
         info["episode_task_completions"] = self.episode_task_completions
-        if self.terminate_on_tasks_completed:
-            # terminate if there are no more tasks to complete
-            terminated = len(self.episode_task_completions) == len(self.goal.keys())
+        # if self.terminate_on_tasks_completed:
+        #     # terminate if there are no more tasks to complete
+        #     terminated = len(self.episode_task_completions) == len(self.goal.keys())
             # terminate if there are no more tasks to complete
         
         if self.episode_step >= self.max_episode_steps:
@@ -367,6 +367,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
     def reset(self, *, seed: Optional[int] = None, **kwargs):
         # super().reset(seed=seed, **kwargs)
+        self.episode_step = 0
         self.episode_task_completions.clear()
         robot_obs, _ = self.robot_env.reset(seed=seed)
         obs = self._get_obs(robot_obs)

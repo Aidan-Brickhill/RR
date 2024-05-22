@@ -81,5 +81,21 @@ poetry run python cleanrl/dqn_atari_jax.py --env-id BreakoutNoFrameskip-v4
 
 ---
 
-go onto a node and use as if its a computer
-srun -N 1 -p stampede --pty bash
+<!-- go onto a node and use as if its a computer
+srun -N 1 -p stampede --pty bash -->
+
+conda create --name handover python=3.10
+
+conda activate handover
+
+git clone https://github.com/Aidan-Brickhill/RR.git
+
+pip install stable-baselines3[extra]
+
+pip install "torch==1.12.1" --upgrade --extra-index-url https://download.pytorch.org/whl/cu113
+
+pip install --upgrade "jax[cuda11_cudnn82]==0.4.8" -f https://storage.googleapis.com/jax-releases/jax_cuda_releases.html
+
+python3 train.py
+
+source ~/.handover
