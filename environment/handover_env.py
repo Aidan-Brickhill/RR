@@ -318,6 +318,10 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward += 50
             combined_reward += 5
 
+            # Penalize any movement after reaching the goal
+            giver_velocity = np.sum(np.abs(giver_current_vel))
+            combined_reward -= stop_penalty_factor * giver_velocity
+
 
 
         distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
