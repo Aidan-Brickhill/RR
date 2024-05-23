@@ -288,9 +288,8 @@ class HandoverEnv(gym.Env, EzPickle):
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
     ):        
-        velocity_penalty_factor = 0.1
-        position_penalty_factor = 0.1
-        acceleration_penalty_factor = 0.1
+        velocity_penalty_factor = 0.4
+        position_penalty_factor = 0.7
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -340,12 +339,6 @@ class HandoverEnv(gym.Env, EzPickle):
         reciever_velocity_diff = np.sum(np.abs(reciever_current_vel - reciever_prev_vel))
         velocity_penalty = velocity_penalty_factor * (giver_velocity_diff + reciever_velocity_diff)
         combined_reward -= velocity_penalty
-
-        giver_acceleration = giver_current_vel - giver_prev_vel
-        reciever_acceleration = reciever_current_vel - reciever_prev_vel
-        giver_acceleration_penalty = np.sum(np.abs(giver_acceleration))
-        reciever_acceleration_penalty = np.sum(np.abs(reciever_acceleration))
-        combined_reward -= acceleration_penalty_factor * (giver_acceleration_penalty + reciever_acceleration_penalty)
 
         # Combine the rewards
         combined_reward += (reward_giver + reward_reciever) / 2
