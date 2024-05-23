@@ -288,8 +288,10 @@ class HandoverEnv(gym.Env, EzPickle):
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
     ):        
-        velocity_penalty_factor = 0.4
-        position_penalty_factor = 0.7
+        velocity_penalty_factor = 0.2
+        position_penalty_factor = 0.2
+        stop_penalty_factor = 3.0
+
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -313,11 +315,10 @@ class HandoverEnv(gym.Env, EzPickle):
             self.step_task_completions.append("panda_giver_fetch")
             if "panda_giver_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_giver_fetch")
-                combined_reward += 10
-            combined_reward += 2
+                combined_reward += 50
+            combined_reward += 5
 
-            giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
-            combined_reward -= position_penalty_factor * giver_position_diff
+
 
         distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
         reward_reciever = 1 - np.tanh(distance_reciever)       
@@ -326,18 +327,26 @@ class HandoverEnv(gym.Env, EzPickle):
             self.step_task_completions.append("panda_reciever_fetch")
             if "panda_reciever_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_reciever_fetch")
-                combined_reward += 10
-            combined_reward += 2
+                combined_reward += 50
+            combined_reward += 5
 
-            reciever_position_diff = np.sum(np.abs(reciever_current_pos - reciever_prev_pos))
-            combined_reward -= position_penalty_factor * reciever_position_diff
+            # Penalize any movement after reaching the goal
+            reciever_velocity = np.sum(np.abs(reciever_current_vel))
+            combined_reward -= stop_penalty_factor * reciever_velocity
+
+
 
         if len(self.step_task_completions) == len(self.goal.keys()):
-                combined_reward += 10
+                combined_reward += 20
 
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
         reciever_velocity_diff = np.sum(np.abs(reciever_current_vel - reciever_prev_vel))
         velocity_penalty = velocity_penalty_factor * (giver_velocity_diff + reciever_velocity_diff)
+        combined_reward -= velocity_penalty
+
+        reciever_position_diff = np.sum(np.abs(reciever_current_pos - reciever_prev_pos))
+        giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
+        combined_reward = position_penalty_factor * (giver_position_diff + reciever_position_diff)
         combined_reward -= velocity_penalty
 
         # Combine the rewards
