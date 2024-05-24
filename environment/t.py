@@ -1,7 +1,7 @@
 import gymnasium as gym
 from handover_env import HandoverEnv
 
-env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "panda_reciever_fetch"], max_episode_steps = 50)
+env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "panda_reciever_wait"], max_episode_steps = 50)
 observation, info = env.reset()
 
 # environment_observations = observation['observation']
