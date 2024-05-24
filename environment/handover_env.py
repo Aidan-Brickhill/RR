@@ -20,7 +20,7 @@ OBS_ELEMENT_INDICES = {
 OBS_ELEMENT_GOALS = {
     "panda_giver_fetch": np.array([0, 0, 1.4]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
-    "panda_reciever_wait": np.array([-0.75, -0.4, 1.8]),
+    "panda_reciever_wait": np.array([0.41, 0.01, 1.84]),
     "panda_reciever_fetch": np.array([0, 0, 0.8]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
