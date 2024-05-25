@@ -18,18 +18,18 @@ OBS_ELEMENT_INDICES = {
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([0, 0, 1.4]),
+    "panda_giver_fetch": np.array([-0.648, 0.4, 0.95]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
-    "panda_reciever_wait": np.array([0.41, 0.01, 1.84]),
+    "panda_reciever_wait": np.array([0.55, 0.01, 1.88]),
     "panda_reciever_fetch": np.array([0, 0, 0.8]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.1
+PANDA_GIVER_FETCH_THRESH = 0.05
 PANDA_GIVER_LIFT_THRESH = 0.1
 OBJECT_LIFT_THRESH = 0.3
 
-PANDA_RECIEVER_WAIT_THRESH= 0.1
+PANDA_RECIEVER_WAIT_THRESH= 0.05
 PANDA_RECIEVER_FETCH_THRESH = 0.1
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
@@ -288,10 +288,12 @@ class HandoverEnv(gym.Env, EzPickle):
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
     ):        
+        # weight factors
+        distance_penalty_factor = 0.5
         velocity_penalty_factor = 0.05
         position_penalty_factor = 0.05
         stop_penalty_factor = 3.0
-
+        wait_penalty_factor = 10.0
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -307,51 +309,51 @@ class HandoverEnv(gym.Env, EzPickle):
 
         combined_reward = 0
 
+        # distance of giver
         distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
 
-        # Apply threshold to determine if tasks are completed
+        # reward determination
         if distance_giver < PANDA_GIVER_FETCH_THRESH:
             self.step_task_completions.append("panda_giver_fetch")
-            combined_reward += 10
-
+            combined_reward += distance_penalty_factor / distance_giver
+            
             # Penalize any movement after reaching the goal
             giver_velocity = np.sum(np.abs(giver_current_vel))
             combined_reward -= stop_penalty_factor * giver_velocity
         else:
-            combined_reward -= distance_giver
+            combined_reward -= distance_penalty_factor * distance_giver
 
-        # make receiver still
+        # distance of reciever
         distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
-        # reward_reciever = 1 - np.tanh(distance_reciever)       
-            
+       
+        # reward determination
         if distance_reciever < PANDA_RECIEVER_WAIT_THRESH:
             self.step_task_completions.append("panda_reciever_wait")
-            combined_reward += 10
+            combined_reward += distance_penalty_factor / distance_reciever
 
             # Penalize any movement after reaching the goal
             reciever_velocity = np.sum(np.abs(reciever_current_vel))
-            combined_reward -= stop_penalty_factor * reciever_velocity
+            combined_reward -= wait_penalty_factor * reciever_velocity
         else:
-            combined_reward -= distance_reciever
+            combined_reward -= distance_penalty_factor * distance_reciever
 
         # if the fetch has been completed for the first time, big reward
         if "panda_giver_fetch" in self.step_task_completions and "panda_giver_fetch" not in self.episode_task_completions:
             self.episode_task_completions.append("panda_giver_fetch")
-            combined_reward += 50
+            combined_reward += 100
         
         # if the wait has been completed after the fetch has been done, big reward
         if "panda_reciever_wait" in self.step_task_completions and "panda_giver_fetch" in self.episode_task_completions:
             self.episode_task_completions.append("panda_reciever_wait")
-            combined_reward += 50
+            combined_reward += 1000
 
-        if len(self.episode_task_completions) == len(self.goal.keys()):
-            combined_reward += 2000
-
+        # penalize velocity changes
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
         reciever_velocity_diff = np.sum(np.abs(reciever_current_vel - reciever_prev_vel))
         velocity_penalty = velocity_penalty_factor * (giver_velocity_diff + reciever_velocity_diff)
         combined_reward -= velocity_penalty
 
+        # penalize position changes
         reciever_position_diff = np.sum(np.abs(reciever_current_pos - reciever_prev_pos))
         giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
         combined_reward = position_penalty_factor * (giver_position_diff + reciever_position_diff)

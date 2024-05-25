@@ -5,7 +5,6 @@ from stable_baselines3.common.monitor import Monitor
 import wandb
 from wandb.integration.sb3 import WandbCallback
 
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 config = {
     "policy_type": "MlpPolicy",
@@ -32,7 +31,7 @@ env = VecVideoRecorder(
     video_length=80,
 )
 
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", device=device)
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(
