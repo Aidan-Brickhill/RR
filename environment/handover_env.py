@@ -328,11 +328,13 @@ class HandoverEnv(gym.Env, EzPickle):
         # reward determination
         if distance_reciever < PANDA_RECIEVER_WAIT_THRESH:
             self.step_task_completions.append("panda_reciever_wait")
+            combined_reward += distance_penalty_factor / distance_reciever
 
-        if "panda_giver_fetch" not in self.episode_task_completions:
             # Penalize any movement after reaching the goal
             reciever_velocity = np.sum(np.abs(reciever_current_vel))
-            combined_reward -= reciever_velocity
+            combined_reward -= stop_penalty_factor * reciever_velocity
+        else:
+            combined_reward -= distance_penalty_factor / distance_reciever
 
         # if the fetch has been completed for the first time, big reward
         if "panda_giver_fetch" in self.step_task_completions and "panda_giver_fetch" not in self.episode_task_completions:
@@ -353,8 +355,8 @@ class HandoverEnv(gym.Env, EzPickle):
         # penalize position changes
         reciever_position_diff = np.sum(np.abs(reciever_current_pos - reciever_prev_pos))
         giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
-        combined_reward = position_penalty_factor * (giver_position_diff + reciever_position_diff)
-        combined_reward -= velocity_penalty
+        position_penalty = position_penalty_factor * (giver_position_diff + reciever_position_diff)
+        combined_reward -= position_penalty
 
         return combined_reward
     
