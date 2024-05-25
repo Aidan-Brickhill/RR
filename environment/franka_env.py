@@ -125,13 +125,6 @@ class FrankaRobot(MujocoEnv):
         end_effector_giver_id = self.model_names.site_name2id["panda_giver_end_effector"]
         robot_giver_end_effector_pos = self.data.site_xpos[end_effector_giver_id].ravel()
 
-        # robot_giver_joints_pos = []
-        # for body in range(7):
-        #     body_name = f"panda_giver_link{body}"
-        #     body_id = self.model_names.body_name2id[body_name]
-        #     robot_giver_joints_pos.append(self.data.body_xpos[body_id].ravel())
-
-
         end_effector_receiver_id = self.model_names.site_name2id["panda_reciever_end_effector"]
         robot_reciever_end_effector_pos = self.data.site_xpos[end_effector_receiver_id].ravel()
 
@@ -148,7 +141,6 @@ class FrankaRobot(MujocoEnv):
         )
 
         self._last_robot_qpos = robot_qpos
-        no_xyz_joints = np.concatenate((robot_qpos[:9].copy(), robot_giver_end_effector_pos, robot_qvel[:9].copy(), robot_qpos[9:].copy(), robot_reciever_end_effector_pos, robot_qvel[9:].copy()))
         return np.concatenate((robot_qpos[:9].copy(), robot_giver_end_effector_pos, robot_qvel[:9].copy(), robot_qpos[9:].copy(), robot_reciever_end_effector_pos, robot_qvel[9:].copy()))
 
     def reset_model(self):
