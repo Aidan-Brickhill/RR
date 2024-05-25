@@ -328,13 +328,11 @@ class HandoverEnv(gym.Env, EzPickle):
         # reward determination
         if distance_reciever < PANDA_RECIEVER_WAIT_THRESH:
             self.step_task_completions.append("panda_reciever_wait")
-            combined_reward += distance_penalty_factor / distance_reciever
 
+        if "panda_giver_fetch" not in self.episode_task_completions:
             # Penalize any movement after reaching the goal
             reciever_velocity = np.sum(np.abs(reciever_current_vel))
-            combined_reward -= stop_penalty_factor * reciever_velocity
-        else:
-            combined_reward -= distance_penalty_factor / distance_reciever
+            combined_reward -= reciever_velocity
 
         # if the fetch has been completed for the first time, big reward
         if "panda_giver_fetch" in self.step_task_completions and "panda_giver_fetch" not in self.episode_task_completions:
@@ -402,9 +400,9 @@ class HandoverEnv(gym.Env, EzPickle):
         info = {"tasks_to_complete": list(self.tasks_to_complete)}
         info["step_task_completions"] = self.step_task_completions.copy()
 
-        for task in self.step_task_completions:
-            if task not in self.episode_task_completions:
-                self.episode_task_completions.append(task)
+        # for task in self.step_task_completions:
+        #     if task not in self.episode_task_completions:
+        #         self.episode_task_completions.append(task)
         info["episode_task_completions"] = self.episode_task_completions
         if self.terminate_on_tasks_completed:
             # terminate if there are no more tasks to complete
