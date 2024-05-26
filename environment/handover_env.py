@@ -15,6 +15,7 @@ OBS_ELEMENT_INDICES = {
     "panda_reciever_wait": np.array([30, 31, 32]),
     "panda_reciever_fetch": np.array([30, 31, 32]),
     "panda_reciever_place": np.array([30, 31, 32, 36, 37, 38]),
+    "kettle_lift": np.array([42, 43, 44]),
 }
 
 OBS_ELEMENT_GOALS = {
@@ -23,6 +24,8 @@ OBS_ELEMENT_GOALS = {
     "panda_reciever_wait": np.array([0.47, 0.01, 1.84]),
     "panda_reciever_fetch": np.array([0, 0, 0.8]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
+    "kettle_lift": np.array([-0.75, 0.4, 0.9]),
+
 } 
 
 PANDA_GIVER_FETCH_THRESH = 0.1
@@ -282,12 +285,44 @@ class HandoverEnv(gym.Env, EzPickle):
             **kwargs,
         )
 
+    def calculate_reward3(
+        self,
+        desired_goal: "dict[str, np.ndarray]",
+        achieved_goal: "dict[str, np.ndarray]",
+        robot_obs,
+    ):
+        reward = 0
+        kettle_lift = achieved_goal["kettle_lift"][2]
+
+        distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
+        if distance_giver < PANDA_GIVER_FETCH_THRESH:
+            self.step_task_completions.append("panda_giver_fetch")
+            reward = 0.25
+            kettle_lift = achieved_goal["kettle_lift"][2]
+            if kettle_lift > desired_goal["kettle_lift"][2] -0.1:
+                if kettle_lift > desired_goal["kettle_lift"][2]:
+                    reward = 0.5
+                    self.step_task_completions.append("kettle_lift")
+                    # init arm 2 movement
+                    self.episode_task_completions.append("kettle_lift")
+            else:
+                reward = 0.25
+                distance_height = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
+                reward = reward + 0.25 * (1 - np.tanh(1 - distance_height))
+        else:
+            reward = reward + 0.25 * (1 - np.tanh(1 - distance_giver))
+
+        return reward
+
+    
     def calculate_reward(
         self,
         desired_goal: "dict[str, np.ndarray]",
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
-    ):        
+    ): 
+        reward = self.calculate_reward3(desired_goal, achieved_goal, robot_obs)       
+        return reward
         # weight factors
         distance_penalty_factor = 0.5
         velocity_penalty_factor = 0.05
@@ -384,6 +419,8 @@ class HandoverEnv(gym.Env, EzPickle):
         return observations
 
     def step(self, action):
+        if "kettle_lift" not in self.episode_task_completions:
+            action[-9:] = 0
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 

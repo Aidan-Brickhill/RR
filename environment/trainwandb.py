@@ -21,7 +21,7 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["panda_giver_fetch", "panda_reciever_wait"], max_episode_steps = 80))
+    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["panda_giver_fetch", "kettle_lift"], max_episode_steps = 80))
 
 env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
