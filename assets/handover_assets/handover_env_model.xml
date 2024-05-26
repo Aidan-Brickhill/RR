@@ -21,6 +21,8 @@
         <!-- Transparent green box -->
         <geom type="box" size="0.1 0.1 0.1" pos="-0.648 0.4 0.95" rgba="0 1 0 0.5"/>
 
+        <geom type="box" size="0.1 0.1 0.1" pos="0 0 1.3" rgba="1 0 0 0.5"/>
+
         <geom type="box" size="0.1 0.1 0.1" pos="0.47 0.01 1.84" rgba="0 0 1 0.5"/>
 
 

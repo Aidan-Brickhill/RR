@@ -24,7 +24,7 @@ OBS_ELEMENT_GOALS = {
     "panda_reciever_wait": np.array([0.47, 0.01, 1.84]),
     "panda_reciever_fetch": np.array([0, 0, 0.8]),
     "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
-    "kettle_lift": np.array([-0.75, 0.4, 0.9]),
+    "kettle_lift": np.array([0, 0, 1]),
 
 } 
 
@@ -37,9 +37,8 @@ PANDA_RECIEVER_FETCH_THRESH = 0.1
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
 
-MAX_HEIGHT = 1.25
+MAX_HEIGHT = 1.8
 MIN_HEIGHT = 0.7
-MIN_HANDOVER_HEIGHT = 0.85
 
 STABILITY_THRESH = 0.3
 END_EFFECTOR_DISTANCE_THRESH = 0.3
@@ -324,7 +323,7 @@ class HandoverEnv(gym.Env, EzPickle):
         velocity_penalty_factor = 0.05
         position_penalty_factor = 0.05
         stop_penalty_factor = 3.0
-
+        lift_reward_factor = 10.0
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -356,10 +355,25 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the fetch has been completed for the first time, big reward
         if "panda_giver_fetch" in self.step_task_completions and "panda_giver_fetch" not in self.episode_task_completions:
             self.episode_task_completions.append("panda_giver_fetch")
-            self.episode_task_completions.append("kettle_lift")
-
             combined_reward += 50
+        
+        if "panda_giver_fetch" in self.step_task_completions:
 
+            distance_kettle = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
+            if distance_kettle < PANDA_GIVER_LIFT_THRESH:
+                self.step_task_completions.append("panda_giver_fetch")
+                combined_reward += lift_reward_factor * 10
+                self.episode_task_completions.append("kettle_lift")
+            else:
+                combined_reward -= distance_kettle
+            
+            kettle_y = achieved_goal["kettle_lift"][2]
+            
+            if kettle_y < MIN_HEIGHT or kettle_y > MAX_HEIGHT:
+                combined_reward -= 5000
+                self.episode_task_completions.append("kettle_lift")
+            elif kettle_y > 0.8:
+                combined_reward += 10
 
         if len(self.episode_task_completions) == len(self.goal.keys()):
             combined_reward += 2000
