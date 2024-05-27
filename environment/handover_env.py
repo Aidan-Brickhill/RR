@@ -332,8 +332,7 @@ class HandoverEnv(gym.Env, EzPickle):
         kettle_y = achieved_goal["kettle_lift"][2]
 
         # if the end effector hasnt been put in the goal position 
-        # if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
-        if True:
+        if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
             # get the distance between the end effector and kettle
             distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["kettle_lift"])
             
