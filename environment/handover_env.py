@@ -29,7 +29,7 @@ OBS_ELEMENT_GOALS = {
 } 
 
 PANDA_GIVER_FETCH_THRESH = 0.1
-PANDA_GIVER_HOLD_THRESH = 0.1
+PANDA_GIVER_HOLD_THRESH = 0.2
 PANDA_GIVER_LIFT_THRESH = 0.1
 
 OBJECT_LIFT_THRESH = 0.3
@@ -421,16 +421,6 @@ class HandoverEnv(gym.Env, EzPickle):
             # provide a very negative reward (cancle out the completed reward)
             combined_reward -= 5000
 
-        # penalize changes in velocity to help with smoother movements
-        giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
-        velocity_penalty = velocity_penalty_factor * giver_velocity_diff 
-        combined_reward -= velocity_penalty
-
-        # penalize changes in position to help with smoother movements
-        giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
-        position_penalty = position_penalty_factor * giver_position_diff 
-        combined_reward -= position_penalty
-
         # if the tasks have all been completed, give a large reward
         if len(self.episode_task_completions) == len(self.goal.keys()):
             combined_reward += 2000
@@ -446,10 +436,17 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward -= 10
 
             # punish velocity from the waiter
-            combined_reward -= wait_penalty * reciever_current_vel
+            combined_reward -= wait_penalty * np.sum(np.abs(reciever_current_vel))
 
-        # ensure the reward is a scalar
-        combined_reward = float(combined_reward)
+        # penalize changes in velocity to help with smoother movements
+        giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
+        velocity_penalty = velocity_penalty_factor * giver_velocity_diff 
+        combined_reward -= velocity_penalty
+
+        # penalize changes in position to help with smoother movements
+        giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
+        position_penalty = position_penalty_factor * giver_position_diff 
+        combined_reward -= position_penalty
 
         return combined_reward
     
