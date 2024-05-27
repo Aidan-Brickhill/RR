@@ -448,6 +448,9 @@ class HandoverEnv(gym.Env, EzPickle):
             # punish velocity from the waiter
             combined_reward -= wait_penalty * reciever_current_vel
 
+        # ensure the reward is a scalar
+        combined_reward = float(combined_reward)
+
         return combined_reward
     
     def _get_obs(self, robot_obs):
