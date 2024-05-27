@@ -28,7 +28,7 @@ env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
     record_video_trigger=lambda x: x % 200000 == 0,
-    video_length=80,
+    video_length=140,
 )
 
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")

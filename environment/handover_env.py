@@ -29,7 +29,7 @@ OBS_ELEMENT_GOALS = {
 } 
 
 PANDA_GIVER_FETCH_THRESH = 0.1
-PANDA_GIVER_HOLD_THRESH = 0.2
+PANDA_GIVER_HOLD_THRESH = 0.25
 PANDA_GIVER_LIFT_THRESH = 0.1
 
 OBJECT_LIFT_THRESH = 0.3
@@ -296,10 +296,7 @@ class HandoverEnv(gym.Env, EzPickle):
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
     ):        
-        velocity_penalty_factor = 0.05
-        position_penalty_factor = 0.05
-        wait_penalty = 3.0
-        lift_reward_factor = 10.0
+
         initial_lift_height = 0.8
 
         # gets the previous qpos and qvels of the robot
@@ -313,7 +310,6 @@ class HandoverEnv(gym.Env, EzPickle):
         reciever_current_pos = robot_obs[21:30]
         giver_current_vel = robot_obs[12:21]
         reciever_current_vel = robot_obs[33:42]
-        distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["kettle_lift"])
 
         combined_reward = 0
 
@@ -322,46 +318,44 @@ class HandoverEnv(gym.Env, EzPickle):
 
             # get the distance between the end effector and the goal positon
             distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
+
+            # provide relative reward based on the distance
+            combined_reward += 0.25 * (1-np.tanh(distance_giver))
             
             # if the end effector enters the goal postion
             if distance_giver < PANDA_GIVER_FETCH_THRESH:
 
                 # record the entry
-                self.step_task_completions.append("panda_giver_fetch")
-                self.episode_task_completions.append("panda_giver_fetch")
-
-                # provide a large reward
-                combined_reward += 50
-
-            # if the end effector is not in the goal postion
-            else:
-                # pemalize the reward by the distance
-                combined_reward -= distance_giver
-
+                self.episode_task_completions.append("panda_giver_fetch")          
+            
         # get the y pos of the kettle
         kettle_y = achieved_goal["kettle_lift"][2]
 
         # if the end effector hasnt been put in the goal position 
-        if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
+        # if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
+        if True:
             # get the distance between the end effector and kettle
             distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["kettle_lift"])
+            
+            # provide relative reward based on the distance
+            combined_reward += 0.50 * (1-np.tanh(distance_kettle_giver))
 
             # if the end effector is close to the kettle
             if distance_kettle_giver < PANDA_GIVER_HOLD_THRESH:
                 
-                # provide a reward
-                combined_reward += 5
-
                 # if the kettle has been slightly lifted
                 if kettle_y >= initial_lift_height:
 
                     # provide a reward
-                    combined_reward += 25
+                    combined_reward += 1
 
                     # and motivate movement to the goal
 
                     # get the distance between the kettle and the goal positon
                     distance_kettle = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
+
+                    # provide relative reward based on the distance
+                    combined_reward += 0.75 * (1-np.tanh(distance_kettle))
 
                     # if the kettle is in the goal position 
                     if distance_kettle < PANDA_GIVER_LIFT_THRESH:
@@ -377,34 +371,17 @@ class HandoverEnv(gym.Env, EzPickle):
                             self.episode_task_completions.append("panda_giver_fetch")
 
                         # provide a reward
-                        combined_reward += lift_reward_factor * 10
-                    
-                    # if the kettle is not in the goal position 
-                    else:
-
-                        # penalize it by the distance
-                        combined_reward -= distance_kettle
-                
-                else:
-                    
-                    # penalize by the kettle height difference
-                    combined_reward -= (initial_lift_height - kettle_y)
-
-            # if the end effector is not close to the kettle
-            else:
-
-                # penalize more heavily for leaving the kettle
-                combined_reward -= distance_kettle_giver
+                        combined_reward +=  10
 
         # if the giver end effector goes below a certain height penailize it
         giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]
         if giver_end_effector_y < MIN_END_EFFECTOR_HEIGHT:
-            combined_reward -= 10
+            combined_reward -= 1
         
         # if the reciever end effector goes below a certain height penailize it
         reciever_end_effector_y = achieved_goal["panda_reciever_wait"][2]
         if reciever_end_effector_y < MIN_END_EFFECTOR_HEIGHT:
-            combined_reward -= 10
+            combined_reward -= 1
 
         # if the kettle is too high/low 
         if kettle_y < MIN_OBJECT_HEIGHT or kettle_y > MAX_OBJECT_HEIGHT:
@@ -419,34 +396,31 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 5000
+            combined_reward -= 100
 
         # if the tasks have all been completed, give a large reward
         if len(self.episode_task_completions) == len(self.goal.keys()):
-            combined_reward += 2000
+            combined_reward += 100
 
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
-
-            # get the distance between the end effector and the wait positon
-            distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
             
-            # if its not within the square give a negative reward
-            if distance_reciever > PANDA_RECIEVER_WAIT_THRESH:
-                combined_reward -= 10
+            # get the distance between the end effector and the goal positon
+            distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
+
+            # provide relative reward based on the distance
+            combined_reward += 0.25 * (1-np.tanh(distance_reciever))
 
             # punish velocity from the waiter
-            combined_reward -= wait_penalty * np.sum(np.abs(reciever_current_vel))
+            combined_reward -= 0.01 * np.sum(np.abs(reciever_current_vel))
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
-        velocity_penalty = velocity_penalty_factor * giver_velocity_diff 
-        combined_reward -= velocity_penalty
+        combined_reward -= 0.005 * giver_velocity_diff 
 
         # penalize changes in position to help with smoother movements
         giver_position_diff = np.sum(np.abs(giver_current_pos - giver_prev_pos))
-        position_penalty = position_penalty_factor * giver_position_diff 
-        combined_reward -= position_penalty
+        combined_reward -= 0.005 * giver_position_diff
 
         return combined_reward
     
