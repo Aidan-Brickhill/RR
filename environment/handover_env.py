@@ -289,35 +289,6 @@ class HandoverEnv(gym.Env, EzPickle):
             **kwargs,
         )
 
-    def calculate_reward3(
-        self,
-        desired_goal: "dict[str, np.ndarray]",
-        achieved_goal: "dict[str, np.ndarray]",
-        robot_obs,
-    ):
-        reward = 0
-        kettle_lift = achieved_goal["kettle_lift"][2]
-
-        distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
-        if distance_giver < PANDA_GIVER_FETCH_THRESH:
-            self.step_task_completions.append("panda_giver_fetch")
-            reward = 0.25
-            kettle_lift = achieved_goal["kettle_lift"][2]
-            if kettle_lift > desired_goal["kettle_lift"][2] -0.1:
-                if kettle_lift > desired_goal["kettle_lift"][2]:
-                    reward = 0.5
-                    self.step_task_completions.append("kettle_lift")
-                    # init arm 2 movement
-                    self.episode_task_completions.append("kettle_lift")
-            else:
-                reward = 0.25
-                distance_height = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
-                reward = reward + 0.25 * (1 - np.tanh(1 - distance_height))
-        else:
-            reward = reward + 0.25 * (1 - np.tanh(1 - distance_giver))
-
-        return reward
-
     
     def calculate_reward(
         self,
@@ -327,8 +298,9 @@ class HandoverEnv(gym.Env, EzPickle):
     ):        
         velocity_penalty_factor = 0.05
         position_penalty_factor = 0.05
+        wait_penalty = 10.0
         lift_reward_factor = 10.0
-        leave_kettle_penalty = 20
+        initial_lift_height = 0.8
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -366,10 +338,9 @@ class HandoverEnv(gym.Env, EzPickle):
                 # pemalize the reward by the distance
                 combined_reward -= distance_giver
 
-        
+        kettle_y = achieved_goal["kettle_lift"][2]
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
-            
             # get the distance between the end effector and kettle
             distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["kettle_lift"])
 
@@ -386,17 +357,16 @@ class HandoverEnv(gym.Env, EzPickle):
                 if kettle_y < MIN_OBJECT_HEIGHT or kettle_y > MAX_OBJECT_HEIGHT:
                     # finish the episode
                     self.episode_task_completions.append("kettle_lift")
+                    self.episode_task_completions.append("panda_reciever_wait")
 
                     # provide a very negative reward (cancle out the completed reward)
-                    combined_reward -= 2000
-
-                    return combined_reward
+                    combined_reward -= 50000
 
                 # if the kettle has been slightly lifted
-                if kettle_y >= 0.8:
+                if kettle_y >= initial_lift_height:
 
                     # provide a reward
-                    combined_reward += 20
+                    combined_reward += 25
 
                     # and motivate movement to the goal
 
@@ -409,21 +379,27 @@ class HandoverEnv(gym.Env, EzPickle):
                         # record the entry
                         self.step_task_completions.append("panda_giver_fetch")
                         self.episode_task_completions.append("kettle_lift")
+                        self.episode_task_completions.append("panda_reciever_wait")
 
                         # provide a reward
-                        combined_reward += lift_reward_factor * 5
+                        combined_reward += lift_reward_factor * 10
                     
                     # if the kettle is not in the goal position 
                     else:
 
                         # penalize it by the distance
                         combined_reward -= distance_kettle
+                
+                else:
+                    
+                    # penalize by the kettle height difference
+                    combined_reward -= (initial_lift_height - kettle_y)
 
             # if the end effector is not close to the kettle
             else:
 
                 # penalize more heavily for leaving the kettle
-                combined_reward -= leave_kettle_penalty * distance_kettle_giver
+                combined_reward -= distance_kettle_giver
 
         # if the giver end effector goes below a certain height penailize it
         giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]
@@ -443,6 +419,21 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the tasks have all been completed, give a large reward
         if len(self.episode_task_completions) == len(self.goal.keys()):
             combined_reward += 2000
+
+        # if the tasks have not all been completed ensure the reciever robot is waiting
+        else:
+
+            # get the distance between the end effector and the wait positon
+            distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
+            
+            # if its not within the square give a negative reward
+            if distance_reciever > PANDA_RECIEVER_WAIT_THRESH:
+                combined_reward -= 10
+
+            # punish velocity changes from the reciever robot heavily
+            reciever_velocity_diff = np.sum(np.abs(reciever_current_vel - reciever_prev_vel))
+            velocity_penalty = wait_penalty * reciever_velocity_diff 
+            combined_reward -= velocity_penalty
 
         return combined_reward
     
@@ -470,8 +461,6 @@ class HandoverEnv(gym.Env, EzPickle):
         return observations
 
     def step(self, action):
-        if "kettle_lift" not in self.episode_task_completions:
-            action[-9:] = 0
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 
