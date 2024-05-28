@@ -349,7 +349,7 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 0.25 * (1-np.tanh(height_from_kettle))
                 
             # if the kettle has been slightly lifted
-            if kettle_y >= initial_lift_height:
+            if kettle_y >= initial_lift_height-1:
 
                 # provide a reward
                 combined_reward += 1
