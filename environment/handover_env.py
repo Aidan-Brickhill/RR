@@ -410,7 +410,7 @@ class HandoverEnv(gym.Env, EzPickle):
             distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
 
             # provide relative reward based on the distance
-            combined_reward += 0.25 * (1-np.tanh(distance_reciever))
+            combined_reward += 0.125 * (1-np.tanh(distance_reciever))
 
             # punish velocity from the waiter
             combined_reward -= 0.01 * np.sum(np.abs(reciever_current_vel))
