@@ -5,7 +5,6 @@ import numpy as np
 from gymnasium import spaces
 from gymnasium.utils.ezpickle import EzPickle
 
-from gymnasium_robotics.core import GoalEnv
 from franka_env import FrankaRobot
 
 

@@ -17,11 +17,10 @@ This project is covered by the Apache 2.0 License.
 
 from os import path
 
-import mujoco._functions
 import numpy as np
 from gymnasium import spaces
 from gymnasium.envs.mujoco.mujoco_env import MujocoEnv
-import mujoco._functions as mujoco_f
+
 from utils import (
     get_config_root_node,
     read_config_from_node,
