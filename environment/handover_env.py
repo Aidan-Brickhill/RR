@@ -19,7 +19,7 @@ OBS_ELEMENT_INDICES = {
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([-0.648, 0.4, 0.95]),
+    "panda_giver_fetch": np.array([-0.75, 0.4, 0.975]),
     "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
     "panda_reciever_wait": np.array([0.47, 0.01, 1.84]),
     "panda_reciever_fetch": np.array([0, 0, 0.8]),
@@ -28,13 +28,11 @@ OBS_ELEMENT_GOALS = {
 
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.1
-PANDA_GIVER_HOLD_THRESH = 0.25
+PANDA_GIVER_FETCH_THRESH = 0.15
+PANDA_GIVER_HOLD_THRESH = 0.15
 PANDA_GIVER_LIFT_THRESH = 0.1
 
-OBJECT_LIFT_THRESH = 0.3
 
-PANDA_RECIEVER_WAIT_THRESH= 0.1
 PANDA_RECIEVER_FETCH_THRESH = 0.1
 PANDA_RECIEVER_PLACE_THRESH = 0.1
 OBJECT_PLACE_THRESH = 0.1
@@ -297,7 +295,7 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs,
     ):        
 
-        initial_lift_height = 0.8
+        initial_lift_height = 0.9
 
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
@@ -313,34 +311,38 @@ class HandoverEnv(gym.Env, EzPickle):
 
         combined_reward = 0
 
+        # get the distance between the end effector and kettle (above 0.2)
+        around_kettle = achieved_goal["kettle_lift"].copy()
+        around_kettle[2] += 0.2
+        distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - around_kettle)
+
         # if the end effector hasnt made it to the goal yet
         if "panda_giver_fetch" not in self.episode_task_completions:
 
-            # get the distance between the end effector and the goal positon
-            distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
-
             # provide relative reward based on the distance
-            combined_reward += 0.25 * (1-np.tanh(distance_giver))
+            combined_reward += 0.25 * (1-np.tanh(distance_kettle_giver))
             
             # if the end effector enters the goal postion
-            if distance_giver < PANDA_GIVER_FETCH_THRESH:
+            if distance_kettle_giver < PANDA_GIVER_FETCH_THRESH:
 
                 # record the entry
                 self.episode_task_completions.append("panda_giver_fetch")          
             
         # get the y pos of the kettle
         kettle_y = achieved_goal["kettle_lift"][2]
-
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
-            # get the distance between the end effector and kettle
-            distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["kettle_lift"])
             
             # provide relative reward based on the distance
-            combined_reward += 0.50 * (1-np.tanh(distance_kettle_giver))
+            combined_reward += 0.25 * (1-np.tanh(distance_kettle_giver))
 
             # if the end effector is close to the kettle
             if distance_kettle_giver < PANDA_GIVER_HOLD_THRESH:
+                
+                # get the diffrence between the current y and goal y
+                height_from_kettle = initial_lift_height - kettle_y 
+
+                combined_reward += 0.50 * (1-np.tanh(height_from_kettle))
                 
                 # if the kettle has been slightly lifted
                 if kettle_y >= initial_lift_height:
