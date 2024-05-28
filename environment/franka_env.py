@@ -34,7 +34,7 @@ MAX_ROTATION_DISPLACEMENT = 0.5
 
 DEFAULT_CAMERA_CONFIG = {
     "distance": 3.8,
-    "azimuth": 90.0,
+    "azimuth": -90.0,
     "elevation": -40.0,
     "lookat": np.array([0, 0, 0.7]),
 }
