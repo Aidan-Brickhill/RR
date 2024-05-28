@@ -333,7 +333,10 @@ class HandoverEnv(gym.Env, EzPickle):
 
             # get the distance between the end effector and kettle (above 0.2)
             around_kettle = achieved_goal["kettle_lift"].copy()
+            around_kettle[0] += 0.1
+            around_kettle[1] -= 0.05
             around_kettle[2] += 0.225
+
             distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - around_kettle)
             
             # provide relative reward based on the distance
