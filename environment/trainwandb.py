@@ -32,7 +32,7 @@ env = VecVideoRecorder(
     video_length=140,
 )
 
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", ent_coef=0.1)
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(
