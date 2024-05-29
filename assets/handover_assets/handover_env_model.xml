@@ -20,9 +20,9 @@
 
         <!-- Transparent green box -->
         <!-- fetch -->
-        <geom type="box" size="0.2 0.2 0.2" pos="-0.75 0.4 0.9" rgba="0 1 0 0.2"/>
+        <!-- <geom type="box" size="0.2 0.2 0.2" pos="-0.75 0.4 0.9" rgba="0 1 0 0.2"/> -->
         <!-- stay -->
-        <!-- <geom type="box" size="0.15 0.15 0.15" pos="-0.65 0.35 1" rgba="0 1 0 0.2"/> -->
+        <geom type="box" size="0.15 0.15 0.15" pos="-0.65 0.325 1" rgba="0 1 0 0.2"/>
 
         <geom type="box" size="0.2 0.2 0.2" pos="0 0 1.3" rgba="1 0 0 0.2"/>
 
