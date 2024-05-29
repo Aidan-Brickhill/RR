@@ -28,7 +28,7 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 50000 == 0,
+    record_video_trigger=lambda x: x % 75000 == 0,
     video_length=140,
 )
 
