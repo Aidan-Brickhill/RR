@@ -345,7 +345,7 @@ class HandoverEnv(gym.Env, EzPickle):
             height_from_kettle = initial_lift_height - kettle_y 
             
             # provide relative reward based on the height of the kettle
-            combined_reward += 0.25 * (1-np.tanh(height_from_kettle))
+            combined_reward += 0.50 * (1-np.tanh(height_from_kettle))
 
             # get the distance between the kettle and the goal positon
             distance_kettle = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
@@ -359,21 +359,21 @@ class HandoverEnv(gym.Env, EzPickle):
                 # provide a reward
                 combined_reward += 1
 
-                # if the kettle is in the goal position 
-                if distance_kettle < PANDA_GIVER_LIFT_THRESH:
+            # if the kettle is in the goal position 
+            if distance_kettle < PANDA_GIVER_LIFT_THRESH:
 
-                    # finish the episode
-                    if "kettle_lift" not in self.episode_task_completions:
-                        self.episode_task_completions.append("kettle_lift")
+                # finish the episode
+                if "kettle_lift" not in self.episode_task_completions:
+                    self.episode_task_completions.append("kettle_lift")
 
-                    if "panda_reciever_wait" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_reciever_wait")
+                if "panda_reciever_wait" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_reciever_wait")
 
-                    if "panda_giver_fetch" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_giver_fetch")
+                if "panda_giver_fetch" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_giver_fetch")
 
-                    # provide a reward
-                    combined_reward +=  10
+                # provide a reward
+                combined_reward +=  10
 
         # if the giver end effector goes below a certain height penailize it
         giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]

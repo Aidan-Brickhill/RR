@@ -8,7 +8,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 10100000,
+    "total_timesteps": 3100000,
     "env_name": "HandoverEnv",
 }
 
@@ -28,11 +28,11 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 200000 == 0,
+    record_video_trigger=lambda x: x % 50000 == 0,
     video_length=140,
 )
 
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", ent_coef=0.1)
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(
