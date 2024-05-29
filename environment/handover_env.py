@@ -398,7 +398,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 100
+            combined_reward -= 10
 
         # if the tasks have all been completed, give a large reward
         if len(self.episode_task_completions) == len(self.goal.keys()):
