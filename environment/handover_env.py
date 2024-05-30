@@ -10,42 +10,29 @@ from franka_env import FrankaRobot
 
 OBS_ELEMENT_INDICES = {
     "panda_giver_fetch": np.array([9, 10, 11]),
-    "panda_giver_lift": np.array([9, 10, 11, 36, 37, 38]),
     "panda_reciever_wait": np.array([30, 31, 32]),
-    "panda_reciever_fetch": np.array([30, 31, 32]),
-    "panda_reciever_place": np.array([30, 31, 32, 36, 37, 38]),
-    "kettle_lift": np.array([42, 43, 44]),
+    "object_lift": np.array([44]),
+    "object_move": np.array([42, 43, 44]),
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([-0.75, 0.4, 0.9]),
-    "panda_giver_lift": np.array([0, 0, 0.85, 0, 0, 0.85]),
+    "panda_giver_fetch": np.array([-0.75, 0.4, 0.83]),
     "panda_reciever_wait": np.array([0.47, 0.01, 1.84]),
-    "panda_reciever_fetch": np.array([0, 0, 0.8]),
-    "panda_reciever_place": np.array([-0.75, -0.4, 0.8, -0.75, -0.4, 0.775]),
-    "kettle_lift": np.array([0, 0, 1.3]),
-
+    "object_lift": np.array([0.9]),
+    "object_move": np.array([0, 0, 1.3]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.2
-PANDA_GIVER_HOLD_THRESH = 0.15
-PANDA_GIVER_LIFT_THRESH = 0.2
-
-
-PANDA_RECIEVER_FETCH_THRESH = 0.1
-PANDA_RECIEVER_PLACE_THRESH = 0.1
-OBJECT_PLACE_THRESH = 0.1
+PANDA_GIVER_FETCH_THRESH = 0.15
+OBJECT_MOVE_THRESH = 0.2
 
 MAX_OBJECT_HEIGHT = 1.8
 MIN_OBJECT_HEIGHT = 0.7
 
-MIN_END_EFFECTOR_HEIGHT = 0.8
+MIN_END_EFFECTOR_HEIGHT = 0.78
 
-
+# to do
 STABILITY_THRESH = 0.3
 END_EFFECTOR_DISTANCE_THRESH = 0.3
-
-
 
 class HandoverEnv(gym.Env, EzPickle):
     """
@@ -57,13 +44,13 @@ class HandoverEnv(gym.Env, EzPickle):
     ## Goal
 
     The goal has a multitask configuration. The multiple tasks to be completed in an episode can be set by passing a list of tasks to the argument`tasks_to_complete`. For example, to open
-    the microwave door and move the kettle create the environment as follows:
+    the microwave door and move the object create the environment as follows:
 
     The following is a table with all the possible tasks and their respective joint goal values:
 
     | Task             | Description                                                    | Joint Type | Goal                                     |
     | ---------------- | -------------------------------------------------------------- | ---------- | ---------------------------------------- |
-    | "kettle"         | Move the kettle from one table to the next                     | free       | [ 0.75, -0.4, 0.775, 1, 0., 0., 0.] |
+    | "object"         | Move the object from one table to the next                     | free       | [ 0.75, -0.4, 0.775, 1, 0., 0., 0.] |
 
     ## Action Space
 
@@ -97,7 +84,7 @@ class HandoverEnv(gym.Env, EzPickle):
     The observation is a `goal-aware` observation space. The observation space contains the following keys:
 
     * `observation`: this is a `Box(-inf, inf, shape=(49,), dtype="float64")` space and it is formed by the robot's joint positions and velocities, as well as
-        the pose and velocities of the kettle (object to be handed over). An additional uniform noise of range `[-1,1]` is added to the observations. The noise is also scaled by a factor
+        the pose and velocities of the object (object to be handed over). An additional uniform noise of range `[-1,1]` is added to the observations. The noise is also scaled by a factor
         of `robot_noise_ratio` and `object_noise_ratio` given in the environment arguments. The elements of the `observation` array are the following:
 
 
@@ -150,19 +137,19 @@ class HandoverEnv(gym.Env, EzPickle):
     | 40    | `robot:panda_reciever_r_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_r_gripper_finger_joint                      | slide      | linear velocity (m/s)      |
     | 41    | `robot:panda_reciever_l_gripper_finger_joint` slide joint linear velocity     | -Inf     | Inf      | robot:panda_reciever_l_gripper_finger_joint                      | slide      | linear velocity (m/s)      |    
     
-    | 36    | Kettle's x coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 37    | Kettle's y coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 38    | Kettle's z coordinate                                 | -Inf     | Inf      | kettle                                   | free       | position (m)               |
-    | 39    | Kettle's x quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 40    | Kettle's y quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 41    | Kettle's z quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 42    | Kettle's w quaternion rotation                        | -Inf     | Inf      | kettle                                   | free       | -                          |
-    | 43    | Kettle's x linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 44    | Kettle's y linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 45    | Kettle's z linear velocity                            | -Inf     | Inf      | kettle                                   | free       | linear velocity (m/s)      |
-    | 46    | Kettle's x axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
-    | 47    | Kettle's y axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
-    | 48    | Kettle's z axis angular rotation                      | -Inf     | Inf      | kettle                                   | free       | angular velocity(rad/s)    |
+    | 42    | object's x coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
+    | 43    | object's y coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
+    | 45    | object's z coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
+    | 39    | object's x quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 40    | object's y quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 41    | object's z quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 42    | object's w quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 43    | object's x linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 44    | object's y linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 45    | object's z linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 46    | object's x axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
+    | 47    | object's y axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
+    | 48    | object's z axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
 
     * `desired_goal`: this key represents the final goal to be achieved. The value is another `Dict` space with keys the tasks to be completed in the episode and values the joint
     goal configuration of each joint in the task as specified in the `Goal` section.
@@ -185,7 +172,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
     ## Starting State
 
-    The simulation starts with all of the joint position actuators of the Franka robot set to zero. The kettle will be placed at the edge of the table.
+    The simulation starts with all of the joint position actuators of the Franka robot set to zero. The object will be placed at the edge of the table.
 
     ## Episode End
 
@@ -324,47 +311,45 @@ class HandoverEnv(gym.Env, EzPickle):
                 # record the entry
                 self.episode_task_completions.append("panda_giver_fetch")          
             
-        # get the y pos of the kettle
-        kettle_y = achieved_goal["kettle_lift"][2]
+        # get the y pos of the object
+        object_y = achieved_goal["object_lift"][0]
 
         # if the end effector hasnt been put in the goal position 
-        if  "panda_giver_fetch" in self.episode_task_completions and "kettle_lift" not in self.episode_task_completions:
-
-            # get the distance between the end effector and kettle (above 0.2)
-            around_kettle = achieved_goal["kettle_lift"].copy()
-            around_kettle[0] += 0.1
-            around_kettle[1] -= 0.75
-            around_kettle[2] += 0.225
-
-            distance_kettle_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - around_kettle)
+        # if  "panda_giver_fetch" in self.episode_task_completions and "object_lift" not in self.episode_task_completions:
+        if True:
+            # get the distance between the end effector and object (above 0.2)
+            distance_object_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
             
             # provide relative reward based on the distance
-            combined_reward += 0.125 * (1-np.tanh(distance_kettle_giver))
+            combined_reward += 0.125 * (1-np.tanh(distance_object_giver))
 
             # get the diffrence between the current y and goal y
-            height_from_kettle = initial_lift_height - kettle_y 
+            height_from_object = desired_goal["object_lift"][0] - object_y 
             
-            # provide relative reward based on the height of the kettle
-            combined_reward += 0.50 * (1-np.tanh(height_from_kettle))
+            # provide relative reward based on the height of the object
+            combined_reward += 0.50 * (1-np.tanh(height_from_object))
 
-            # get the distance between the kettle and the goal positon
-            distance_kettle = np.linalg.norm(achieved_goal["kettle_lift"] - desired_goal["kettle_lift"])
+            # get the distance between the object and the goal positon
+            distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
             # provide relative reward based on the distance
-            combined_reward += 0.75 * (1-np.tanh(distance_kettle))
+            combined_reward += 0.75 * (1-np.tanh(distance_object))
                 
-            # if the kettle has been slightly lifted
-            if kettle_y >= initial_lift_height-1:
-
+            # if the object has been slightly lifted
+            if object_y >= desired_goal["object_lift"][0]:
+                
+                if "object_lift" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_lift")
+                    
                 # provide a reward
                 combined_reward += 1
 
-            # if the kettle is in the goal position 
-            if distance_kettle < PANDA_GIVER_LIFT_THRESH:
+            # if the object is in the goal position 
+            if distance_object < OBJECT_MOVE_THRESH:
 
                 # finish the episode
-                if "kettle_lift" not in self.episode_task_completions:
-                    self.episode_task_completions.append("kettle_lift")
+                if "object_move" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_move")
 
                 if "panda_reciever_wait" not in self.episode_task_completions:
                     self.episode_task_completions.append("panda_reciever_wait")
@@ -385,11 +370,13 @@ class HandoverEnv(gym.Env, EzPickle):
         if reciever_end_effector_y < MIN_END_EFFECTOR_HEIGHT:
             combined_reward -= 1
 
-        # if the kettle is too high/low 
-        if kettle_y < MIN_OBJECT_HEIGHT or kettle_y > MAX_OBJECT_HEIGHT:
+        # if the object is too high/low 
+        if object_y < MIN_OBJECT_HEIGHT or object_y > MAX_OBJECT_HEIGHT:
             # finish the episode
-            if "kettle_lift" not in self.episode_task_completions:
-                self.episode_task_completions.append("kettle_lift")
+            if "object_move" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_move")
+            if "object_lift" not in self.episode_task_completions:
+                self.episode_task_completions.append("object_lift")
 
             if "panda_reciever_wait" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_reciever_wait")
@@ -411,7 +398,7 @@ class HandoverEnv(gym.Env, EzPickle):
             distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
 
             # provide relative reward based on the distance
-            combined_reward += 0.10 * (1-np.tanh(distance_reciever))
+            combined_reward += 0.125 * (1-np.tanh(distance_reciever))
 
             # punish velocity from the waiter
             combined_reward -= 0.01 * np.sum(np.abs(reciever_current_vel))
@@ -431,16 +418,16 @@ class HandoverEnv(gym.Env, EzPickle):
         obj_qvel = self.data.qvel[18:].copy()
 
         # Simulate observation noise
-        obj_qpos += (
-            self.object_noise_ratio
-            * self.robot_env.robot_pos_noise_amp[17:]
-            * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qpos.shape)
-        )
-        obj_qvel += (
-            self.object_noise_ratio
-            * self.robot_env.robot_vel_noise_amp[18:]
-            * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
-        )
+        # obj_qpos += (
+        #     self.object_noise_ratio
+        #     * self.robot_env.robot_pos_noise_amp[17:]
+        #     * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qpos.shape)
+        # )
+        # obj_qvel += (
+        #     self.object_noise_ratio
+        #     * self.robot_env.robot_vel_noise_amp[18:]
+        #     * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
+        # )
 
         observations = np.concatenate((robot_obs, obj_qpos, obj_qvel))
         self.achieved_goal = {

@@ -21,7 +21,7 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["panda_giver_fetch", "kettle_lift", "panda_reciever_wait"], max_episode_steps = 140))
+    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait"], max_episode_steps = 140))
 
 env= DummyVecEnv([make_env] * 4)
 
