@@ -310,7 +310,8 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")          
             
         # if the end effector hasnt been put in the goal position 
-        if  "panda_giver_fetch" in self.episode_task_completions and "object_lift" not in self.episode_task_completions:
+        if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
+            
             # get the distance between the end effector and object (above 0.2)
             distance_object_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
             
