@@ -32,12 +32,11 @@ MAX_CARTESIAN_DISPLACEMENT = 0.2
 MAX_ROTATION_DISPLACEMENT = 0.5
 
 DEFAULT_CAMERA_CONFIG = {
-    "distance": 3.8,
+    "distance": 2.8,
     "azimuth": -90.0,
-    "elevation": -40.0,
-    "lookat": np.array([0, 0, 0.7]),
+    "elevation": -35.0,
+    "lookat": np.array([0, 0, 0.9]),
 }
-
 
 class FrankaRobot(MujocoEnv):
     metadata = {
@@ -51,7 +50,6 @@ class FrankaRobot(MujocoEnv):
 
     def __init__(
         self,
-        # todo - check if this okay
         model_path="../assets/franka_assets/chain.xml",
         frame_skip=40,
         robot_noise_ratio: float = 0.01,

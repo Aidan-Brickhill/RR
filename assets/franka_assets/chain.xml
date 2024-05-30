@@ -1,6 +1,6 @@
 <mujocoinclude>
     <body name="panda" childclass="panda">
-        <body name="panda_giver_link0" childclass="panda" pos="-0.75 0 0">
+        <body name="panda_giver_link0" childclass="panda" pos="-0.75 -0.425 0" euler="0 0 1.5708">
             <geom class="panda_viz" mesh="link0_viz"/>
             <geom class="panda_col" mesh="link0_col" mass="2.91242"/>
             <body name="panda_giver_link1" pos="0 0 0.333">
@@ -98,7 +98,7 @@
             </body>
         </body>
 
-        <body name="panda_reciever_link0" childclass="panda" pos="0.75 0 0" quat="0 0 0 0.707">
+        <body name="panda_reciever_link0" childclass="panda" pos="0.75 0.425 0" euler="0 0 -1.5708">
             <geom class="panda_viz" mesh="link0_viz"/>
             <geom class="panda_col" mesh="link0_col" mass="2.91242"/>
             <body name="panda_reciever_link1" pos="0 0 0.333">

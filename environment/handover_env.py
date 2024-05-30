@@ -16,8 +16,8 @@ OBS_ELEMENT_INDICES = {
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([-0.75, 0.4, 0.83]),
-    "panda_reciever_wait": np.array([0.47, 0.01, 1.84]),
+    "panda_giver_fetch": np.array([-0.75, 0.35, 0.83]),
+    "panda_reciever_wait": np.array([0.8, 0.15, 1.87]),
     "object_lift": np.array([0.9]),
     "object_move": np.array([0, 0, 1.3]),
 } 
@@ -281,8 +281,6 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs,
     ):        
 
-        initial_lift_height = 0.9
-
         # gets the previous qpos and qvels of the robot
         giver_prev_pos = self.prev_step_robot_qpos[:9]
         reciever_prev_pos = self.prev_step_robot_qpos[9:]
@@ -311,9 +309,6 @@ class HandoverEnv(gym.Env, EzPickle):
                 # record the entry
                 self.episode_task_completions.append("panda_giver_fetch")          
             
-        # get the y pos of the object
-        object_y = achieved_goal["object_lift"][0]
-
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_lift" not in self.episode_task_completions:
             # get the distance between the end effector and object (above 0.2)
@@ -323,10 +318,10 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 0.125 * (1-np.tanh(distance_object_giver))
 
             # get the diffrence between the current y and goal y
-            height_from_object = desired_goal["object_lift"][0] - object_y 
+            distance_height_object = desired_goal["object_lift"][0] - achieved_goal["object_lift"][0] 
             
             # provide relative reward based on the height of the object
-            combined_reward += 0.50 * (1-np.tanh(height_from_object))
+            combined_reward += 0.50 * (1-np.tanh(distance_height_object))
 
             # get the distance between the object and the goal positon
             distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
@@ -335,7 +330,7 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 0.75 * (1-np.tanh(distance_object))
                 
             # if the object has been slightly lifted
-            if object_y >= desired_goal["object_lift"][0]:
+            if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
@@ -357,7 +352,7 @@ class HandoverEnv(gym.Env, EzPickle):
                     self.episode_task_completions.append("panda_giver_fetch")
 
                 # provide a reward
-                combined_reward +=  10
+                combined_reward +=  100
 
         # if the giver end effector goes below a certain height penailize it
         giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]
@@ -370,7 +365,7 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward -= 1
 
         # if the object is too high/low 
-        if object_y < MIN_OBJECT_HEIGHT or object_y > MAX_OBJECT_HEIGHT:
+        if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
             # finish the episode
             if "object_move" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_move")
@@ -386,10 +381,6 @@ class HandoverEnv(gym.Env, EzPickle):
             # provide a very negative reward (cancle out the completed reward)
             combined_reward -= 10
 
-        # if the tasks have all been completed, give a large reward
-        if len(self.episode_task_completions) == len(self.goal.keys()):
-            combined_reward += 100
-
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
             
@@ -400,7 +391,7 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 0.125 * (1-np.tanh(distance_reciever))
 
             # punish velocity from the waiter
-            combined_reward -= 0.01 * np.sum(np.abs(reciever_current_vel))
+            combined_reward -= 0.05 * np.sum(np.abs(reciever_current_vel))
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
@@ -417,16 +408,16 @@ class HandoverEnv(gym.Env, EzPickle):
         obj_qvel = self.data.qvel[18:].copy()
 
         # Simulate observation noise
-        # obj_qpos += (
-        #     self.object_noise_ratio
-        #     * self.robot_env.robot_pos_noise_amp[17:]
-        #     * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qpos.shape)
-        # )
-        # obj_qvel += (
-        #     self.object_noise_ratio
-        #     * self.robot_env.robot_vel_noise_amp[18:]
-        #     * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
-        # )
+        obj_qpos += (
+            self.object_noise_ratio
+            * self.robot_env.robot_pos_noise_amp[17:]
+            * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qpos.shape)
+        )
+        obj_qvel += (
+            self.object_noise_ratio
+            * self.robot_env.robot_vel_noise_amp[18:]
+            * self.robot_env.np_random.uniform(low=-1.0, high=1.0, size=obj_qvel.shape)
+        )
 
         observations = np.concatenate((robot_obs, obj_qpos, obj_qvel))
         self.achieved_goal = {
