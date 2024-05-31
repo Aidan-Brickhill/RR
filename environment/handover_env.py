@@ -327,12 +327,6 @@ class HandoverEnv(gym.Env, EzPickle):
             # provide relative reward based on the height of the object
             combined_reward += 0.50 * (1-np.tanh(distance_height_object))
 
-            # reward a positive change in height
-            height_diff = achieved_goal["object_lift"][0] - prev_object_height
-
-            if height_diff > 0.001:
-                combined_reward += 1
-
             # get the distance between the object and the goal positon
             distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
@@ -347,6 +341,15 @@ class HandoverEnv(gym.Env, EzPickle):
                     
                 # provide a reward
                 combined_reward += 1
+            
+            else:
+                
+                # reward a positive change in height
+                height_diff = achieved_goal["object_lift"][0] - prev_object_height
+
+                if height_diff > 0.001:
+                    combined_reward += 1
+
 
             # if the object is in the goal position 
             if distance_object < OBJECT_MOVE_THRESH:
