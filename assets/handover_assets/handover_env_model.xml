@@ -61,8 +61,11 @@
             <include file="item_assets/kettle_chain.xml" size='0.75 0.75 0.75'/>
         </body> -->
 
+        <!-- height to lift to -->
+        <geom type="box" size="0.02 0.02 0.02" pos="-0.75 0.35 0.9" rgba="0 1 1 0.5"/>
+
         <!-- initial object zone -->
-        <geom type="box" size="0.15 0.15 0.15" pos="-0.75 0.35 0.83" rgba="0 1 0 0.15"/>
+        <geom type="box" size="0.1 0.1 0.1" pos="-0.75 0.35 0.83" rgba="0 1 0 0.15"/>
 
         <!-- object -->
         <body name="box" pos="-0.75 0.35 0.785">
