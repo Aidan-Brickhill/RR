@@ -262,6 +262,8 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.prev_step_robot_qpos = np.array(18)
         self.prev_step_robot_qvel = np.array(18)
+        self.prev_object_height = 0.76
+
 
 
         EzPickle.__init__(
@@ -279,6 +281,7 @@ class HandoverEnv(gym.Env, EzPickle):
         desired_goal: "dict[str, np.ndarray]",
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
+        prev_object_height,
     ):        
 
         # gets the previous qpos and qvels of the robot
@@ -323,6 +326,12 @@ class HandoverEnv(gym.Env, EzPickle):
             
             # provide relative reward based on the height of the object
             combined_reward += 0.50 * (1-np.tanh(distance_height_object))
+
+            # reward a positive change in height
+            height_diff = achieved_goal["object_lift"][0] - prev_object_height
+
+            if height_diff > 0.001:
+                combined_reward += 1
 
             # get the distance between the object and the goal positon
             distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
@@ -433,9 +442,11 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.episode_step += 1
 
-        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs)
+        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, self.prev_object_height)
+
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
+        self.prev_object_height = self.achieved_goal["object_lift"][0]
        
         # When the task is accomplished remove from the list of tasks to be completed
         if self.remove_task_when_completed:
@@ -469,6 +480,8 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs, _ = self.robot_env.reset(seed=seed)
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
+        self.prev_object_height = self.achieved_goal["object_lift"][0]
+
 
         obs = self._get_obs(robot_obs)
         self.tasks_to_complete = set(self.goal.keys())

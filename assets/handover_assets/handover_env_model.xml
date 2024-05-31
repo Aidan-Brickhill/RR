@@ -65,7 +65,7 @@
         <geom type="box" size="0.15 0.15 0.15" pos="-0.75 0.35 0.83" rgba="0 1 0 0.15"/>
 
         <!-- object -->
-        <body name="box" pos="-0.75 0.35 0.76">
+        <body name="box" pos="-0.75 0.35 0.785">
             <freejoint name="box"/>
             <include file="item_assets/kettle_chain.xml" size='0.75 0.75 0.75'/>
         </body>
