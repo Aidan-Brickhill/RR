@@ -341,14 +341,11 @@ class HandoverEnv(gym.Env, EzPickle):
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
-
                     # finish the episode
                     if "object_move" not in self.episode_task_completions:
                         self.episode_task_completions.append("object_move")
-
                     if "panda_reciever_wait" not in self.episode_task_completions:
                         self.episode_task_completions.append("panda_reciever_wait")
-
                     if "panda_giver_fetch" not in self.episode_task_completions:
                         self.episode_task_completions.append("panda_giver_fetch")
 
@@ -382,7 +379,7 @@ class HandoverEnv(gym.Env, EzPickle):
         if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
             # finish the episode
             if "object_move" not in self.episode_task_completions:
-                    self.episode_task_completions.append("object_move")
+                self.episode_task_completions.append("object_move")
             if "object_lift" not in self.episode_task_completions:
                 self.episode_task_completions.append("object_lift")
             if "panda_reciever_wait" not in self.episode_task_completions:
