@@ -22,7 +22,7 @@ OBS_ELEMENT_GOALS = {
     "object_move": np.array([0, 0, 1.3]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.15
+PANDA_GIVER_FETCH_THRESH = 0.1
 OBJECT_MOVE_THRESH = 0.2
 
 MAX_OBJECT_HEIGHT = 1.8
@@ -315,12 +315,6 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
             
-            # get the distance between the end effector and object (above 0.2)
-            distance_object_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
-            
-            # provide relative reward based on the distance
-            combined_reward += 0.125 * (1-np.tanh(distance_object_giver))
-
             # get the diffrence between the current y and goal y
             distance_height_object = desired_goal["object_lift"][0] - achieved_goal["object_lift"][0] 
             
