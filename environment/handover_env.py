@@ -22,7 +22,7 @@ OBS_ELEMENT_GOALS = {
     "object_move": np.array([0, 0, 1.3]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.1
+PANDA_GIVER_FETCH_THRESH = 0.15
 OBJECT_MOVE_THRESH = 0.2
 
 MAX_OBJECT_HEIGHT = 1.8
@@ -263,7 +263,7 @@ class HandoverEnv(gym.Env, EzPickle):
         self.prev_step_robot_qpos = np.array(18)
         self.prev_step_robot_qvel = np.array(18)
         self.prev_object_height = 0.76
-
+        self.max_object_height = 0.76
 
 
         EzPickle.__init__(
@@ -275,13 +275,13 @@ class HandoverEnv(gym.Env, EzPickle):
             **kwargs,
         )
 
-    
     def calculate_reward(
         self,
         desired_goal: "dict[str, np.ndarray]",
         achieved_goal: "dict[str, np.ndarray]",
         robot_obs,
         prev_object_height,
+        max_object_height,
     ):        
 
         # gets the previous qpos and qvels of the robot
@@ -319,47 +319,54 @@ class HandoverEnv(gym.Env, EzPickle):
             distance_height_object = desired_goal["object_lift"][0] - achieved_goal["object_lift"][0] 
             
             # provide relative reward based on the height of the object
-            combined_reward += 0.50 * (1-np.tanh(distance_height_object))
-
-            # get the distance between the object and the goal positon
-            distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
-
-            # provide relative reward based on the distance
-            combined_reward += 0.75 * (1-np.tanh(distance_object))
+            combined_reward += 0.25 * (1-np.tanh(distance_height_object))
                 
             # if the object has been slightly lifted
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 
+                # provide a reward for the first time the object has been lifted above a threshold
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
+                    combined_reward += 10
+                
+                # provide a small reward for 
+                else:
+                    combined_reward += 1
+
+                # get the distance between the object and the goal positon
+                distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+
+                # provide relative reward based on the distance
+                combined_reward += 0.75 * (1-np.tanh(distance_object))
                     
-                # provide a reward
-                combined_reward += 1
+                # if the object is in the goal position 
+                if distance_object < OBJECT_MOVE_THRESH:
+
+                    # finish the episode
+                    if "object_move" not in self.episode_task_completions:
+                        self.episode_task_completions.append("object_move")
+
+                    if "panda_reciever_wait" not in self.episode_task_completions:
+                        self.episode_task_completions.append("panda_reciever_wait")
+
+                    if "panda_giver_fetch" not in self.episode_task_completions:
+                        self.episode_task_completions.append("panda_giver_fetch")
+
+                    # provide a reward
+                    combined_reward +=  100
             
             else:
                 
                 # reward a positive change in height
                 height_diff = achieved_goal["object_lift"][0] - prev_object_height
 
-                if height_diff > 0.001:
-                    combined_reward += 1
+                # if the height is the highest its ever been
+                if height_diff > 0.001 and max_object_height < achieved_goal["object_lift"][0]:
+                    combined_reward += 2
 
-
-            # if the object is in the goal position 
-            if distance_object < OBJECT_MOVE_THRESH:
-
-                # finish the episode
-                if "object_move" not in self.episode_task_completions:
-                    self.episode_task_completions.append("object_move")
-
-                if "panda_reciever_wait" not in self.episode_task_completions:
-                    self.episode_task_completions.append("panda_reciever_wait")
-
-                if "panda_giver_fetch" not in self.episode_task_completions:
-                    self.episode_task_completions.append("panda_giver_fetch")
-
-                # provide a reward
-                combined_reward +=  100
+                # if the height has chnaged
+                elif height_diff > 0.001:
+                    combined_reward += 0.5
 
         # if the giver end effector goes below a certain height penailize it
         giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]
@@ -378,15 +385,13 @@ class HandoverEnv(gym.Env, EzPickle):
                     self.episode_task_completions.append("object_move")
             if "object_lift" not in self.episode_task_completions:
                 self.episode_task_completions.append("object_lift")
-
             if "panda_reciever_wait" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_reciever_wait")
-
             if "panda_giver_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 10
+            combined_reward -= 25
 
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
@@ -439,11 +444,13 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.episode_step += 1
 
-        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, self.prev_object_height)
+        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, self.prev_object_height, self.max_object_height)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
         self.prev_object_height = self.achieved_goal["object_lift"][0]
+        if self.achieved_goal["object_lift"][0] > self.max_object_height:
+            self.max_object_height = self.achieved_goal["object_lift"][0]
        
         # When the task is accomplished remove from the list of tasks to be completed
         if self.remove_task_when_completed:
@@ -478,7 +485,7 @@ class HandoverEnv(gym.Env, EzPickle):
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
         self.prev_object_height = self.achieved_goal["object_lift"][0]
-
+        self.max_object_height = self.achieved_goal["object_lift"][0]
 
         obs = self._get_obs(robot_obs)
         self.tasks_to_complete = set(self.goal.keys())
