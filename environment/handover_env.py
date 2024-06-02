@@ -16,9 +16,9 @@ OBS_ELEMENT_INDICES = {
 }
 
 OBS_ELEMENT_GOALS = {
-    "panda_giver_fetch": np.array([-0.75, 0.35, 0.83]),
+    "panda_giver_fetch": np.array([-0.75, 0.3, 0.83]),
     "panda_reciever_wait": np.array([0.8, 0.15, 1.87]),
-    "object_lift": np.array([0.9]),
+    "object_lift": np.array([1]),
     "object_move": np.array([0, 0, 1.3]),
 } 
 
