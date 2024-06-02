@@ -22,7 +22,7 @@ OBS_ELEMENT_GOALS = {
     "object_move": np.array([0, 0, 1.3]),
 } 
 
-PANDA_GIVER_FETCH_THRESH = 0.1
+PANDA_GIVER_FETCH_THRESH = 0.2
 OBJECT_MOVE_THRESH = 0.2
 
 MAX_OBJECT_HEIGHT = 1.8
@@ -319,16 +319,21 @@ class HandoverEnv(gym.Env, EzPickle):
             
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
+
+            # distance between giver and object
+            distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_lift"])
+
+            # provide relative reward based on the distance
+            combined_reward += 0.125 * (1-np.tanh(distance_giver_object))
             
             # get the diffrence between the current y and goal y
-            distance_height_object = desired_goal["object_lift"][0] - achieved_goal["object_lift"][0] 
+            distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*2 
             
             # provide relative reward based on the height of the object
-            combined_reward += 0.25 * (1-np.tanh(distance_height_object))
+            combined_reward += 0.75 * (1-np.tanh(distance_height_object))
 
             # reward the robot touching the object with its fingers
             if len(good_collisons) > 0:
-                # penalty for giver robot hitting table
                 combined_reward += 0.5 * good_collisons.count("giver_robot_finger_object_col")
                 
             # if the object has been slightly lifted
@@ -368,25 +373,25 @@ class HandoverEnv(gym.Env, EzPickle):
                 height_diff = achieved_goal["object_lift"][0] - prev_object_height
 
                 # if the height is the highest its ever been
-                if height_diff > 0.01 and max_object_height < achieved_goal["object_lift"][0]:
+                if height_diff >= 0.05 and max_object_height < achieved_goal["object_lift"][0]:
                     combined_reward += 2
 
                 # if the height has chnaged
-                elif height_diff > 0.01:
+                elif height_diff >= 0.05:
                     combined_reward += 0.5
         
         if len(bad_collisons) > 0:
             # penalty for giver robot hitting table
-            combined_reward -= 0.75 * bad_collisons.count("giver_robot_table_collision")
-            combined_reward -= 0.25 * bad_collisons.count("giver_robot_finger_table_collision")
+            combined_reward -= bad_collisons.count("giver_robot_table_collision")
+            combined_reward -= 0.35 * bad_collisons.count("giver_robot_finger_table_collision")
 
             # penalty for reciever robot hitting table
-            combined_reward -= 0.75 * bad_collisons.count("reciever_robot_table_collision")
-            combined_reward -= 0.25 * bad_collisons.count("reciever_robot_finger_table_collision")
+            combined_reward -= bad_collisons.count("reciever_robot_table_collision")
+            combined_reward -= 0.35 * bad_collisons.count("reciever_robot_finger_table_collision")
 
             # penalty for giver robot not using fingers in pickup task
-            combined_reward -= 2 * bad_collisons.count("giver_robot_hand_object_col")
-            combined_reward -= 2 * bad_collisons.count("giver_robot_link_object_col")
+            combined_reward -= 1.5 * bad_collisons.count("giver_robot_hand_object_col")
+            combined_reward -= 1.5 * bad_collisons.count("giver_robot_link_object_col")
 
         # if the object is too high/low 
         if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
