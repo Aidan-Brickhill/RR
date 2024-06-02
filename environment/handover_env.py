@@ -321,7 +321,7 @@ class HandoverEnv(gym.Env, EzPickle):
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
 
             # distance between giver and object
-            distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_lift"])
+            distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
 
             # provide relative reward based on the distance
             combined_reward += 0.125 * (1-np.tanh(distance_giver_object))
