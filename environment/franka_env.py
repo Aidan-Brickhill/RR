@@ -109,8 +109,130 @@ class FrankaRobot(MujocoEnv):
 
         return obs, 0.0, False, False, {}
     
+    def _collsion_detection(self):
 
+        bad_collisons = []
+        good_collisons = []
 
+        for i in range(self.data.ncon):
+
+            contact = self.data.contact[i]
+            geom1 = self.model_names.geom_id2name[contact.geom1]
+            geom2 = self.model_names.geom_id2name[contact.geom2]
+
+            # collsion between box and table
+            if (geom1 == "object_collision" and geom2 == "giver_table_top") or (geom2 == "object_collision" and geom1 == "giver_table_top"):
+                continue
+            # collsion between box and table
+            if (geom1 == "object_collision" and geom2 == "reciever_table_top") or (geom2 == "object_collision" and geom1 == "reciever_table_top"):
+                continue
+
+            # collsion between giver fingers
+            if (geom1 == "giver_leftfinger_col" and geom2 == "giver_rightfinger_col") or (geom2 == "giver_leftfinger_col" and geom1 == "giver_rightfinger_col"):
+                continue
+            # collsion between reciever fingers
+            if (geom1 == "reciever_rightfinger_col" and geom2 == "reciever_leftfinger_col") or (geom2 == "reciever_rightfinger_col" and geom1 == "reciever_leftfinger_col"):
+                continue
+
+            # collsion between giver robot and table
+            if ("giver" in geom1 and geom2 == "giver_table_top") or ("giver" in geom2 and geom1 == "giver_table_top"):
+               
+                # collsion between giver robot finger and table
+                if ("finger" in geom1 or "finger" in geom2):
+                    bad_collisons.append("giver_robot_finger_table_collision")
+                    continue
+                
+                # collsion between giver robot and table
+                else:
+                    bad_collisons.append("giver_robot_table_collision")
+                    continue
+
+            # collsion between giver robot and table
+            if ("giver" in geom1 and geom2 == "reciever_table_top") or ("giver" in geom2 and geom1 == "reciever_table_top"):
+                
+                # collsion between giver robot finger and table
+                if ("finger" in geom1 or "finger" in geom2):
+                    bad_collisons.append("giver_robot_finger_table_collision")
+                    continue
+                
+                # collsion between giver robot and table
+                else:
+                    bad_collisons.append("giver_robot_table_collision")
+                    continue
+
+            # collsion between reciever robot and table
+            if ("reciever" in geom1 and geom2 == "giver_table_top") or ("reciever" in geom2 and geom1 == "giver_table_top"):
+                
+                # collsion between giver robot finger and table
+                if ("finger" in geom1 or "finger" in geom2):
+                    bad_collisons.append("reciever_robot_finger_table_collision")
+                    continue
+                
+                # collsion between giver robot and table
+                else:
+                    bad_collisons.append("reciever_robot_table_collision")
+                    continue
+                
+
+            # collsion between reciever robot and table
+            if ("reciever" in geom1 and geom2 == "reciever_table_top") or ("reciever" in geom2 and geom1 == "reciever_table_top"):
+                
+                # collsion between giver robot finger and table
+                if ("finger" in geom1 or "finger" in geom2):
+                    bad_collisons.append("reciever_robot_finger_table_collision")
+                    continue
+                
+                # collsion between giver robot and table
+                else:
+                    bad_collisons.append("reciever_robot_table_collision")
+                    continue
+
+            # collsion between giver robot and reciever robot
+            if ("giver" in geom1 and geom2 == "reciever") or ("giver" in geom2 and geom1 == "reciever"):
+                bad_collisons.append("robot_collision")
+                continue
+                
+            # collsion between giver robot and object
+            if ("giver" in geom1 and geom2 == "object_collision") or ("giver" in geom2 and geom1 == "object_collision"):
+               
+                # collsion between giver robot finger and object
+                if ("finger" in geom1 or "finger" in geom2):
+                    good_collisons.append("giver_robot_finger_object_col")
+                    continue
+
+                # collsion between giver robot hand and object
+                elif ("hand" in geom1 or "hand" in geom2):
+                    bad_collisons.append("giver_robot_hand_object_col")
+                    continue
+                
+                # collsion between giver robot link and object
+                else:
+                    bad_collisons.append("giver_robot_link_object_col")
+                    continue
+            
+            # collsion between reciever robot and object
+            if ("reciever" in geom1 and geom2 == "object_collision") or ("reciever" in geom2 and geom1 == "object_collision"):
+               
+                # collsion between reciever robot finger and object
+                if ("finger" in geom1 or "finger" in geom2):
+                    good_collisons.append("reciever_robot_finger_object_col")
+                    continue
+
+                # collsion between reciever robot hand and object
+                elif ("hand" in geom1 or "hand" in geom2):
+                    bad_collisons.append("reciever_robot_hand_object_col")
+                    continue
+                
+                # collsion between reciever robot link and object
+                else:
+                    bad_collisons.append("reciever_robot_link_object_col")
+                    continue
+
+            col = geom1 + geom2
+        
+        return (good_collisons, bad_collisons)
+
+    
     def _get_obs(self):
         # Gather simulated observation
         robot_qpos, robot_qvel = robot_get_obs(
@@ -121,11 +243,8 @@ class FrankaRobot(MujocoEnv):
         end_effector_giver_id = self.model_names.site_name2id["panda_giver_end_effector"]
         robot_giver_end_effector_pos = self.data.site_xpos[end_effector_giver_id].ravel()
 
-        if self.data.ncon> 4:
-            for i in range(self.data.ncon):
-                contact = self.data.contact[i]
-                geom1 = self.model_names.geom_id2name[contact.geom1]
-                geom2 = self.model_names.geom_id2name[contact.geom2]
+        
+
 
         end_effector_receiver_id = self.model_names.site_name2id["panda_reciever_end_effector"]
         robot_reciever_end_effector_pos = self.data.site_xpos[end_effector_receiver_id].ravel()

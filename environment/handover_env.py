@@ -282,6 +282,7 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs,
         prev_object_height,
         max_object_height,
+        collsions,
     ):        
 
         # gets the previous qpos and qvels of the robot
@@ -295,6 +296,10 @@ class HandoverEnv(gym.Env, EzPickle):
         reciever_current_pos = robot_obs[21:30]
         giver_current_vel = robot_obs[12:21]
         reciever_current_vel = robot_obs[33:42]
+
+        good_collisons = collsions[0]
+        bad_collisons = collsions[1]
+
 
         combined_reward = 0
 
@@ -320,6 +325,11 @@ class HandoverEnv(gym.Env, EzPickle):
             
             # provide relative reward based on the height of the object
             combined_reward += 0.25 * (1-np.tanh(distance_height_object))
+
+            # reward the robot touching the object with its fingers
+            if len(good_collisons) > 0:
+                # penalty for giver robot hitting table
+                combined_reward += 0.5 * good_collisons.count("giver_robot_finger_object_col")
                 
             # if the object has been slightly lifted
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
@@ -364,16 +374,19 @@ class HandoverEnv(gym.Env, EzPickle):
                 # if the height has chnaged
                 elif height_diff > 0.01:
                     combined_reward += 0.5
-
-        # if the giver end effector goes below a certain height penailize it
-        giver_end_effector_y = achieved_goal["panda_giver_fetch"][2]
-        if giver_end_effector_y < MIN_END_EFFECTOR_HEIGHT:
-            combined_reward -= 1
         
-        # if the reciever end effector goes below a certain height penailize it
-        reciever_end_effector_y = achieved_goal["panda_reciever_wait"][2]
-        if reciever_end_effector_y < MIN_END_EFFECTOR_HEIGHT:
-            combined_reward -= 1
+        if len(bad_collisons) > 0:
+            # penalty for giver robot hitting table
+            combined_reward -= 0.75 * bad_collisons.count("giver_robot_table_collision")
+            combined_reward -= 0.25 * bad_collisons.count("giver_robot_finger_table_collision")
+
+            # penalty for reciever robot hitting table
+            combined_reward -= 0.75 * bad_collisons.count("reciever_robot_table_collision")
+            combined_reward -= 0.25 * bad_collisons.count("reciever_robot_finger_table_collision")
+
+            # penalty for giver robot not using fingers in pickup task
+            combined_reward -= 2 * bad_collisons.count("giver_robot_hand_object_col")
+            combined_reward -= 2 * bad_collisons.count("giver_robot_link_object_col")
 
         # if the object is too high/low 
         if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
@@ -439,9 +452,11 @@ class HandoverEnv(gym.Env, EzPickle):
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
         obs = self._get_obs(robot_obs)
 
+        collsions = self.robot_env._collsion_detection()
+
         self.episode_step += 1
 
-        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, self.prev_object_height, self.max_object_height)
+        reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, self.prev_object_height, self.max_object_height, collsions)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))

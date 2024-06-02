@@ -5,10 +5,9 @@ from stable_baselines3.common.monitor import Monitor
 import wandb
 from wandb.integration.sb3 import WandbCallback
 
-
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 10100000,
+    "total_timesteps": 3100000,
     "env_name": "HandoverEnv",
 }
 

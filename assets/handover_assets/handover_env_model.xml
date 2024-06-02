@@ -36,22 +36,22 @@
 
         <!-- panda reciever table -->
         <body name="panda_receiver_table" pos="0.75 0 0" quat="1 0 0 1">
-            <geom material="wood" name= "reciever-table-top" type="box" size=".6 .375 .025" pos="0 0 0.735" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "reciever-table-under-top" type="box" size="0.59 0.26 .05" pos="0 0 0.66" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "reciever-table-leg-1" type="box" size="0.025 0.025 0.305" pos="-0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "reciever-table-leg-2" type="box" size="0.025 0.025 0.305" pos="-0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "reciever-table-leg-3" type="box" size="0.025 0.025 0.305" pos="0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "reciever-table-leg-4" type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="wood" name= "reciever_table_top" type="box" size=".6 .375 .025" pos="0 0 0.735" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "reciever_table_under_top" type="box" size="0.59 0.26 .05" pos="0 0 0.66" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "reciever_table_leg_1" type="box" size="0.025 0.025 0.305" pos="-0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "reciever_table_leg_2" type="box" size="0.025 0.025 0.305" pos="-0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "reciever_table_leg_3" type="box" size="0.025 0.025 0.305" pos="0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "reciever_table_leg_4" type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
         </body>
 
         <!-- panda giver table -->
         <body name="panda_giver_table" pos="-0.75 0 0" quat="1 0 0 1">
-            <geom material="wood" name= "giver-table-top" type="box" size=".6 .375 .025" pos="0 0 0.735" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "giver-table-under-top" type="box" size="0.59 0.26 .05" pos="0 0 0.66" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "giver-table-leg-1" type="box" size="0.025 0.025 0.305" pos="-0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "giver-table-leg-2" type="box" size="0.025 0.025 0.305" pos="-0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "giver-table-leg-3" type="box" size="0.025 0.025 0.305" pos="0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
-            <geom material="metal" name= "giver-table-leg-4" type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="wood" name= "giver_table_top" type="box" size=".6 .375 .025" pos="0 0 0.735" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "giver_table_under_top" type="box" size="0.59 0.26 .05" pos="0 0 0.66" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "giver_table_leg_1" type="box" size="0.025 0.025 0.305" pos="-0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "giver_table_leg_2" type="box" size="0.025 0.025 0.305" pos="-0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "giver_table_leg_3" type="box" size="0.025 0.025 0.305" pos="0.565 0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
+            <geom material="metal" name= "giver_table_leg_4" type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
         </body>
 
         
