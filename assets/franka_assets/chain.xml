@@ -2,66 +2,65 @@
     <body name="panda" childclass="panda">
         <body name="panda_giver_link0" childclass="panda" pos="-0.75 -0.425 0" euler="0 0 1.5708">
             <geom class="panda_viz" mesh="link0_viz"/>
-            <geom class="panda_col" mesh="link0_col" mass="2.91242"/>
+            <geom class="panda_col" mesh="link0_col" mass="2.91242" name="giver_link0_col"/>
             <body name="panda_giver_link1" pos="0 0 0.333">
                 <joint name="robot:panda_giver_joint1" range="-2.8973 2.8973" class="panda_arm"/>
                 <geom class="panda_viz" mesh="link1_viz"/>
-                <geom class="panda_col" mesh="link1_col" mass="2.7063"/>
+                <geom class="panda_col" mesh="link1_col" mass="2.7063" name="giver_link1_col"/>
                 <body name="panda_giver_link2" pos="0 0 0" quat="0.707107 -0.707107 0 0">
                     <joint name="robot:panda_giver_joint2" range="-1.7628 1.7628" class="panda_arm"/>
                     <geom class="panda_viz" mesh="link2_viz"/>
-                    <geom class="panda_col" mesh="link2_col" mass="2.73046"/>
+                    <geom class="panda_col" mesh="link2_col" mass="2.73046" name="giver_link2_col"/>
                     <body name="panda_giver_link3" pos="0 -0.316 0" quat="0.707107 0.707107 0 0">
                         <joint name="robot:panda_giver_joint3" range="-2.8973 2.8973" class="panda_arm"/>
                         <geom class="panda_viz" mesh="link3_viz"/>
-                        <geom class="panda_col" mesh="link3_col" mass="2.04104"/>
+                        <geom class="panda_col" mesh="link3_col" mass="2.04104" name="giver_link3_col"/>
                         <body name="panda_giver_link4" pos="0.0825 0 0" quat="0.707107 0.707107 0 0">
                             <joint name="robot:panda_giver_joint4" range="-3.0718 -0.4" class="panda_arm"/>
                             <geom class="panda_viz" mesh="link4_viz"/>
-                            <geom class="panda_col" mesh="link4_col" mass="2.08129"/>
+                            <geom class="panda_col" mesh="link4_col" mass="2.08129" name="giver_link4_col"/>
                             <body name="panda_giver_link5" pos="-0.0825 0.384 0" quat="0.707107 -0.707107 0 0">
                                 <joint name="robot:panda_giver_joint5" range="-2.8973 2.8973" class="panda_forearm"/>
                                 <geom class="panda_viz" mesh="link5_viz"/>
-                                <geom class="panda_col" mesh="link5_col" mass="3.00049"/>
+                                <geom class="panda_col" mesh="link5_col" mass="3.00049" name="giver_link5_col"/>
                                 <body name="panda_giver_link6" pos="0 0 0" euler='1.57 0 1.57'>
                                     <joint name="robot:panda_giver_joint6" range="-1.6573 2.1127" class="panda_forearm"/>
                                     <!-- <body name="panda_giver_link6" pos="0 0 0" quat="0.707107 0.707107 0 0"> -->
                                     <!-- <joint name="panda_giver_joint6" range="-0.0873 3.8223" class="panda_forearm"/> -->
                                     <geom class="panda_viz" mesh="link6_viz"/>
-                                    <geom class="panda_col" mesh="link6_col" mass="1.3235"/>
+                                    <geom class="panda_col" mesh="link6_col" mass="1.3235" name="giver_link6_col"/>
                                     <body name="panda_giver_link7" pos="0.088 0 0" euler='1.57 0 0.7854'>
                                         <joint name="robot:panda_giver_joint7" range="-2.8973 2.8973" class="panda_forearm"/>
                                         <!-- <body name="panda_giver_link7" pos="0.088 0 0" quat="0.707107 0.707107 0 0"> -->
                                         <!-- <joint name="panda_giver_joint7" range="-2.9671 2.9671" class="panda_forearm"/> -->
                                         <geom class="panda_viz" mesh="link7_viz"/>
-                                        <geom class="panda_col" mesh="link7_col" mass="0.2"/>
+                                        <geom class="panda_col" mesh="link7_col" mass="0.2"  name="giver_link7_col"/>
                                         <geom pos="0 0 0.107" quat="0.92388 0 0 -0.382683" class="panda_viz" mesh="hand_viz"/>
-                                        <geom pos="0 0 0.107" quat="0.92388 0 0 -0.382683" class="panda_col" mesh="hand_col" mass="0.81909"/>
-                                        <site name='panda_giver_end_effector' pos='0 0 .210' size='0.01' euler='0 0 -0.785398'/>
+                                        <geom pos="0 0 0.107" quat="0.92388 0 0 -0.382683" class="panda_col" mesh="hand_col" mass="0.81909" name="giver_hand_col"/>
+                                        <site name='panda_giver_end_effector' pos='0 0 .255' size='0.01' euler='0 0 -0.785398'/>
                                         <body name="panda_giver_leftfinger" pos="0 0 0.1654" quat="0.92388 0 0 -0.382683" childclass='panda_finger'>
                                             <inertial pos="-1.57863e-05 0.0118731 0.0434103" quat="0.705868 0.0310348 -0.0314925 0.706962" mass="0.0927059" diaginertia="6.57134e-05 6.09611e-05 1.09932e-05" />
                                             <joint name="robot:panda_giver_finger_joint1"  axis="0 1 0" type="slide" range="0 0.04" class="panda_finger"/>
                                             <geom class="panda_viz" mesh="finger_viz"/>
                                             <!-- <geom class="panda_col" mesh="finger_col"/> -->
-                                            <geom size="0.0070" fromto=".009 .006 .0875   -.009 .009 .0875" type="capsule" />
-                                            <geom size="0.0070" fromto=".009 .009 .0875   -.009 .006 .0875" type="capsule" />
+                                            <geom size="0.0070" fromto=".009 .006 .0875   -.009 .009 .0875" type="capsule" name="giver_leftfinger0_col"/>
+                                            <geom size="0.0070" fromto=".009 .009 .0875   -.009 .006 .0875" type="capsule" name="giver_leftfinger1_col"/>
 
-                                            <geom size="0.0075" fromto=".009 .007 .0775   -.009 .010 .0775" type="capsule" />
-                                            <geom size="0.0075" fromto=".009 .010 .0775   -.009 .007 .0775" type="capsule" />
+                                            <geom size="0.0075" fromto=".009 .007 .0775   -.009 .010 .0775" type="capsule" name="giver_leftfinger2_col"/>
+                                            <geom size="0.0075" fromto=".009 .010 .0775   -.009 .007 .0775" type="capsule" name="giver_leftfinger3_col"/>
 
-                                            <geom size="0.0082" fromto=".009 .008 .0675   -.009 .011 .0675" type="capsule" />
-                                            <geom size="0.0082" fromto=".009 .011 .0675   -.009 .008 .0675" type="capsule" />
+                                            <geom size="0.0082" fromto=".009 .008 .0675   -.009 .011 .0675" type="capsule" name="giver_leftfinger4_col"/>
+                                            <geom size="0.0082" fromto=".009 .011 .0675   -.009 .008 .0675" type="capsule" name="giver_leftfinger5_col"/>
+                                            <geom size="0.0090" fromto=".009 .009 .0575   -.009 .012 .0575" type="capsule" name="giver_leftfinger6_col"/>
+                                            <geom size="0.0090" fromto=".009 .012 .0575   -.009 .009 .0575" type="capsule" name="giver_leftfinger7_col"/>
 
-                                            <geom size="0.0090" fromto=".009 .009 .0575   -.009 .012 .0575" type="capsule" />
-                                            <geom size="0.0090" fromto=".009 .012 .0575   -.009 .009 .0575" type="capsule" />
+                                            <geom size="0.0100" fromto=".009 .0105 .0475   -.009 .0135 .0475" type="capsule" name="giver_leftfinger8_col"/>
+                                            <geom size="0.0100" fromto=".009 .0135 .0475   -.009 .0105 .0475" type="capsule" name="giver_leftfinger9_col"/>
 
-                                            <geom size="0.0100" fromto=".009 .0105 .0475   -.009 .0135 .0475" type="capsule" />
-                                            <geom size="0.0100" fromto=".009 .0135 .0475   -.009 .0105 .0475" type="capsule" />
+                                            <geom size="0.0110" fromto=".009 .012 .035   -.009 .015 .035" type="capsule" name="giver_leftfinger10_col"/>
+                                            <geom size="0.0110" fromto=".009 .015 .035   -.009 .012 .035" type="capsule" name="giver_leftfinger11_col"/>
 
-                                            <geom size="0.0110" fromto=".009 .012 .035   -.009 .015 .035" type="capsule" />
-                                            <geom size="0.0110" fromto=".009 .015 .035   -.009 .012 .035" type="capsule" />
-
-                                            <geom size="0.0185 0.0120 0.0175" pos="0 0.014 0.015" type="box" euler='.03 0 0' />
+                                            <geom size="0.0185 0.0120 0.0175" pos="0 0.014 0.015" type="box" euler='.03 0 0' name="giver_leftfinger12_col"/>
 
                                         </body>
                                         <body name="panda_giver_rightfinger" pos="0 0 0.1654" quat="0.92388 0 0 -0.382683"  childclass='panda_finger'>
@@ -69,25 +68,25 @@
                                             <joint name="robot:panda_giver_finger_joint2" axis="0 -1 0" type="slide" range="0 0.04" class="panda_finger"/>
                                             <geom quat="0 0 0 1" class="panda_viz" mesh="finger_viz"/>
                                             <!-- <geom class="panda_col" mesh="finger_col"/> -->
-                                            <geom size="0.0070" fromto=".009 -.006 .0875   -.009 -.009 .0875" type="capsule" />
-                                            <geom size="0.0070" fromto=".009 -.009 .0875   -.009 -.006 .0875" type="capsule" />
+                                            <geom size="0.0070" fromto=".009 -.006 .0875   -.009 -.009 .0875" type="capsule" name="giver_rightfinger0_col"/>
+                                            <geom size="0.0070" fromto=".009 -.009 .0875   -.009 -.006 .0875" type="capsule" name="giver_rightfinger1_col"/>
 
-                                            <geom size="0.0075" fromto=".009 -.007 .0775   -.009 -.010 .0775" type="capsule" />
-                                            <geom size="0.0075" fromto=".009 -.010 .0775   -.009 -.007 .0775" type="capsule" />
+                                            <geom size="0.0075" fromto=".009 -.007 .0775   -.009 -.010 .0775" type="capsule" name="giver_rightfinger2_col"/>
+                                            <geom size="0.0075" fromto=".009 -.010 .0775   -.009 -.007 .0775" type="capsule" name="giver_rightfinger3_col"/>
 
-                                            <geom size="0.0082" fromto=".009 -.008 .0675   -.009 -.011 .0675" type="capsule" />
-                                            <geom size="0.0082" fromto=".009 -.011 .0675   -.009 -.008 .0675" type="capsule" />
+                                            <geom size="0.0082" fromto=".009 -.008 .0675   -.009 -.011 .0675" type="capsule" name="giver_rightfinger4_col"/>
+                                            <geom size="0.0082" fromto=".009 -.011 .0675   -.009 -.008 .0675" type="capsule" name="giver_rightfinger5_col"/>
 
-                                            <geom size="0.0090" fromto=".009 -.009 .0575   -.009 -.012 .0575" type="capsule" />
-                                            <geom size="0.0090" fromto=".009 -.012 .0575   -.009 -.009 .0575" type="capsule" />
+                                            <geom size="0.0090" fromto=".009 -.009 .0575   -.009 -.012 .0575" type="capsule" name="giver_rightfinger6_col"/>
+                                            <geom size="0.0090" fromto=".009 -.012 .0575   -.009 -.009 .0575" type="capsule" name="giver_rightfinger7_col"/>
 
-                                            <geom size="0.0100" fromto=".009 -.0105 .0475   -.009 -.0135 .0475" type="capsule" />
-                                            <geom size="0.0100" fromto=".009 -.0135 .0475   -.009 -.0105 .0475" type="capsule" />
+                                            <geom size="0.0100" fromto=".009 -.0105 .0475   -.009 -.0135 .0475" type="capsule" name="giver_rightfinger8_col"/>
+                                            <geom size="0.0100" fromto=".009 -.0135 .0475   -.009 -.0105 .0475" type="capsule" name="giver_rightfinger9_col"/>
 
-                                            <geom size="0.0110" fromto=".009 -.012 .035   -.009 -.015 .035" type="capsule" />
-                                            <geom size="0.0110" fromto=".009 -.015 .035   -.009 -.012 .035" type="capsule" />
+                                            <geom size="0.0110" fromto=".009 -.012 .035   -.009 -.015 .035" type="capsule" name="giver_rightfinger10_col"/>
+                                            <geom size="0.0110" fromto=".009 -.015 .035   -.009 -.012 .035" type="capsule" name="giver_rightfinger11_col"/>
 
-                                            <geom size="0.0185 0.0120 0.0175" pos="0 -.014 0.015" type="box" euler='-.03 0 0' />
+                                            <geom size="0.0185 0.0120 0.0175" pos="0 -.014 0.015" type="box" euler='-.03 0 0' name="giver_rightfinger12_col"/>
                                         </body>
                                     </body>
                                 </body>

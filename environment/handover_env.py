@@ -28,7 +28,7 @@ OBJECT_MOVE_THRESH = 0.2
 MAX_OBJECT_HEIGHT = 1.8
 MIN_OBJECT_HEIGHT = 0.7
 
-MIN_END_EFFECTOR_HEIGHT = 0.78
+MIN_END_EFFECTOR_HEIGHT = 0.8
 
 # to do
 STABILITY_THRESH = 0.3
@@ -358,11 +358,11 @@ class HandoverEnv(gym.Env, EzPickle):
                 height_diff = achieved_goal["object_lift"][0] - prev_object_height
 
                 # if the height is the highest its ever been
-                if height_diff > 0.001 and max_object_height < achieved_goal["object_lift"][0]:
+                if height_diff > 0.01 and max_object_height < achieved_goal["object_lift"][0]:
                     combined_reward += 2
 
                 # if the height has chnaged
-                elif height_diff > 0.001:
+                elif height_diff > 0.01:
                     combined_reward += 0.5
 
         # if the giver end effector goes below a certain height penailize it

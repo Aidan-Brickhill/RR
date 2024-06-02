@@ -89,9 +89,6 @@ class FrankaRobot(MujocoEnv):
         self._read_specs_from_config(config_path)
         self.model_names = MujocoModelNames(self.model)
 
-
-
-
     def step(self, action):
         action = np.clip(action, -1.0, 1.0)
 
@@ -111,6 +108,8 @@ class FrankaRobot(MujocoEnv):
         obs = self._get_obs()
 
         return obs, 0.0, False, False, {}
+    
+
 
     def _get_obs(self):
         # Gather simulated observation
@@ -121,6 +120,12 @@ class FrankaRobot(MujocoEnv):
         # end_effector
         end_effector_giver_id = self.model_names.site_name2id["panda_giver_end_effector"]
         robot_giver_end_effector_pos = self.data.site_xpos[end_effector_giver_id].ravel()
+
+        if self.data.ncon> 4:
+            for i in range(self.data.ncon):
+                contact = self.data.contact[i]
+                geom1 = self.model_names.geom_id2name[contact.geom1]
+                geom2 = self.model_names.geom_id2name[contact.geom2]
 
         end_effector_receiver_id = self.model_names.site_name2id["panda_reciever_end_effector"]
         robot_reciever_end_effector_pos = self.data.site_xpos[end_effector_receiver_id].ravel()

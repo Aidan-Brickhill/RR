@@ -28,7 +28,7 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 10000 == 0,
+    record_video_trigger=lambda x: x % 100000 == 0,
     video_length=450,
 )
 
@@ -40,7 +40,7 @@ model.learn(
         model_save_path=f"models/{run.id}",
         verbose=2,
     ),
-    
+
 )
 
 run.finish()

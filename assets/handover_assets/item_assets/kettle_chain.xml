@@ -21,8 +21,8 @@
 
 <mujocoinclude>
     <body name="objectroot" childclass="object">
-        <geom material="metal" size="0.025 0.025 0.025"/>
-        <geom class="object_collision" size="0.025 0.025 0.025" mass="1"/>
+        <geom material="metal" name="object" size="0.025 0.025 0.025"/>
+        <geom class="object_collision"  name="object-colision"  size="0.025 0.025 0.025" mass="1"/>
         <site type="sphere" name="object_site" pos="0 0 0" size=".01" group="3" rgba="1 0 0 1"/>
     </body>
 </mujocoinclude>
