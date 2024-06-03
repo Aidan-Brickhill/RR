@@ -7,7 +7,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 4100000,
+    "total_timesteps": 5100000,
     "env_name": "HandoverEnv",
 }
 
@@ -20,7 +20,7 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait"], max_episode_steps = 450))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait", "object_stable"], max_episode_steps = 450))
 
 env= DummyVecEnv([make_env] * 4)
 

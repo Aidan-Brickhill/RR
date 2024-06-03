@@ -13,6 +13,8 @@ OBS_ELEMENT_INDICES = {
     "panda_reciever_wait": np.array([30, 31, 32]),
     "object_lift": np.array([44]),
     "object_move": np.array([42, 43, 44]),
+    "object_stable": np.array([45, 46, 47, 48]),
+
 }
 
 OBS_ELEMENT_GOALS = {
@@ -20,6 +22,8 @@ OBS_ELEMENT_GOALS = {
     "panda_reciever_wait": np.array([0.8, 0.15, 1.87]),
     "object_lift": np.array([1]),
     "object_move": np.array([0, 0, 1.3]),
+    "object_stable": np.array([1, 0, 0, 0]),
+
 } 
 
 PANDA_GIVER_FETCH_THRESH = 0.2
@@ -139,11 +143,11 @@ class HandoverEnv(gym.Env, EzPickle):
     
     | 42    | object's x coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
     | 43    | object's y coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
-    | 45    | object's z coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
-    | 39    | object's x quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
-    | 40    | object's y quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
-    | 41    | object's z quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
-    | 42    | object's w quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 44    | object's z coordinate                                 | -Inf     | Inf      | object                                   | free       | position (m)               |
+    | 45    | object's x quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 46    | object's y quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 47    | object's z quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
+    | 48    | object's w quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
     | 43    | object's x linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
     | 44    | object's y linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
     | 45    | object's z linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
@@ -319,18 +323,12 @@ class HandoverEnv(gym.Env, EzPickle):
             
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
-
-            # distance between giver and object
-            distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
-
-            # provide relative reward based on the distance
-            combined_reward += 0.125 * (1-np.tanh(distance_giver_object))
             
             # get the diffrence between the current y and goal y
             distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*2 
             
             # provide relative reward based on the height of the object
-            combined_reward += 0.75 * (1-np.tanh(distance_height_object))
+            combined_reward +=  (1-np.tanh(distance_height_object))
 
             # reward the robot touching the object with its fingers
             if len(good_collisons) > 0:
@@ -374,11 +372,17 @@ class HandoverEnv(gym.Env, EzPickle):
 
                 # if the height is the highest its ever been
                 if height_diff >= 0.05 and max_object_height < achieved_goal["object_lift"][0]:
-                    combined_reward += 2
+                    combined_reward += 1
 
                 # if the height has chnaged
                 elif height_diff >= 0.05:
                     combined_reward += 0.5
+
+                # get the diffrence between the quaternion  and the foal quaternion (before its been lifted)
+                quat_object = np.linalg.norm(achieved_goal["object_stable"] - desired_goal["object_stable"])
+                
+                # provide relative reward based on the quaternion difference
+                combined_reward += 0.5 * (1-np.tanh(quat_object))
         
         if len(bad_collisons) > 0:
             # penalty for giver robot hitting table
@@ -406,7 +410,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 25
+            combined_reward -= 50
 
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
