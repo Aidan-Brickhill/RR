@@ -323,72 +323,91 @@ class HandoverEnv(gym.Env, EzPickle):
             
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
-
-            # proivde negative reward for object still being on table
-            if len(bad_collisons) > 0:
-                combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
-            
+           
             # reward the robot touching the object with its fingers
-            if len(good_collisons) > 0:
-                combined_reward += 0.5 * good_collisons.count("giver_robot_finger_object_col")
+            if good_collisons.count("giver_robot_finger_object_col") == 1:
+                combined_reward += 0.1
 
-            # get the diffrence between the current y and goal y
-            distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
-            
-            # provide relative reward based on the height of the object
-            combined_reward += 0.25 * (1-np.tanh(distance_height_object))
+            if good_collisons.count("giver_robot_finger_object_col") == 2:
+                combined_reward += 0.75
+
+            # get the distance between the object and the goal positon
+            distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+
+            # provide relative reward based on the distance
+            combined_reward += 0.75 * (1-np.tanh(distance_object))
                 
-            # if the object has been slightly lifted
-            if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
-                
-                # provide a reward for the first time the object has been lifted above a threshold
+            # if the object is in the goal position 
+            if distance_object < OBJECT_MOVE_THRESH:
+                # finish the episode
+                if "object_move" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_move")
+                if "panda_reciever_wait" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_reciever_wait")
+                if "panda_giver_fetch" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_giver_fetch")
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
-                    combined_reward += 10
-                
-                # provide a small reward for 
-                else:
-                    combined_reward += 1
+                # provide a reward
+                combined_reward +=  1000
 
-                # get the distance between the object and the goal positon
-                distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
-
-                # provide relative reward based on the distance
-                combined_reward += 0.75 * (1-np.tanh(distance_object))
-                    
-                # if the object is in the goal position 
-                if distance_object < OBJECT_MOVE_THRESH:
-                    # finish the episode
-                    if "object_move" not in self.episode_task_completions:
-                        self.episode_task_completions.append("object_move")
-                    if "panda_reciever_wait" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_reciever_wait")
-                    if "panda_giver_fetch" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_giver_fetch")
-
-                    # provide a reward
-                    combined_reward +=  100
+            # # get the diffrence between the current y and goal y
+            # distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
             
-            else:
+            # # provide relative reward based on the height of the object
+            # combined_reward += 0.25 * (1-np.tanh(distance_height_object))
                 
-                # reward a positive change in height
-                height_diff = achieved_goal["object_lift"][0] - prev_object_height
-
-                # if the height is the highest its ever been
-                if height_diff >= 0.05 and max_object_height < achieved_goal["object_lift"][0]:
-                    combined_reward += 1
-
-                # if the height has chnaged
-                elif height_diff >= 0.05:
-                    combined_reward += 0.5
-
-                # get the diffrence between the quaternion  and the foal quaternion (before its been lifted)
-                quat_object = np.abs(np.linalg.norm(achieved_goal["object_stable"] - desired_goal["object_stable"]))
+            # # if the object has been slightly lifted
+            # if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 
-                if quat_object > 0.8 and self.object_rotated==False:
-                    # provide relative reward based on the quaternion difference
-                    self.object_rotated=True
-                    combined_reward -= 20
+            #     # provide a reward for the first time the object has been lifted above a threshold
+            #     if "object_lift" not in self.episode_task_completions:
+            #         self.episode_task_completions.append("object_lift")
+            #         combined_reward += 10
+                
+            #     # provide a small reward for 
+            #     else:
+            #         combined_reward += 1
+
+            #     # get the distance between the object and the goal positon
+            #     distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+
+            #     # provide relative reward based on the distance
+            #     combined_reward += 0.75 * (1-np.tanh(distance_object))
+                    
+            #     # if the object is in the goal position 
+            #     if distance_object < OBJECT_MOVE_THRESH:
+            #         # finish the episode
+            #         if "object_move" not in self.episode_task_completions:
+            #             self.episode_task_completions.append("object_move")
+            #         if "panda_reciever_wait" not in self.episode_task_completions:
+            #             self.episode_task_completions.append("panda_reciever_wait")
+            #         if "panda_giver_fetch" not in self.episode_task_completions:
+            #             self.episode_task_completions.append("panda_giver_fetch")
+
+            #         # provide a reward
+            #         combined_reward +=  100
+            
+            # else:
+                
+            #     # reward a positive change in height
+            #     height_diff = achieved_goal["object_lift"][0] - prev_object_height
+
+            #     # if the height is the highest its ever been
+            #     if height_diff >= 0.05 and max_object_height < achieved_goal["object_lift"][0]:
+            #         combined_reward += 1
+
+            #     # if the height has chnaged
+            #     elif height_diff >= 0.05:
+            #         combined_reward += 0.5
+
+            #     # get the diffrence between the quaternion  and the foal quaternion (before its been lifted)
+            #     quat_object = np.abs(np.linalg.norm(achieved_goal["object_stable"] - desired_goal["object_stable"]))
+                
+            #     if quat_object > 0.8 and self.object_rotated==False:
+            #         # provide relative reward based on the quaternion difference
+            #         self.object_rotated=True
+            #         combined_reward -= 20
         
         if len(bad_collisons) > 0:
             # penalty for giver robot hitting table
