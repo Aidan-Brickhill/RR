@@ -268,6 +268,7 @@ class HandoverEnv(gym.Env, EzPickle):
         self.prev_step_robot_qvel = np.array(18)
         self.prev_object_height = 0.76
         self.max_object_height = 0.76
+        self.object_rotated = False
 
 
         EzPickle.__init__(
@@ -304,7 +305,6 @@ class HandoverEnv(gym.Env, EzPickle):
         good_collisons = collsions[0]
         bad_collisons = collsions[1]
 
-
         combined_reward = 0
 
         # if the end effector hasnt made it to the goal yet
@@ -323,16 +323,20 @@ class HandoverEnv(gym.Env, EzPickle):
             
         # if the end effector hasnt been put in the goal position 
         if  "panda_giver_fetch" in self.episode_task_completions and "object_move" not in self.episode_task_completions:
-            
-            # get the diffrence between the current y and goal y
-            distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*2 
-            
-            # provide relative reward based on the height of the object
-            combined_reward +=  (1-np.tanh(distance_height_object))
 
+            # proivde negative reward for object still being on table
+            if len(bad_collisons) > 0:
+                combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
+            
             # reward the robot touching the object with its fingers
             if len(good_collisons) > 0:
                 combined_reward += 0.5 * good_collisons.count("giver_robot_finger_object_col")
+
+            # get the diffrence between the current y and goal y
+            distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
+            
+            # provide relative reward based on the height of the object
+            combined_reward += 0.25 * (1-np.tanh(distance_height_object))
                 
             # if the object has been slightly lifted
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
@@ -379,10 +383,12 @@ class HandoverEnv(gym.Env, EzPickle):
                     combined_reward += 0.5
 
                 # get the diffrence between the quaternion  and the foal quaternion (before its been lifted)
-                quat_object = np.linalg.norm(achieved_goal["object_stable"] - desired_goal["object_stable"])
+                quat_object = np.abs(np.linalg.norm(achieved_goal["object_stable"] - desired_goal["object_stable"]))
                 
-                # provide relative reward based on the quaternion difference
-                combined_reward += 0.5 * (1-np.tanh(quat_object))
+                if quat_object > 0.8 and self.object_rotated==False:
+                    # provide relative reward based on the quaternion difference
+                    self.object_rotated=True
+                    combined_reward -= 20
         
         if len(bad_collisons) > 0:
             # penalty for giver robot hitting table
