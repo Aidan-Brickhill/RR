@@ -340,6 +340,9 @@ class HandoverEnv(gym.Env, EzPickle):
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
+
+                combined_reward += 1
+                
             else:
             
                 # get the diffrence between the current y and goal y
