@@ -315,7 +315,7 @@ class HandoverEnv(gym.Env, EzPickle):
             # provide relative reward based on the distance
             combined_reward += 0.25 * (1-np.tanh(distance_giver))
 
-            combined_reward -= 0.5 * bad_collisons.count("object_on_giver_table")
+            combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
             
             # if the end effector enters the goal postion
             if distance_giver < PANDA_GIVER_FETCH_THRESH:
@@ -328,16 +328,16 @@ class HandoverEnv(gym.Env, EzPickle):
            
             # reward the robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
-                combined_reward += 0.1
+                combined_reward += 1
 
             if good_collisons.count("giver_robot_finger_object_col") == 2:
-                combined_reward += 0.75
+                combined_reward += 2
 
-            combined_reward -= 0.5 * bad_collisons.count("object_on_giver_table") * self.episode_step/self.max_episode_steps
+            combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
             if bad_collisons.count("object_on_giver_table") == 0:
 
-                combined_reward += 1
+                combined_reward += 10
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])

@@ -20,7 +20,7 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait", "object_stable"], max_episode_steps = 1200))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait", "object_stable"], max_episode_steps = 300))
 
 env= DummyVecEnv([make_env] * 4)
 
@@ -28,7 +28,7 @@ env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
     record_video_trigger=lambda x: x % 100000 == 0,
-    video_length=1200,
+    video_length=600,
 )
 
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
