@@ -265,6 +265,8 @@ class HandoverEnv(gym.Env, EzPickle):
         self.max_episode_steps = max_episode_steps
 
         self.prev_step_robot_qpos = np.array(18)
+        self.init_reciever_pos = np.array(9)
+
         self.prev_step_robot_qvel = np.array(18)
         self.prev_object_height = 0.76
         self.max_object_height = 0.76
@@ -335,9 +337,18 @@ class HandoverEnv(gym.Env, EzPickle):
 
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
-            if bad_collisons.count("object_on_giver_table") == 0:
+            if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
+                if "object_lift" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_lift")
+            else:
+            
+                # get the diffrence between the current y and goal y
+                distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
+            
+                # provide relative reward based on the height of the object
+                combined_reward += 0.25 * (1-np.tanh(distance_height_object))
 
-                combined_reward += 10
+            if len(bad_collisons) == 0 :
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
@@ -442,7 +453,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 100
+            combined_reward -= 1000
 
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
@@ -455,6 +466,9 @@ class HandoverEnv(gym.Env, EzPickle):
 
             # punish velocity from the waiter
             combined_reward -= 0.05 * np.sum(np.abs(reciever_current_vel))
+
+            # punish postion from initial position
+            combined_reward -= 0.05 * np.sum(np.abs(reciever_current_pos-self.init_reciever_pos))
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
@@ -535,10 +549,12 @@ class HandoverEnv(gym.Env, EzPickle):
         self.episode_step = 0
         self.episode_task_completions.clear()
         robot_obs, _ = self.robot_env.reset(seed=seed)
+
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
         self.prev_object_height = self.achieved_goal["object_lift"][0]
         self.max_object_height = self.achieved_goal["object_lift"][0]
+        self.init_reciever_pos = robot_obs[21:30]
 
         obs = self._get_obs(robot_obs)
         self.tasks_to_complete = set(self.goal.keys())
