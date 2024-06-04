@@ -442,7 +442,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_giver_fetch")
 
             # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 50
+            combined_reward -= 100
 
         # if the tasks have not all been completed ensure the reciever robot is waiting
         else:
