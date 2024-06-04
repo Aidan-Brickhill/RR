@@ -204,7 +204,7 @@ class HandoverEnv(gym.Env, EzPickle):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 12,
+        "render_fps": 50,
     }
 
     def __init__(
@@ -331,25 +331,31 @@ class HandoverEnv(gym.Env, EzPickle):
             if good_collisons.count("giver_robot_finger_object_col") == 2:
                 combined_reward += 0.75
 
-            # get the distance between the object and the goal positon
-            distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+            combined_reward -= bad_collisons.count("object_on_giver_table") * self.episode_step/self.max_episode_steps
 
-            # provide relative reward based on the distance
-            combined_reward += 0.75 * (1-np.tanh(distance_object))
-                
-            # if the object is in the goal position 
-            if distance_object < OBJECT_MOVE_THRESH:
-                # finish the episode
-                if "object_move" not in self.episode_task_completions:
-                    self.episode_task_completions.append("object_move")
-                if "panda_reciever_wait" not in self.episode_task_completions:
-                    self.episode_task_completions.append("panda_reciever_wait")
-                if "panda_giver_fetch" not in self.episode_task_completions:
-                    self.episode_task_completions.append("panda_giver_fetch")
-                if "object_lift" not in self.episode_task_completions:
-                    self.episode_task_completions.append("object_lift")
-                # provide a reward
-                combined_reward +=  1000
+            if bad_collisons.count("object_on_giver_table") == 0:
+
+                combined_reward += 1
+
+                # get the distance between the object and the goal positon
+                distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+
+                # provide relative reward based on the distance
+                combined_reward += 0.75 * (1-np.tanh(distance_object))
+                    
+                # if the object is in the goal position 
+                if distance_object < OBJECT_MOVE_THRESH:
+                    # finish the episode
+                    if "object_move" not in self.episode_task_completions:
+                        self.episode_task_completions.append("object_move")
+                    if "panda_reciever_wait" not in self.episode_task_completions:
+                        self.episode_task_completions.append("panda_reciever_wait")
+                    if "panda_giver_fetch" not in self.episode_task_completions:
+                        self.episode_task_completions.append("panda_giver_fetch")
+                    if "object_lift" not in self.episode_task_completions:
+                        self.episode_task_completions.append("object_lift")
+                    # provide a reward
+                    combined_reward +=  1000
 
             # # get the diffrence between the current y and goal y
             # distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
@@ -409,18 +415,17 @@ class HandoverEnv(gym.Env, EzPickle):
             #         self.object_rotated=True
             #         combined_reward -= 20
         
-        if len(bad_collisons) > 0:
-            # penalty for giver robot hitting table
-            combined_reward -= bad_collisons.count("giver_robot_table_collision")
-            combined_reward -= 0.35 * bad_collisons.count("giver_robot_finger_table_collision")
+        # penalty for giver robot hitting table
+        combined_reward -= bad_collisons.count("giver_robot_table_collision")
+        combined_reward -= 0.35 * bad_collisons.count("giver_robot_finger_table_collision")
 
-            # penalty for reciever robot hitting table
-            combined_reward -= bad_collisons.count("reciever_robot_table_collision")
-            combined_reward -= 0.35 * bad_collisons.count("reciever_robot_finger_table_collision")
+        # penalty for reciever robot hitting table
+        combined_reward -= bad_collisons.count("reciever_robot_table_collision")
+        combined_reward -= 0.35 * bad_collisons.count("reciever_robot_finger_table_collision")
 
-            # penalty for giver robot not using fingers in pickup task
-            combined_reward -= 1.5 * bad_collisons.count("giver_robot_hand_object_col")
-            combined_reward -= 1.5 * bad_collisons.count("giver_robot_link_object_col")
+        # penalty for giver robot not using fingers in pickup task
+        combined_reward -= 1.5 * bad_collisons.count("giver_robot_hand_object_col")
+        combined_reward -= 1.5 * bad_collisons.count("giver_robot_link_object_col")
 
         # if the object is too high/low 
         if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
@@ -483,9 +488,9 @@ class HandoverEnv(gym.Env, EzPickle):
         return observations
 
     def step(self, action):
+        
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
-        obs = self._get_obs(robot_obs)
-
+        obs = self._get_obs(robot_obs)   
         collsions = self.robot_env._collsion_detection()
 
         self.episode_step += 1

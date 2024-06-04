@@ -45,13 +45,13 @@ class FrankaRobot(MujocoEnv):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 12,
+        "render_fps": 50,
     }
 
     def __init__(
         self,
         model_path="../assets/franka_assets/chain.xml",
-        frame_skip=40,
+        frame_skip=10,
         robot_noise_ratio: float = 0.01,
         default_camera_config: dict = DEFAULT_CAMERA_CONFIG,
         **kwargs,
@@ -209,7 +209,6 @@ class FrankaRobot(MujocoEnv):
         
         return (good_collisons, bad_collisons)
 
-    
     def _get_obs(self):
         # Gather simulated observation
         robot_qpos, robot_qvel = robot_get_obs(
@@ -219,9 +218,6 @@ class FrankaRobot(MujocoEnv):
         # end_effector
         end_effector_giver_id = self.model_names.site_name2id["panda_giver_end_effector"]
         robot_giver_end_effector_pos = self.data.site_xpos[end_effector_giver_id].ravel()
-
-        
-
 
         end_effector_receiver_id = self.model_names.site_name2id["panda_reciever_end_effector"]
         robot_reciever_end_effector_pos = self.data.site_xpos[end_effector_receiver_id].ravel()
