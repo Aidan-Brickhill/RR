@@ -349,9 +349,13 @@ class HandoverEnv(gym.Env, EzPickle):
                 distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
             
                 # provide relative reward based on the height of the object
-                combined_reward += 0.25 * (1-np.tanh(distance_height_object))
+                combined_reward += 0.5 * (1-np.tanh(distance_height_object))
 
-            if len(bad_collisons) == 0 :
+                if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]-0.1:
+
+                    combined_reward += 0.5
+
+            if len(bad_collisons) == 0 and  achieved_goal["object_lift"][0] >= 0.82:
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
