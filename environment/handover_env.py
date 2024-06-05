@@ -330,15 +330,15 @@ class HandoverEnv(gym.Env, EzPickle):
            
             # reward the robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
-                combined_reward += 0.25
+                combined_reward += 1
 
             if good_collisons.count("giver_robot_finger_object_col") == 2:
-                combined_reward += 0.5
+                combined_reward += 2
             
             if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 3 
+                combined_reward += 5
             elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 0.75 
+                combined_reward += 3
 
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
@@ -353,7 +353,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
                 # Calculate the height proportion (from min_height to max_height)
                 height_proportion = (achieved_goal["object_lift"][0] -  0.79) / (desired_goal["object_lift"][0] -  0.79)
-                dynamic_reward_scale = 0.25 + (2 - 0.25) * height_proportion
+                dynamic_reward_scale = 0.25 + (4 - 0.25) * height_proportion
                 # get the diffrence between the current y and goal y
                 distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
 
