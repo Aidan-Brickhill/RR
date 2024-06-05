@@ -330,44 +330,38 @@ class HandoverEnv(gym.Env, EzPickle):
            
             # reward the robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
-                # 1 finger
                 combined_reward += 1
+
             if good_collisons.count("giver_robot_finger_object_col") == 2:
-                # 2 fingers
                 combined_reward += 2
 
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
-            # if the object is above a certain height
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
+                    combined_reward += 100
 
-                combined_reward += 1
-                
+                combined_reward += 2
+
             else:
-            
+
+                # Calculate the height proportion (from min_height to max_height)
+                height_proportion = (achieved_goal["object_lift"][0] -  0.79) / (desired_goal["object_lift"][0] -  0.79)
+                dynamic_reward_scale = 0.25 + (2 - 0.25) * height_proportion
                 # get the diffrence between the current y and goal y
                 distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
-            
-                # provide relative reward based on the height of the object
-                combined_reward += 0.5 * (1-np.tanh(distance_height_object))
 
-                if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]-0.1:
+                combined_reward += dynamic_reward_scale * (1-np.tanh(distance_height_object))
 
-                    combined_reward += 0.5
 
-                if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]-0.175:
-
-                    combined_reward += 0.25
-
-            if "object_lift" in self.episode_task_completions:
+            if achieved_goal["object_lift"][0] > 0.86:
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
                 # provide relative reward based on the distance
-                combined_reward += 0.75 * (1-np.tanh(distance_object))
+                combined_reward += (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
