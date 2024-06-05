@@ -312,11 +312,13 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the end effector hasnt made it to the goal yet
         if "panda_giver_fetch" not in self.episode_task_completions:
             
+            # calculate distance between current pos and desired pos
             distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
 
             # provide relative reward based on the distance
             combined_reward += 0.25 * (1-np.tanh(distance_giver))
 
+            # negative penalty if the object is touching the table
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
             
             # if the end effector enters the goal postion
@@ -330,13 +332,15 @@ class HandoverEnv(gym.Env, EzPickle):
            
             # reward the robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
+                # 1 finger
                 combined_reward += 1
-
             if good_collisons.count("giver_robot_finger_object_col") == 2:
+                # 2 fingers
                 combined_reward += 2
 
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
+            # if the object is above a certain height
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
@@ -355,7 +359,11 @@ class HandoverEnv(gym.Env, EzPickle):
 
                     combined_reward += 0.5
 
-            if len(bad_collisons) == 0 and  achieved_goal["object_lift"][0] >= 0.82:
+                if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]-0.175:
+
+                    combined_reward += 0.25
+
+            if "object_lift" in self.episode_task_completions:
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
