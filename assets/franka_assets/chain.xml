@@ -43,6 +43,7 @@
                                             <joint name="robot:panda_giver_finger_joint1"  axis="0 1 0" type="slide" range="0 0.04" class="panda_finger"/>
                                             <geom class="panda_viz" mesh="finger_viz"/>
                                             <geom class="panda_col" mesh="finger_col" name="giver_leftfinger_col"/>
+                                            
                                             <!-- <geom size="0.0070" fromto=".009 .006 .0875   -.009 .009 .0875" type="capsule" name="giver_leftfinger0_col"/>
                                             <geom size="0.0070" fromto=".009 .009 .0875   -.009 .006 .0875" type="capsule" name="giver_leftfinger1_col"/>
 
@@ -68,10 +69,15 @@
                                             <joint name="robot:panda_giver_finger_joint2" axis="0 -1 0" type="slide" range="0 0.04" class="panda_finger"/>
                                             <geom quat="0 0 0 1" class="panda_viz" mesh="finger_viz"/>
                                             <geom class="panda_col" mesh="finger_col" name="giver_rightfinger_col"/>
-                                            <!-- <geom size="0.0070" fromto=".009 -.006 .0875   -.009 -.009 .0875" type="capsule" name="giver_rightfinger0_col"/>
-                                            <geom size="0.0070" fromto=".009 -.009 .0875   -.009 -.006 .0875" type="capsule" name="giver_rightfinger1_col"/>
 
-                                            <geom size="0.0075" fromto=".009 -.007 .0775   -.009 -.010 .0775" type="capsule" name="giver_rightfinger2_col"/>
+
+                                            <!-- <geom size="0.0070" fromto=".009 -.006 .0875   -.009 -.009 .0875" type="capsule" name="giver_rightfinger0_col"/>
+                                            <geom size="0.0070" fromto=".009 -.009 .0875   -.009 -.006 .0875" type="capsule" name="giver_rightfinger1_col"/> -->
+                                            <!-- inside finger (width in terms of across finger face);(width between gap);(height,len finger) -->
+                                            
+                                            <!-- TODO MAYBE -->
+                                            <!-- <geom size="0.3 0.1 0.075" pos="0 0 0" type="box" name="giver_rightfinger_flat_col"/> -->
+                                            <!-- <geom size="0.0075" fromto=".009 -.007 .0775   -.009 -.010 .0775" type="capsule" name="giver_rightfinger2_col"/>
                                             <geom size="0.0075" fromto=".009 -.010 .0775   -.009 -.007 .0775" type="capsule" name="giver_rightfinger3_col"/>
 
                                             <geom size="0.0082" fromto=".009 -.008 .0675   -.009 -.011 .0675" type="capsule" name="giver_rightfinger4_col"/>
@@ -81,9 +87,9 @@
                                             <geom size="0.0090" fromto=".009 -.012 .0575   -.009 -.009 .0575" type="capsule" name="giver_rightfinger7_col"/>
 
                                             <geom size="0.0100" fromto=".009 -.0105 .0475   -.009 -.0135 .0475" type="capsule" name="giver_rightfinger8_col"/>
-                                            <geom size="0.0100" fromto=".009 -.0135 .0475   -.009 -.0105 .0475" type="capsule" name="giver_rightfinger9_col"/>
+                                            <geom size="0.0100" fromto=".009 -.0135 .0475   -.009 -.0105 .0475" type="capsule" name="giver_rightfinger9_col"/> -->
 
-                                            <geom size="0.0110" fromto=".009 -.012 .035   -.009 -.015 .035" type="capsule" name="giver_rightfinger10_col"/>
+                                            <!-- <geom size="0.0110" fromto=".009 -.012 .035   -.009 -.015 .035" type="capsule" name="giver_rightfinger10_col"/>
                                             <geom size="0.0110" fromto=".009 -.015 .035   -.009 -.012 .035" type="capsule" name="giver_rightfinger11_col"/>
 
                                             <geom size="0.0185 0.0120 0.0175" pos="0 -.014 0.015" type="box" euler='-.03 0 0' name="giver_rightfinger12_col"/> -->

@@ -120,12 +120,42 @@ class FrankaRobot(MujocoEnv):
             geom1 = self.model_names.geom_id2name[contact.geom1]
             geom2 = self.model_names.geom_id2name[contact.geom2]
 
-            
+
             # collsion between giver fingers
             if (geom1 == "giver_leftfinger_col" and geom2 == "giver_rightfinger_col") or (geom2 == "giver_leftfinger_col" and geom1 == "giver_rightfinger_col"):
                 continue
             # collsion between reciever fingers
             if (geom1 == "reciever_rightfinger_col" and geom2 == "reciever_leftfinger_col") or (geom2 == "reciever_rightfinger_col" and geom1 == "reciever_leftfinger_col"):
+                continue
+
+            elif (("giver_rightfinger_flat_col" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger_flat_col" in geom2)):
+                continue # ii
+
+            if (("giver_rightfinger0" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger0" in geom2)):
+                continue
+            elif (("giver_rightfinger1" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger1" in geom2)):
+                continue
+            elif (("giver_rightfinger2" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger2" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger3" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger3" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger4" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger4" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger5" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger5" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger6" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger6" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger7" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger7" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger8" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger8" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger9" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger9" in geom2)):
+                continue # ii
+            elif (("giver_rightfinger10" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger10" in geom2)):
+                continue
+            elif (("giver_rightfinger11" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger11" in geom2)):
+                continue
+            elif (("giver_rightfinger12" in geom1 and "giver_leftfinger_col" not in geom2) or ("giver_leftfinger_col" not in geom1 and "giver_rightfinger12" in geom2)):
                 continue
 
             # collsion between box and table
