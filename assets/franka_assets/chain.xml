@@ -43,6 +43,9 @@
                                             <joint name="robot:panda_giver_finger_joint1"  axis="0 1 0" type="slide" range="0 0.04" class="panda_finger"/>
                                             <geom class="panda_viz" mesh="finger_viz"/>
                                             <geom class="panda_col" mesh="finger_col" name="giver_leftfinger_col"/>
+
+                                            <geom size="0.005 0.0005 0.025" pos="0 0 0.05" type="box" name="giver_leftfinger_flat_col"/>
+
                                             
                                             <!-- <geom size="0.0070" fromto=".009 .006 .0875   -.009 .009 .0875" type="capsule" name="giver_leftfinger0_col"/>
                                             <geom size="0.0070" fromto=".009 .009 .0875   -.009 .006 .0875" type="capsule" name="giver_leftfinger1_col"/>
@@ -71,7 +74,7 @@
                                             <geom quat="0 0 0 1" class="panda_col" mesh="finger_col" name="giver_rightfinger_col"/>
 
 
-                                            <!-- <geom size="0.3 0.1 0.075" pos="0 0 0" type="box" name="giver_rightfinger_flat_col"/> -->
+                                            <geom size="0.005 0.0005 0.025" pos="0 0 0.05" type="box" name="giver_rightfinger_flat_col"/>
 
 
                                             <!-- <geom size="0.0070" fromto=".009 -.006 .0875   -.009 -.009 .0875" type="capsule" name="giver_rightfinger0_col"/>
