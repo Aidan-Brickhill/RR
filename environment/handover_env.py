@@ -357,10 +357,9 @@ class HandoverEnv(gym.Env, EzPickle):
             # if the object is not above the threshold
             else:
                 
-                # if the height increases while its holding the object
+                # if the height increases
                 if achieved_goal["object_lift"][0] > max_object_height + 0.001:
-                    if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                        combined_reward += 8
+                    combined_reward += 8
 
             # if its above a certain  height
             if achieved_goal["object_lift"][0] > 0.86:
