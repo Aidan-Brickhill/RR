@@ -353,7 +353,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
                 # Calculate the height proportion (from min_height to max_height)
                 height_proportion = (achieved_goal["object_lift"][0] -  0.79) / (desired_goal["object_lift"][0] -  0.79)
-                dynamic_reward_scale = 0.25 + (2 - 0.25) * height_proportion
+                dynamic_reward_scale = 3 + (6 - 3) * height_proportion
                 # get the diffrence between the current y and goal y
                 distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
 
