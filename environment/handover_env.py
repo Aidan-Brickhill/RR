@@ -335,10 +335,10 @@ class HandoverEnv(gym.Env, EzPickle):
             if good_collisons.count("giver_robot_finger_object_col") == 2:
                 combined_reward += 2
             
-            if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 5
-            elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 3
+            # if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+            #     combined_reward += 5
+            # elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+            #     combined_reward += 3
 
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
