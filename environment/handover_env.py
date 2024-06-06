@@ -331,42 +331,45 @@ class HandoverEnv(gym.Env, EzPickle):
             # reward the robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
                 combined_reward += 1
-
             if good_collisons.count("giver_robot_finger_object_col") == 2:
                 combined_reward += 2
             
-            # if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            #     combined_reward += 5
-            # elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            #     combined_reward += 3
+            # reward the robot touching the object with its fingers (inside its grip)
+            if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                combined_reward += 5
+            elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                combined_reward += 3
 
+            # negative penalty if the object is touching the table
             combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
 
+            #  if the object above the threshold
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
+
+                # one big reward
                 if "object_lift" not in self.episode_task_completions:
                     self.episode_task_completions.append("object_lift")
                     combined_reward += 100
 
-                combined_reward += 2
+                # smaller constant reward
+                combined_reward += 12
 
+            # if the object is not above the threshold
             else:
+                
+                # if the height increases while its holding the object
+                if achieved_goal["object_lift"][0] > max_object_height + 0.001:
+                    if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                        combined_reward += 8
 
-                # Calculate the height proportion (from min_height to max_height)
-                height_proportion = (achieved_goal["object_lift"][0] -  0.79) / (desired_goal["object_lift"][0] -  0.79)
-                dynamic_reward_scale = 3 + (6 - 3) * height_proportion
-                # get the diffrence between the current y and goal y
-                distance_height_object = (desired_goal["object_lift"][0] - achieved_goal["object_lift"][0])*4
-
-                combined_reward += dynamic_reward_scale * (1-np.tanh(distance_height_object))
-
-
+            # if its above a certain  height
             if achieved_goal["object_lift"][0] > 0.86:
 
                 # get the distance between the object and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
                 # provide relative reward based on the distance
-                combined_reward += (1-np.tanh(distance_object))
+                combined_reward += 10 * (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
