@@ -331,7 +331,7 @@ class HandoverEnv(gym.Env, EzPickle):
             
             # reward the robot touching the object with its finger
             if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 2.5
+                combined_reward += 4
             elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
                 combined_reward += 1.5
             elif good_collisons.count("giver_robot_finger_object_col") == 2:
@@ -354,7 +354,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
                 # provide relative reward based on the distance
-                combined_reward += 5 + 10 * (1-np.tanh(distance_object))
+                combined_reward += 12 + 10 * (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
@@ -375,7 +375,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 
                 # if the height increases
                 if achieved_goal["object_lift"][0] > max_object_height + 0.001:
-                    combined_reward += 10
+                    combined_reward += 12
 
         # if the object has been dropped
         if max_object_height > desired_goal["object_lift"][0] and achieved_goal["object_lift"][0] < 0.81:
