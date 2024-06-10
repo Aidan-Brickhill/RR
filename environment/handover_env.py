@@ -20,7 +20,7 @@ OBS_ELEMENT_INDICES = {
 OBS_ELEMENT_GOALS = {
     "panda_giver_fetch": np.array([-0.75, 0.3, 0.83]),
     "panda_reciever_wait": np.array([0.8, 0.15, 1.87]),
-    "object_lift": np.array([0.95]),
+    "object_lift": np.array([0.86]),
     "object_move": np.array([0, 0, 1.3]),
     "object_stable": np.array([1, 0, 0, 0]),
 
@@ -204,7 +204,7 @@ class HandoverEnv(gym.Env, EzPickle):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 50,
+        "render_fps": 31,
     }
 
     def __init__(
@@ -361,6 +361,11 @@ class HandoverEnv(gym.Env, EzPickle):
                 if achieved_goal["object_lift"][0] > max_object_height + 0.001:
                         combined_reward += 8
 
+            #  #  if the object lifted and lowered blow height, penalize
+            # if "object_lift" in self.episode_task_completions:
+            #     if achieved_goal["object_lift"][0] < desired_goal["object_lift"][0]:
+            #         combined_reward -= 5
+
             # if its above a certain  height
             if achieved_goal["object_lift"][0] > 0.86:
 
@@ -368,7 +373,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
                 # provide relative reward based on the distance
-                combined_reward += 10 * (1-np.tanh(distance_object))
+                combined_reward += 25 * (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
@@ -382,7 +387,7 @@ class HandoverEnv(gym.Env, EzPickle):
                     if "object_lift" not in self.episode_task_completions:
                         self.episode_task_completions.append("object_lift")
                     # provide a reward
-                    combined_reward +=  1000
+                    combined_reward +=  10000
         
         # penalty for giver robot hitting table
         combined_reward -= bad_collisons.count("giver_robot_table_collision")

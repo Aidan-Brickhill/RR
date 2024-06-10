@@ -45,13 +45,13 @@ class FrankaRobot(MujocoEnv):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 50,
+        "render_fps": 31,
     }
 
     def __init__(
         self,
         model_path="../assets/franka_assets/chain.xml",
-        frame_skip=10,
+        frame_skip=16,
         robot_noise_ratio: float = 0.01,
         default_camera_config: dict = DEFAULT_CAMERA_CONFIG,
         **kwargs,
