@@ -63,7 +63,7 @@
 
         <body name="box" pos="-0.75 0.3 0.785">
             <freejoint name="box"/>
-            <include file="item_assets/kettle_chain.xml" size='0.75 0.75 0.75'/>
+            <include file="item_assets/kettle_chain.xml"/>
         </body>
     </worldbody>
 </mujoco>
