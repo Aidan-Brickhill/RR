@@ -313,8 +313,22 @@ class HandoverEnv(gym.Env, EzPickle):
             # calculate distance between current pos and desired pos
             distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
 
-            # provide relative reward based on the distance
-            combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
+            # give a reward based on distance and scale it based on whether the robot fingers are touching the object
+            if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                # both fingers (inside)
+                combined_reward += 1.25 *(1-np.tanh(distance_giver_object))
+            elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                # 1 finger (inside)
+                combined_reward += (1-np.tanh(distance_giver_object))
+            elif good_collisons.count("giver_robot_finger_object_col") == 2:
+                # both fingers
+                combined_reward += 0.75 * (1-np.tanh(distance_giver_object))
+            elif good_collisons.count("giver_robot_finger_object_col") == 1:
+                # 1 finger
+                combined_reward += 0.5 * (1-np.tanh(distance_giver_object))
+            else:
+                # no finger
+                combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
 
             # if the end effector enters the goal postion
             if "panda_giver_fetch" not in self.episode_task_completions:
@@ -323,12 +337,6 @@ class HandoverEnv(gym.Env, EzPickle):
                     self.episode_task_completions.append("panda_giver_fetch")          
                     combined_reward += 5 * self.max_episode_steps/self.episode_step
             
-            # reward the robot touching the object with its fingers (inside its grip)
-            if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 0.75
-            elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward += 0.15
-
             # if the object above the threshold
             if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
                 if "object_lift" not in self.episode_task_completions:
@@ -340,7 +348,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
 
                 # provide relative reward based on the distance
-                combined_reward += (1-np.tanh(distance_object))
+                combined_reward += 2 * (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
