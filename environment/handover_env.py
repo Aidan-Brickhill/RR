@@ -332,38 +332,38 @@ class HandoverEnv(gym.Env, EzPickle):
             #     combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
 
             # VARIATION 1 ==========
-            # if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            #     # both fingers (inside)
-            #     combined_reward += 5 + 5 * (1-np.tanh(distance_giver_object))
-            # elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            #     # 1 finger (inside)
-            #     combined_reward += 3 + 3 * (1-np.tanh(distance_giver_object))
-            # elif good_collisons.count("giver_robot_finger_object_col") == 2:
-            #     # both fingers
-            #     combined_reward += 2 + 2 * (1-np.tanh(distance_giver_object))
-            # elif good_collisons.count("giver_robot_finger_object_col") == 1:
-            #     # 1 finger
-            #     combined_reward += 1 + (1-np.tanh(distance_giver_object))
-            # else:
-            #     # no finger
-            #     combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
-
-            # VARIATION 2 ==========
             if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
                 # both fingers (inside)
-                combined_reward += 10 * (1-np.tanh(distance_giver_object))
+                combined_reward += 5 + 5 * (1-np.tanh(distance_giver_object))
             elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
                 # 1 finger (inside)
-                combined_reward += 6 * (1-np.tanh(distance_giver_object))
+                combined_reward += 3 + 3 * (1-np.tanh(distance_giver_object))
             elif good_collisons.count("giver_robot_finger_object_col") == 2:
                 # both fingers
-                combined_reward += 4 * (1-np.tanh(distance_giver_object))
+                combined_reward += 2 + 2 * (1-np.tanh(distance_giver_object))
             elif good_collisons.count("giver_robot_finger_object_col") == 1:
                 # 1 finger
-                combined_reward += 2 * (1-np.tanh(distance_giver_object))
+                combined_reward += 1 + (1-np.tanh(distance_giver_object))
             else:
                 # no finger
                 combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
+
+            # # VARIATION 2 ==========
+            # if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+            #     # both fingers (inside)
+            #     combined_reward += 10 * (1-np.tanh(distance_giver_object))
+            # elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+            #     # 1 finger (inside)
+            #     combined_reward += 6 * (1-np.tanh(distance_giver_object))
+            # elif good_collisons.count("giver_robot_finger_object_col") == 2:
+            #     # both fingers
+            #     combined_reward += 4 * (1-np.tanh(distance_giver_object))
+            # elif good_collisons.count("giver_robot_finger_object_col") == 1:
+            #     # 1 finger
+            #     combined_reward += 2 * (1-np.tanh(distance_giver_object))
+            # else:
+            #     # no finger
+            #     combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
 
             # if the end effector enters the goal postion
             if "panda_giver_fetch" not in self.episode_task_completions:
@@ -386,9 +386,9 @@ class HandoverEnv(gym.Env, EzPickle):
                 # VARIATION 0=========
                 # combined_reward += 10 * (1-np.tanh(distance_object)) 
                 # VARIATION 1=========
-                # combined_reward += 10 + 10 * (1-np.tanh(distance_object))
+                combined_reward += 10 + 10 * (1-np.tanh(distance_object))
                 # VARIATION 2=========
-                combined_reward += 20 * (1-np.tanh(distance_object))
+                # combined_reward += 20 * (1-np.tanh(distance_object))
                     
                 # if the object is in the goal position 
                 if distance_object < OBJECT_MOVE_THRESH:
@@ -411,9 +411,10 @@ class HandoverEnv(gym.Env, EzPickle):
                         # VARIATION 0=========
                         # combined_reward += 8 
                         # VARIATION 1=========
-                        # combined_reward += 12 
+                        # combined_reward += 12
+                        combined_reward += 16 
                         # VARIATION 2=========
-                        combined_reward += 16
+                        # combined_reward += 16
 
                 
             # get the distance between the end effector and the goal positon
