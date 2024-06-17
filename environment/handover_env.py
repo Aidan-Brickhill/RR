@@ -371,7 +371,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 # if the height increases
                 if "panda_giver_fetch" in self.episode_task_completions:
                     if achieved_goal["object_lift"][0] > max_object_height + 0.001:
-                        combined_reward += 25 
+                        combined_reward += 30 
                 
             # get the distance between the end effector and the goal positon
             distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
