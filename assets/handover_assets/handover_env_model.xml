@@ -62,15 +62,15 @@
         </body> -->
 
 
-        <body name="box" pos="-0.75 0.3 0.785">
-            <freejoint name="box"/>
-            <include file="item_assets/kettle_chain.xml"/>
-        </body>
-
-        <!-- <body name="box" pos="-0.8585814849014785 0.07508903725397244 1.122486051758938" quat="0.5805981864868907 0.1692652163984967 0.25019682345647204 0.7561263871458314">
+        <!-- <body name="box" pos="-0.75 0.3 0.785">
             <freejoint name="box"/>
             <include file="item_assets/kettle_chain.xml"/>
         </body> -->
+
+        <body name="box" pos="-0.8585814849014785 0.07508903725397244 1.122486051758938" quat="0.5805981864868907 0.1692652163984967 0.25019682345647204 0.7561263871458314">
+            <freejoint name="box"/>
+            <include file="item_assets/kettle_chain.xml"/>
+        </body>
 
     </worldbody>
 </mujoco>
