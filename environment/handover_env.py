@@ -12,8 +12,11 @@ OBS_ELEMENT_INDICES = {
     "panda_giver_fetch": np.array([9, 10, 11]),
     "panda_reciever_wait": np.array([30, 31, 32]),
     "object_lift": np.array([44]),
-    "object_move": np.array([42, 43, 44]),
-    "object_stable": np.array([45, 46, 47, 48]),
+    "object_move_p1": np.array([42, 43, 44]),
+
+    "object_move_p2":  np.array([42, 43, 44]),
+    "panda_reciever_fetch": np.array([30, 31, 32]),
+    "panda_reciever_place": np.array([42, 43, 44, 30, 31, 32]),
 
 }
 
@@ -21,13 +24,15 @@ OBS_ELEMENT_GOALS = {
     "panda_giver_fetch": np.array([-0.75, 0.3, 0.83]),
     "panda_reciever_wait": np.array([0.8, 0.15, 1.87]),
     "object_lift": np.array([0.86]),
-    "object_move": np.array([0, 0, 1.3]),
-    "object_stable": np.array([1, 0, 0, 0]),
+    "object_move_p1": np.array([0, 0, 1.3]),
 
+    "object_move_p2":  np.array([0, 0, 1.3]),
+    "panda_reciever_fetch": np.array([0, 0, 1.3]),
+    "panda_reciever_place": np.array([42, 43, 44, 30, 31, 32]),
 } 
 
 PANDA_GIVER_FETCH_THRESH = 0.2
-OBJECT_MOVE_THRESH = 0.15
+object_move_p1_THRESH = 0.15
 
 MAX_OBJECT_HEIGHT = 1.8
 MIN_OBJECT_HEIGHT = 0.7
@@ -148,12 +153,12 @@ class HandoverEnv(gym.Env, EzPickle):
     | 46    | object's y quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
     | 47    | object's z quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
     | 48    | object's w quaternion rotation                        | -Inf     | Inf      | object                                   | free       | -                          |
-    | 43    | object's x linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
-    | 44    | object's y linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
-    | 45    | object's z linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
-    | 46    | object's x axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
-    | 47    | object's y axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
-    | 48    | object's z axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
+    | 49    | object's x linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 50    | object's y linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 51    | object's z linear velocity                            | -Inf     | Inf      | object                                   | free       | linear velocity (m/s)      |
+    | 52    | object's x axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
+    | 53    | object's y axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
+    | 54    | object's z axis angular rotation                      | -Inf     | Inf      | object                                   | free       | angular velocity(rad/s)    |
 
     * `desired_goal`: this key represents the final goal to be achieved. The value is another `Dict` space with keys the tasks to be completed in the episode and values the joint
     goal configuration of each joint in the task as specified in the `Goal` section.
@@ -204,7 +209,7 @@ class HandoverEnv(gym.Env, EzPickle):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 31,
+        "render_fps": 50,
     }
 
     def __init__(
@@ -307,107 +312,115 @@ class HandoverEnv(gym.Env, EzPickle):
 
         combined_reward = 0
 
-        # if the end effector hasnt made it to the goal yet
-        if "object_move" not in self.episode_task_completions:
-            
-            # calculate distance between current pos and desired pos
-            distance_giver_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move"])
+        # pickup reward
+        if "object_move_p1" in self.tasks_to_complete:
 
-            # give a reward based on distance and scale it based on whether the robot fingers are touching the object
-            # VARIATION 1 ==========
-            if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                # both fingers (inside)
-                combined_reward += 5 + 5 * (1-np.tanh(distance_giver_object))
-            elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                # 1 finger (inside)
-                combined_reward += 3 + 3 * (1-np.tanh(distance_giver_object))
-            elif good_collisons.count("giver_robot_finger_object_col") == 2:
-                # both fingers
-                combined_reward += 2 + 2 * (1-np.tanh(distance_giver_object))
-            elif good_collisons.count("giver_robot_finger_object_col") == 1:
-                # 1 finger
-                combined_reward += 1 + (1-np.tanh(distance_giver_object))
-            else:
-                # no finger
-                combined_reward += 0.25 * (1-np.tanh(distance_giver_object))
-
-
-            # if the end effector enters the goal postion
+            # if the end effector hasnt made it to the goal yet
             if "panda_giver_fetch" not in self.episode_task_completions:
-                if distance_giver_object < PANDA_GIVER_FETCH_THRESH:
-                    # record the entry
-                    self.episode_task_completions.append("panda_giver_fetch")          
-                    combined_reward += 5 * self.max_episode_steps/self.episode_step
-            
-            # if the object above the threshold
-            if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
-                if "object_lift" not in self.episode_task_completions:
-                    # record the entry
-                    self.episode_task_completions.append("object_lift")
-                    combined_reward += 25 * self.max_episode_steps/self.episode_step
-
-                # get the distance between the object and the goal positon
-                distance_object = np.linalg.norm(achieved_goal["object_move"] - desired_goal["object_move"])
+                
+                # calculate distance between current pos and desired pos
+                distance_giver = np.linalg.norm(achieved_goal["panda_giver_fetch"] - desired_goal["panda_giver_fetch"])
 
                 # provide relative reward based on the distance
-                combined_reward += 10 + 10 * (1-np.tanh(distance_object))
+                combined_reward += 0.25 * (1-np.tanh(distance_giver))
 
-                    
-                # if the object is in the goal position 
-                if distance_object < OBJECT_MOVE_THRESH:
-                    # finish the episode
-                    if "object_move" not in self.episode_task_completions:
-                        self.episode_task_completions.append("object_move")
-                    if "panda_reciever_wait" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_reciever_wait")
-                    if "panda_giver_fetch" not in self.episode_task_completions:
-                        self.episode_task_completions.append("panda_giver_fetch")
+                # negative penalty if the object is touching the table
+                combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
+                
+                # if the end effector enters the goal postion
+                if distance_giver < PANDA_GIVER_FETCH_THRESH:
+
+                    # record the entry
+                    self.episode_task_completions.append("panda_giver_fetch")          
+                
+            # if the end effector hasnt been put in the goal position 
+            if  "panda_giver_fetch" in self.episode_task_completions and "object_move_p1" not in self.episode_task_completions:
+            
+                # reward the robot touching the object with its fingers
+                if good_collisons.count("giver_robot_finger_object_col") == 1:
+                    combined_reward += 1
+                if good_collisons.count("giver_robot_finger_object_col") == 2:
+                    combined_reward += 2
+                
+                # reward the robot touching the object with its fingers (inside its grip)
+                if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                    combined_reward += 5
+                elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
+                    combined_reward += 3
+
+                # negative penalty if the object is touching the table
+                combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
+
+                #  if the object above the threshold
+                if achieved_goal["object_lift"][0] >= desired_goal["object_lift"][0]:
+
+                    # one big reward
                     if "object_lift" not in self.episode_task_completions:
                         self.episode_task_completions.append("object_lift")
-                    # provide a reward
-                    combined_reward += 10000 * self.max_episode_steps/self.episode_step
-            else:
-                
-                # if the height increases
-                if "panda_giver_fetch" in self.episode_task_completions:
+                        combined_reward += 100
+
+                    # get the distance between the object and the goal positon
+                    distance_object = np.linalg.norm(achieved_goal["object_move_p1"] - desired_goal["object_move_p1"])
+
+                    # provide relative reward based on the distance
+                    combined_reward += 12 + 10 * (1-np.tanh(distance_object))
+                        
+                    # if the object is in the goal position 
+                    if distance_object < object_move_p1_THRESH:
+                        # finish the episode
+                        if "object_move_p1" not in self.episode_task_completions:
+                            self.episode_task_completions.append("object_move_p1")
+                        if "panda_reciever_wait" not in self.episode_task_completions:
+                            self.episode_task_completions.append("panda_reciever_wait")
+                        if "panda_giver_fetch" not in self.episode_task_completions:
+                            self.episode_task_completions.append("panda_giver_fetch")
+                        if "object_lift" not in self.episode_task_completions:
+                            self.episode_task_completions.append("object_lift")
+                        # provide a reward
+                        combined_reward +=  1000
+
+                # if the object is not above the threshold
+                else:
+                    
+                    # if the height increases
                     if achieved_goal["object_lift"][0] > max_object_height + 0.001:
-                        combined_reward += 30 
-                
+                        combined_reward += 8
+
             # get the distance between the end effector and the goal positon
             distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_wait"] - desired_goal["panda_reciever_wait"])
 
             # provide relative reward based on the distance
-            combined_reward += 0.25 * (1-np.tanh(distance_reciever))
+            combined_reward += 0.125 * (1-np.tanh(distance_reciever))
 
             # punish velocity from the waiter
             combined_reward -= 0.05 * np.sum(np.abs(reciever_current_vel))
-       
+
+            # if the object is too high/low 
+            if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
+                # finish the episode
+                if "object_move_p1" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_move_p1")
+                if "object_lift" not in self.episode_task_completions:
+                    self.episode_task_completions.append("object_lift")
+                if "panda_reciever_wait" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_reciever_wait")
+                if "panda_giver_fetch" not in self.episode_task_completions:
+                    self.episode_task_completions.append("panda_giver_fetch")
+
+                # provide a very negative reward (cancle out the completed reward)
+                combined_reward -= 1000
+        
         # penalty for giver robot hitting table
-        combined_reward -= 0.15 * bad_collisons.count("giver_robot_table_collision")
-        combined_reward -= 0.15 * bad_collisons.count("giver_robot_finger_table_collision")
+        combined_reward -= bad_collisons.count("giver_robot_table_collision")
+        combined_reward -= 0.35 * bad_collisons.count("giver_robot_finger_table_collision")
 
         # penalty for reciever robot hitting table
-        combined_reward -= 0.15 * bad_collisons.count("reciever_robot_table_collision")
-        combined_reward -= 0.15 * bad_collisons.count("reciever_robot_finger_table_collision")
+        combined_reward -= bad_collisons.count("reciever_robot_table_collision")
+        combined_reward -= 0.35 * bad_collisons.count("reciever_robot_finger_table_collision")
 
         # penalty for giver robot not using fingers in pickup task
-        combined_reward -= 0.15 * bad_collisons.count("giver_robot_hand_object_col")
-        combined_reward -= 0.15 * bad_collisons.count("giver_robot_link_object_col")
-
-        # if the object is too high/low 
-        if achieved_goal["object_lift"][0] < MIN_OBJECT_HEIGHT or achieved_goal["object_lift"][0] > MAX_OBJECT_HEIGHT:
-            # finish the episode
-            if "object_move" not in self.episode_task_completions:
-                self.episode_task_completions.append("object_move")
-            if "object_lift" not in self.episode_task_completions:
-                self.episode_task_completions.append("object_lift")
-            if "panda_reciever_wait" not in self.episode_task_completions:
-                self.episode_task_completions.append("panda_reciever_wait")
-            if "panda_giver_fetch" not in self.episode_task_completions:
-                self.episode_task_completions.append("panda_giver_fetch")
-
-            # provide a very negative reward (cancle out the completed reward)
-            combined_reward -= 1000           
+        combined_reward -= 1.5 * bad_collisons.count("giver_robot_hand_object_col")
+        combined_reward -= 1.5 * bad_collisons.count("giver_robot_link_object_col")
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
@@ -495,6 +508,8 @@ class HandoverEnv(gym.Env, EzPickle):
         self.max_object_height = self.achieved_goal["object_lift"][0]
 
         obs = self._get_obs(robot_obs)
+
+
         self.tasks_to_complete = set(self.goal.keys())
         info = {
             "tasks_to_complete": list(self.tasks_to_complete),

@@ -7,7 +7,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 15100000,
+    "total_timesteps": 40100000,
     "env_name": "HandoverEnv",
 }
 
@@ -17,35 +17,24 @@ run = wandb.init(
     sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
     monitor_gym=True,  # auto-upload the videos of agents playing the game
     save_code=True,  # optional
-    
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait"], max_episode_steps = 450))
+    # pickup
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move","panda_reciever_wait"], max_episode_steps = 300))
+    # handover
+    # return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_reciever_fetch", "object_move", "panda_reciever_wait",'panda_reciever_place'], max_episode_steps = 300))
 
 env= DummyVecEnv([make_env] * 4)
 
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 150000 == 0,
+    record_video_trigger=lambda x: x % 500000 == 0,
     video_length=600,
 )
 
-model = PPO(
-    config["policy_type"], 
-    env,
-    verbose=1,
-    tensorboard_log=f"runs/{run.id}",
-    n_steps=2048,
-    batch_size=64,
-    n_epochs=10,
-    gamma=0.99,
-    gae_lambda=0.95,
-    ent_coef=0.001,
-    learning_rate=2.5e-4,  
-    clip_range=0.2,  
-)
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(

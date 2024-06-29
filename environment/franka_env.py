@@ -45,13 +45,13 @@ class FrankaRobot(MujocoEnv):
             "rgb_array",
             "depth_array",
         ],
-        "render_fps": 31,
+        "render_fps": 50,
     }
 
     def __init__(
         self,
         model_path="../assets/franka_assets/chain.xml",
-        frame_skip=16,
+        frame_skip=10,
         robot_noise_ratio: float = 0.01,
         default_camera_config: dict = DEFAULT_CAMERA_CONFIG,
         **kwargs,
@@ -249,6 +249,16 @@ class FrankaRobot(MujocoEnv):
 
     def reset_model(self):
         qpos = self.init_qpos
+        # use for handover env positions
+        # qpos[:9] = [2.006107156172305, 
+        #             0.10017181958914444, 
+        #             -1.9900147359117764, 
+        #             -2.0244419418897657, 
+        #             0.5669482994122488, 
+        #             0.20115351350196695, 
+        #             -1.9991158485286418, 
+        #             0.03854448190718312, 
+        #             0.03303391539854269]
         qvel = self.init_qvel
         self.set_state(qpos, qvel)
         obs = self._get_obs()
