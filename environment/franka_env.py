@@ -131,11 +131,20 @@ class FrankaRobot(MujocoEnv):
             if (("giver_rightfinger_flat_col" in geom1 and "object_collision" == geom2) or ("giver_rightfinger_flat_col" in geom2 and "object_collision" == geom1)):
                 if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 0:
                     good_collisons.append("inside_giver_robot_rightfinger_object_col")
-                continue # ii
+                continue  
             if (("giver_leftfinger_flat_col" in geom1 and "object_collision" == geom2) or ("giver_leftfinger_flat_col" in geom2 and "object_collision" == geom1)):
                 if good_collisons.count("inside_giver_robot_leftfinger_object_col") == 0:
                     good_collisons.append("inside_giver_robot_leftfinger_object_col")
-                continue # ii
+                continue  
+
+            if (("reciever_rightfinger_flat_col" in geom1 and "object_collision" == geom2) or ("reciever_rightfinger_flat_col" in geom2 and "object_collision" == geom1)):
+                if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 0:
+                    good_collisons.append("inside_reciever_robot_rightfinger_object_col")
+                continue  
+            if (("reciever_leftfinger_flat_col" in geom1 and "object_collision" == geom2) or ("reciever_leftfinger_flat_col" in geom2 and "object_collision" == geom1)):
+                if good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 0:
+                    good_collisons.append("inside_reciever_robot_leftfinger_object_col")
+                continue  
 
 
             # collsion between box and table
@@ -250,15 +259,15 @@ class FrankaRobot(MujocoEnv):
     def reset_model(self):
         qpos = self.init_qpos
         # use for handover env positions
-        # qpos[:9] = [2.006107156172305, 
-        #             0.10017181958914444, 
-        #             -1.9900147359117764, 
-        #             -2.0244419418897657, 
-        #             0.5669482994122488, 
-        #             0.20115351350196695, 
-        #             -1.9991158485286418, 
-        #             0.03854448190718312, 
-        #             0.03303391539854269]
+        qpos[:9] = [2.006107156172305, 
+                    0.10017181958914444, 
+                    -1.9900147359117764, 
+                    -2.0244419418897657, 
+                    0.5669482994122488, 
+                    0.20115351350196695, 
+                    -1.9991158485286418, 
+                    0.03854448190718312, 
+                    0.03303391539854269]
         qvel = self.init_qvel
         self.set_state(qpos, qvel)
         obs = self._get_obs()
