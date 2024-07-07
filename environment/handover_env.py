@@ -451,17 +451,21 @@ class HandoverEnv(gym.Env, EzPickle):
                 # calculate distance between the giver current pos and desired pos (retreat)
                 distance_reciever = np.linalg.norm(achieved_goal["panda_giver_retreat"] - desired_goal["panda_giver_retreat"])
                 # provide relative reward based on the distance
-                combined_reward += 0.5 * (1-np.tanh(distance_reciever)) 
+                combined_reward += 5 * (1-np.tanh(distance_reciever)) 
             
             # before the receievr moves to the handover zone
             if "panda_reciever_fetch" not in self.episode_task_completions:
                 # get the distance between the object position and the goal positon
                 distance_object = np.linalg.norm(achieved_goal["object_move_p2"] - desired_goal["object_move_p2"])      
                 # provide relative reward based on the distance
-                combined_reward += 5*(1-np.tanh(distance_object))
+                combined_reward += 10*(1-np.tanh(distance_object))
 
             # if the end effector and object has made it to the goal
             if distance_object <= object_move_p2_THRESH:
+                
+                # provide constant reward for being in handover zone
+                if "panda_reciever_fetch" not in self.episode_task_completions:
+                    combined_reward += 15
 
                 # if the end effector enters the goal postion, the reciever is done waiting
                 if "panda_reciever_wait" not in self.episode_task_completions:
@@ -471,15 +475,20 @@ class HandoverEnv(gym.Env, EzPickle):
             # if the end effector and object has made it to the goal 
             if "panda_reciever_wait" in self.episode_task_completions:
 
+                # provide constant reward for being in handover zone
+                if "panda_reciever_fetch" not in self.episode_task_completions:
+
                     # calculate distance between current pos and desired pos
                     distance_reciever = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["panda_reciever_fetch"])
                     # provide relative reward based on the distance
-                    combined_reward += 5 * (1-np.tanh(distance_reciever)) 
+                    combined_reward += 20 * (1-np.tanh(distance_reciever)) 
 
                     # if the end effector enters the goal postion
                     if distance_reciever <= PANDA_RECIEVER_FETCH_THRESH:
                         # allow the reciebver robot to move
                         self.episode_task_completions.append("panda_reciever_fetch") 
+                        combined_reward += 400
+
 
             else:
 
@@ -494,7 +503,12 @@ class HandoverEnv(gym.Env, EzPickle):
            
             # if the end effector hasnt been put in the goal position 
             if  "panda_reciever_fetch" in self.episode_task_completions:
-            
+                
+                # calculate distance between current pos and desired pos
+                distance_reciever_object = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - desired_goal["object_move_p2"])
+                # provide relative reward based on the distance
+                combined_reward += 30 * (1-np.tanh(distance_reciever_object)) 
+
                 # reward the robot touching the object with its fingers
                 if good_collisons.count("reciever_robot_finger_object_col") == 1:
                     combined_reward += 2
@@ -514,7 +528,7 @@ class HandoverEnv(gym.Env, EzPickle):
                     # get the distance between the object and the goal positon (place)
                     distance_object = np.linalg.norm(achieved_goal["panda_reciever_place"] - desired_goal["panda_reciever_place"])
                     # provide relative reward based on the distance
-                    combined_reward += 10 * (1-np.tanh(distance_object))
+                    combined_reward += 50 * (1-np.tanh(distance_object))
                     
                     # if the object is in the goal position  (place)
                     if distance_object <= PANDA_RECIEVER_PLACE_THRESH:
