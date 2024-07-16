@@ -1,7 +1,7 @@
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
-model_path = "/home/aidan/00_Ubuntu_Honours/RR/RR/environment/models/PPO/handover.zip"
+# model_path = "/home/aidan/00_Ubuntu_Honours/RR/RR/environment/models/PPO/handover.zip"
 model_path = "/home/aidan/Ubuntu/RR/RR/environment/models/PPO/model.zip"
 
 
