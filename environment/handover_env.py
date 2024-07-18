@@ -440,16 +440,18 @@ class HandoverEnv(gym.Env, EzPickle):
             distance_reciever = np.linalg.norm(achieved_goal["panda_giver_retreat"] - desired_goal["panda_giver_retreat"])
             # provide relative reward based on the distance
             combined_reward += 5 * (1-np.tanh(distance_reciever)) 
-        
+
+        # get the distance between the object position and the goal positon
+        distance_object = np.linalg.norm(achieved_goal["object_move_p2"] - desired_goal["object_move_p2"])   
+
         # before the receievr moves to the handover zone
         if "panda_reciever_fetch" not in self.episode_task_completions:
-            # get the distance between the object position and the goal positon
-            distance_object = np.linalg.norm(achieved_goal["object_move_p2"] - desired_goal["object_move_p2"])      
+   
             # provide relative reward based on the distance
             combined_reward += 10*(1-np.tanh(distance_object))
 
         # if the end effector and object has made it to the goal
-        if distance_object <= (object_move_p2_THRESH + 0.15):
+        if distance_object <= object_move_p2_THRESH:
             
             # provide constant reward for being in handover zone
             if "panda_reciever_fetch" not in self.episode_task_completions:
@@ -616,7 +618,6 @@ class HandoverEnv(gym.Env, EzPickle):
         
         return combined_reward
     
-     
     def _get_obs(self, robot_obs):
         obj_qpos = self.data.qpos[18:].copy()
         obj_qvel = self.data.qvel[18:].copy()
