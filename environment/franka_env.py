@@ -184,7 +184,7 @@ class FrankaRobot(MujocoEnv):
                     continue
 
             # collsion between giver robot and reciever robot
-            if ("giver" in geom1 and geom2 == "reciever") or ("giver" in geom2 and geom1 == "reciever"):
+            if ("giver" in geom1 and "reciever" in geom2) or ("giver" in geom2 and "reciever" in geom1):
                 bad_collisons.append("robot_collision")
                 continue
                 
