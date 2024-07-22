@@ -441,9 +441,9 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward -= 30
 
             # calculate distance between the giver current pos and desired pos (retreat)
-            distance_reciever = np.linalg.norm(achieved_goal["panda_giver_retreat"] - desired_goal["panda_giver_retreat"])
+            distance_giver_retreat = np.linalg.norm(achieved_goal["panda_giver_retreat"] - desired_goal["panda_giver_retreat"])
             # provide relative reward based on the distance
-            combined_reward += 30 * (1-np.tanh(distance_reciever)) 
+            combined_reward += 30 * (1-np.tanh(distance_giver_retreat)) 
 
             min_OBJECT_HEIGHT_P2 = 0.7
 
