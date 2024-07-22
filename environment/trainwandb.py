@@ -25,7 +25,12 @@ def make_env():
     # handover
     return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_reciever_wait", "object_move_p2", "panda_reciever_fetch","panda_reciever_place","panda_giver_retreat"], max_episode_steps = 300))
 
-env= DummyVecEnv([make_env] * 4)
+# env= DummyVecEnv([make_env] * 4)
+
+from stable_baselines3.common.vec_env import SubprocVecEnv
+
+num_envs = 8  # Adjust this based on your CPU cores
+env = SubprocVecEnv([make_env for _ in range(num_envs)])
 
 env = VecVideoRecorder(
     env,
@@ -34,7 +39,12 @@ env = VecVideoRecorder(
     video_length=600,
 )
 
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+import torch
+
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", device=device)
+
+# model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(

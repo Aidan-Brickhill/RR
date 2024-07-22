@@ -43,7 +43,6 @@ object_move_p2_THRESH = 0.15
 
 MAX_OBJECT_HEIGHT = 1.8
 MIN_OBJECT_HEIGHT = 0.7
-MIN_OBJECT_HEIGHT_P2 = 1
 
 
 MIN_END_EFFECTOR_HEIGHT = 0.8
@@ -411,6 +410,7 @@ class HandoverEnv(gym.Env, EzPickle):
         reciever_current_vel,
         giver_position_diff,
     ):
+        
         # if the reciever hasnt grasped the object
         if self.reciever_grasped == False:
             # reward the reciver robot touching the object with its fingers
@@ -423,24 +423,30 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward += 5
             elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
                 combined_reward += 3
+
+            min_OBJECT_HEIGHT_P2 = 1
+            
         
         # if the revieverr has grasped the object
         else:
             # penalize the giver robot touching the object with its fingers
             if good_collisons.count("giver_robot_finger_object_col") == 1:
-                combined_reward -= 1
+                combined_reward -= 10
             if good_collisons.count("giver_robot_finger_object_col") == 2:
-                combined_reward -= 2
+                combined_reward -= 20
             # penalize the giver robot touching the object with its fingers (inside its grip)
             if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward -= 5
+                combined_reward -= 50
             elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-                combined_reward -= 3
+                combined_reward -= 30
 
             # calculate distance between the giver current pos and desired pos (retreat)
             distance_reciever = np.linalg.norm(achieved_goal["panda_giver_retreat"] - desired_goal["panda_giver_retreat"])
             # provide relative reward based on the distance
-            combined_reward += 5 * (1-np.tanh(distance_reciever)) 
+            combined_reward += 30 * (1-np.tanh(distance_reciever)) 
+
+            min_OBJECT_HEIGHT_P2 = 0.7
+
 
         # get the distance between the object position and the goal positon
         distance_object = np.linalg.norm(achieved_goal["object_move_p2"] - desired_goal["object_move_p2"])      
@@ -517,6 +523,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 combined_reward += 20
                 if self.reciever_grasped == False:
                     combined_reward += 600
+                    min_OBJECT_HEIGHT_P2 = 0.7
                     self.reciever_grasped = True                 
             elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
                 combined_reward += 12
@@ -543,7 +550,7 @@ class HandoverEnv(gym.Env, EzPickle):
                     if "panda_reciever_wait" not in self.episode_task_completions:
                         self.episode_task_completions.append("panda_reciever_wait")
                     # provide a reward
-                    combined_reward +=  1000
+                    combined_reward +=  10000
             
             else:
 
@@ -554,7 +561,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
 
         # if the object is too high/low 
-        if achieved_goal["object_move_p2"][2] < MIN_OBJECT_HEIGHT_P2 or achieved_goal["object_move_p2"][2] > MAX_OBJECT_HEIGHT:
+        if achieved_goal["object_move_p2"][2] < min_OBJECT_HEIGHT_P2 or achieved_goal["object_move_p2"][2] > MAX_OBJECT_HEIGHT:
             # finish the episode
             if "object_move_p2" not in self.episode_task_completions:
                 self.episode_task_completions.append("object_move_p2")
@@ -706,6 +713,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
+        self.reciever_grasped = False
 
         obs = self._get_obs(robot_obs)
 
