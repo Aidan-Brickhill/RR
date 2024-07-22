@@ -515,18 +515,18 @@ class HandoverEnv(gym.Env, EzPickle):
 
             # reward the robot touching the object with its fingers
             if good_collisons.count("reciever_robot_finger_object_col") == 1:
-                combined_reward += 4
-            if good_collisons.count("reciever_robot_finger_object_col") == 2:
                 combined_reward += 8
+            if good_collisons.count("reciever_robot_finger_object_col") == 2:
+                combined_reward += 16
             # reward the robot touching the object with its fingers (inside its grip)
             if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-                combined_reward += 20
+                combined_reward += 40
                 if self.reciever_grasped == False:
                     combined_reward += 600
                     min_OBJECT_HEIGHT_P2 = 0.7
                     self.reciever_grasped = True                 
             elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-                combined_reward += 12
+                combined_reward += 24
 
             # if the object has been grasped
             if self.reciever_grasped:
