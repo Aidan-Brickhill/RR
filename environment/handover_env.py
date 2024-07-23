@@ -615,11 +615,12 @@ class HandoverEnv(gym.Env, EzPickle):
         combined_reward -= 1.5 * bad_collisons.count("reciever_robot_hand_object_col")
         combined_reward -= 1.5 * bad_collisons.count("reciever_robot_link_object_col")
 
-        # penalty for reciever robot not using fingers in pickup task
+        # penalty for reciever robot not using fingers in handover task
         combined_reward -= 1.5 * bad_collisons.count("giver_robot_hand_object_col")
         combined_reward -= 1.5 * bad_collisons.count("giver_robot_link_object_col")
 
-        combined_reward -= 10 * bad_collisons.count("robot_collision")
+        # penalty for robots colliding
+        combined_reward -= 1.5 * bad_collisons.count("robot_collision")
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
