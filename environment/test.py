@@ -1,7 +1,7 @@
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
-model_path = "RR/environment/models/PPO/trainHandover.zip"
+model_path = "RR/environment/models/PPO/trainHandover"
 
 
 # env = HandoverEnv(render_mode="human", tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move_p1","panda_reciever_wait"], max_episode_steps=300)

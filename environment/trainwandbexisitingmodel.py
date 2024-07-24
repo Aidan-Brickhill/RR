@@ -34,7 +34,7 @@ env = VecVideoRecorder(
     video_length=600,
 )
 
-model_path = "RR/environment/models/PPO/trainHandover.zip"
+model_path = "RR/environment/models/PPO/trainHandover"
 model = PPO.load(model_path, env=env)
 
 model.learn(
