@@ -6,6 +6,8 @@
 #SBATCH --time=3600:00
 #SBATCH --partition=bigbatch
 export MUJOCO_GL=egl
-python3 ../environment/trainwandb.py
+# python3 ../environment/trainwandb.py
+python3 ../environment/trainwandbexisitingmodel.py
+
 
 wait;
