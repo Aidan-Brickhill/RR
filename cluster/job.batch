@@ -3,11 +3,11 @@
 #SBATCH --output=/home-mscluster/abrickhill/research/RR/cluster/result.txt
 #SBATCH --ntasks=1
 # increase the time here if you need more than 10 minutes to run your job.
-#SBATCH --time=3600:00
+#SBATCH --time=72:00:00
 #SBATCH --partition=bigbatch
 export MUJOCO_GL=egl
 # python3 ../environment/trainwandb.py
-python3 ../environment/trainwandbexisitingmodel.py
+python3 ../environment/trainwandb.py
 
 
 wait;
