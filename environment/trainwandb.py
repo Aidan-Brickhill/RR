@@ -7,7 +7,7 @@ from wandb.integration.sb3 import WandbCallback
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 30100000,
+    "total_timesteps": 60100000,
     "env_name": "HandoverEnv",
 }
 
