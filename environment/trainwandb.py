@@ -25,7 +25,7 @@ def make_env():
     # handover
     # return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_reciever_wait", "object_move_p2", "panda_reciever_fetch","panda_reciever_place","panda_giver_retreat"], max_episode_steps = 300))
     # BOTH
-    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "panda_reciever_wait", "object_move_p2", "panda_reciever_fetch","panda_reciever_place","panda_giver_retreat"], max_episode_steps = 300))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "panda_reciever_wait", "object_move_p2", "panda_reciever_fetch","panda_reciever_place","panda_giver_retreat"], max_episode_steps = 400))
 
 env= DummyVecEnv([make_env] * 4)
 
