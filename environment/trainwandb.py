@@ -44,7 +44,6 @@ model.learn(
         model_save_path=f"models/{run.id}",
         verbose=2,
     ),
-
 )
 
 run.finish()
