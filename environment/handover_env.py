@@ -314,7 +314,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
             combined_reward += 3
         # reward the giver robot touching the object with its fingers
-        elif good_collisons.count("giver_robot_finger_object_col") == 2:
+        if good_collisons.count("giver_robot_finger_object_col") == 2:
             combined_reward += 2
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward += 1
@@ -344,7 +344,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
             combined_reward += 3
         # reward the giver robot touching the object with its fingers
-        elif good_collisons.count("giver_robot_finger_object_col") == 2:
+        if good_collisons.count("giver_robot_finger_object_col") == 2:
             combined_reward += 2
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward += 1
@@ -397,7 +397,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
             combined_reward += 3
         # reward the giver robot touching the object with its fingers
-        elif good_collisons.count("giver_robot_finger_object_col") == 2:
+        if good_collisons.count("giver_robot_finger_object_col") == 2:
             combined_reward += 2
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward += 1
@@ -430,7 +430,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
             combined_reward += 30
         # reward the reciever robot touching the object with its fingers
-        elif good_collisons.count("reciever_robot_finger_object_col") == 2:
+        if good_collisons.count("reciever_robot_finger_object_col") == 2:
             combined_reward += 20
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
             combined_reward += 10
@@ -451,7 +451,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
             combined_reward -= 30
         # penalize the giver robot touching the object with its fingers
-        elif good_collisons.count("giver_robot_finger_object_col") == 2:
+        if good_collisons.count("giver_robot_finger_object_col") == 2:
             combined_reward -= 20
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward -= 10
@@ -462,7 +462,7 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
             combined_reward += 30
         # reward the reciever robot touching the object with its fingers
-        elif good_collisons.count("reciever_robot_finger_object_col") == 2:
+        if good_collisons.count("reciever_robot_finger_object_col") == 2:
             combined_reward += 20
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
             combined_reward += 10
