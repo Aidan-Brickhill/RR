@@ -14,18 +14,13 @@ config = {
 run = wandb.init(
     project="Safe_Robot_Handover",
     config=config,
-    sync_tensorboard=True,  # auto-upload sb3's tensorboard metrics
-    monitor_gym=True,  # auto-upload the videos of agents playing the game
-    save_code=True,  # optional
+    sync_tensorboard=True,
+    monitor_gym=True,
+    save_code=True,    
 )
 
 def make_env():
-    # pickup
-    # return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_giver_fetch", "object_lift", "object_move_p1","panda_reciever_wait"], max_episode_steps = 300))
-    # handover
-    # return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["panda_reciever_wait", "object_move_p2", "panda_reciever_fetch","panda_reciever_place","panda_giver_retreat"], max_episode_steps = 300))
-    # BOTH
-    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["object_move_place", "object_move_handover", "panda_giver_retreat", "panda_giver_fetch","panda_reciever_wait","panda_reciever_fetch"], max_episode_steps = 400))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_fetch","panda_reciever_to_giver","panda_reciever_fetch"], max_episode_steps = 400))
 
 env= DummyVecEnv([make_env] * 4)
 
