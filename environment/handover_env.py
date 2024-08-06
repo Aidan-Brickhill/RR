@@ -363,13 +363,13 @@ class HandoverEnv(gym.Env, EzPickle):
             self.object_max_height = achieved_goal["object_move_lift"]
             combined_reward += 20
 
-        # if the object has been lifted slightly and is put back down on the table, penalize it
-        elif (self.object_max_height > 0.805 and bad_collisons.count("object_on_giver_table") > 0):
-            combined_reward -= 5 * bad_collisons.count("object_on_giver_table")
+        # # if the object has been lifted slightly and is put back down on the table, penalize it
+        # elif (self.object_max_height > 0.805 and bad_collisons.count("object_on_giver_table") > 0):
+        #     combined_reward -= 5 * bad_collisons.count("object_on_giver_table")
 
-        # if the object has been lifted slightly and is put below the slight height
-        elif (self.object_max_height > 0.805 and achieved_goal["object_move_lift"] < 0.805):
-            combined_reward -= 5
+        # # if the object has been lifted slightly and is put below the slight height
+        # elif (self.object_max_height > 0.805 and achieved_goal["object_move_lift"] < 0.805):
+        #     combined_reward -= 5
 
         # if the objects current position is within the handover region
         if  achieved_goal["object_move_lift"] >=  desired_goal["object_move_lift"]:
@@ -507,6 +507,7 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the object is in the goal position  (place)
         if distance_place_object <= object_move_place_THRESH:
             # finish the episode
+            
             if "panda_giver_fetch" not in self.episode_task_completions:
                 self.episode_task_completions.append("panda_giver_fetch")
             if "panda_giver_retreat" not in self.episode_task_completions:
@@ -514,6 +515,8 @@ class HandoverEnv(gym.Env, EzPickle):
 
             if "object_move_handover" not in self.episode_task_completions:
                 self.episode_task_completions.append("object_move_handover")
+            if "object_move_lift" not in self.episode_task_completions:
+                self.episode_task_completions.append("object_move_lift")
             if "object_move_place" not in self.episode_task_completions:
                 self.episode_task_completions.append("object_move_place")
             
@@ -614,11 +617,11 @@ class HandoverEnv(gym.Env, EzPickle):
         # calculate distance between reciever robot end effector and objects current position
         distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - achieved_goal["object_move_place"])
 
-
         # if the object is too high/low or has been dropped after it has been picked or handed over
         if ((achieved_goal["object_move_lift"] < MIN_OBJECT_HEIGHT or achieved_goal["object_move_lift"] > MAX_OBJECT_HEIGHT) or
             ("panda_reciever_fetch" not in self.episode_task_completions and self.object_max_height > 0.85 and achieved_goal["object_move_handover"][2] < 1.85 and distance_giver_end_effector_to_object > 0.15) or 
-            ("panda_reciever_fetch" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15)):
+            ("panda_reciever_fetch" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15) or
+            ("object_move_lift" in self.episode_task_completions and bad_collisons.count("object_on_giver_table") > 0)):
             # finish the episode
 
             if "panda_giver_fetch" not in self.episode_task_completions:
