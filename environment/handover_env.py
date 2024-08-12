@@ -380,7 +380,7 @@ class HandoverEnv(gym.Env, EzPickle):
         combined_reward -= reviever_velocity_diff
 
         return combined_reward
-    
+
     def giver_robot_move_object_and_reciever_end_effector_together_reward(
         self,
         achieved_goal,
