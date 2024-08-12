@@ -352,11 +352,10 @@ class HandoverEnv(gym.Env, EzPickle):
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward += 1
         
-
         # reward positive height of object changes
-        if (achieved_goal["object_move_lift"] > self.object_max_height + 0.001):
-            self.object_max_height = achieved_goal["object_move_lift"]
-            combined_reward += 20
+        if (achieved_goal["object_move_lift"][0] > self.object_max_height + 0.001):
+            self.object_max_height = achieved_goal["object_move_lift"][0]
+            combined_reward += 40
 
         # # if the object has been lifted slightly and is put back down on the table, penalize it
         # elif (self.object_max_height > 0.805 and bad_collisons.count("object_on_giver_table") > 0):
@@ -402,7 +401,7 @@ class HandoverEnv(gym.Env, EzPickle):
         # calculate distance between end effectors of both robots
         distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["panda_reciever_fetch"])
         # provide relative reward based on the distance
-        combined_reward += 25 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
+        combined_reward += 20 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
 
         # if the objects current position is within the handover region
         if distance_giver_to_reciever_end_effectors < object_move_handover_THRESH:
@@ -433,7 +432,7 @@ class HandoverEnv(gym.Env, EzPickle):
         # calculate distance between end effectors of both robots
         distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["panda_reciever_fetch"])
         # provide relative reward based on the distance
-        combined_reward += 35 * (1-np.tanh(distance_giver_to_reciever_end_effectors))    
+        combined_reward += 25 * (1-np.tanh(distance_giver_to_reciever_end_effectors))    
 
         # penalize for the object leaving the handover region
         if distance_giver_to_reciever_end_effectors > object_move_handover_THRESH:
@@ -568,7 +567,7 @@ class HandoverEnv(gym.Env, EzPickle):
         combined_reward -= 10 * bad_collisons.count("robot_collision")
 
         # negative penalty if the object is touching the giver table
-        combined_reward -= 0.25 * bad_collisons.count("object_on_giver_table")
+        combined_reward -= bad_collisons.count("object_on_giver_table")
 
         # penalize changes in velocity to help with smoother movements
         giver_velocity_diff = np.sum(np.abs(giver_current_vel - giver_prev_vel))
