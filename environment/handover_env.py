@@ -302,8 +302,9 @@ class HandoverEnv(gym.Env, EzPickle):
         reviever_velocity_diff,
     ):
 
-        if (achieved_goal["object_move_handover"][2] > self.object_max_height + 0.001):
-            self.object_max_height = achieved_goal["object_move_handover"][2]
+        # reward positive height of object changes
+        if (achieved_goal["object_move_lift"][0] > self.object_max_height + 0.001):
+            self.object_max_height = achieved_goal["object_move_lift"][0]
 
         # calculate distance between giver robot end effector and objects current position
         distance_giver_end_effector_to_object = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["object_move_place"])
@@ -355,7 +356,7 @@ class HandoverEnv(gym.Env, EzPickle):
         # reward positive height of object changes
         if (achieved_goal["object_move_lift"][0] > self.object_max_height + 0.001):
             self.object_max_height = achieved_goal["object_move_lift"][0]
-            combined_reward += 40
+            combined_reward += 30
 
         # # if the object has been lifted slightly and is put back down on the table, penalize it
         # elif (self.object_max_height > 0.805 and bad_collisons.count("object_on_giver_table") > 0):
@@ -432,11 +433,16 @@ class HandoverEnv(gym.Env, EzPickle):
         # calculate distance between end effectors of both robots
         distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_giver_fetch"] - achieved_goal["panda_reciever_fetch"])
         # provide relative reward based on the distance
-        combined_reward += 25 * (1-np.tanh(distance_giver_to_reciever_end_effectors))    
+        combined_reward += 20 * (1-np.tanh(distance_giver_to_reciever_end_effectors))   
+
+         # calculate distance between end effectors of both robots
+        distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_fetch"] - achieved_goal["object_move_handover"])
+        # provide relative reward based on the distance
+        combined_reward += 10 * (1-np.tanh(distance_reciever_end_effector_to_object))   
 
         # penalize for the object leaving the handover region
         if distance_giver_to_reciever_end_effectors > object_move_handover_THRESH:
-            combined_reward -= 10 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
+            combined_reward -= 15 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
         
         # provide constant reward for being in handover zone
         else:
@@ -612,7 +618,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # if the object is too high/low or has been dropped after it has been picked or handed over
         if ((achieved_goal["object_move_lift"] < MIN_OBJECT_HEIGHT or achieved_goal["object_move_lift"] > MAX_OBJECT_HEIGHT) or
-            ("panda_reciever_fetch" not in self.episode_task_completions and self.object_max_height > 0.85 and achieved_goal["object_move_handover"][2] < 1.85 and distance_giver_end_effector_to_object > 0.15) or 
+            ("panda_reciever_fetch" not in self.episode_task_completions and self.object_max_height >= 0.85 and distance_giver_end_effector_to_object > 0.15) or 
             ("panda_reciever_fetch" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15) or
             ("object_move_lift" in self.episode_task_completions and bad_collisons.count("object_on_giver_table") > 0)):
             # finish the episode
@@ -635,7 +641,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_reciever_fetch")
         
             # provide a very negative reward
-            combined_reward -= 10000
+            combined_reward -= 5000
 
         return combined_reward
     
