@@ -1,7 +1,7 @@
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
-model_path = "RR/environment/models/PPO/h"
+model_path = "RR/environment/models/PPO/drop"
 # model_path = "environment/models/PPO/drop"
 
 
