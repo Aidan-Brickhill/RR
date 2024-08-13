@@ -253,9 +253,14 @@ class HandoverEnv(gym.Env, EzPickle):
         self.step_task_completions = (
             []
         )  # Tasks completed in the current environment step
+        # pickup
+        # self.episode_task_completions = (
+        #     []
+        # ) 
+        # handover
         self.episode_task_completions = (
-            []
-        )  # Tasks completed that have been completed in the current episode
+            ["object_move_lift", "panda_giver_grasp"]
+        ) # Tasks completed that have been completed in the current episode
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
         )
@@ -604,17 +609,17 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # giver robot move object to handover region reward
         elif "panda_reciever_to_giver" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.8
+            MIN_OBJECT_HEIGHT_v = 0.85
             combined_reward += self.giver_robot_move_object_and_reciever_end_effector_together_reward(achieved_goal, good_collisons, combined_reward)
 
         # move robot reciever and giver robot wai to handover region reward
         elif "panda_reciever_grasp" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.8
+            MIN_OBJECT_HEIGHT_v = 0.85
             combined_reward += self.robot_object_handover_reward(achieved_goal, good_collisons, combined_reward)
 
         # giver robot retreat to start pos and reciever robot place object reward
         else:
-            MIN_OBJECT_HEIGHT_v = 0.8
+            MIN_OBJECT_HEIGHT_v = 0.7
             combined_reward += self.giver_robot_retreat_reciever_robot_place_object_reward(achieved_goal, desired_goal, good_collisons, combined_reward)                    
 
         # # calculate distance between giver robot end effector and objects current position
@@ -721,7 +726,12 @@ class HandoverEnv(gym.Env, EzPickle):
     def reset(self, *, seed: Optional[int] = None, **kwargs):
         # super().reset(seed=seed, **kwargs)
         self.episode_step = 0
-        self.episode_task_completions.clear()
+        # pcikup
+        # self.episode_task_completions.clear()
+        # handover
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         robot_obs, _ = self.robot_env.reset(seed=seed)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
