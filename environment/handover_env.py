@@ -254,13 +254,14 @@ class HandoverEnv(gym.Env, EzPickle):
             []
         )  # Tasks completed in the current environment step
         # pickup
-        self.episode_task_completions = (
-            []
-        ) 
-        # handover
         # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # ) # Tasks completed that have been completed in the current episode
+        #     []
+        # ) 
+        # handover
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
+        # Tasks completed that have been completed in the current episode
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
         )
@@ -374,6 +375,7 @@ class HandoverEnv(gym.Env, EzPickle):
     def giver_robot_move_object_and_reciever_end_effector_together_reward(
         self,
         achieved_goal,
+        desired_goal,
         good_collisons,
         combined_reward,
     ):
@@ -388,19 +390,30 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 2
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
             combined_reward += 1
-        
-        # calculate distance between end effectors of both robots
-        distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_giver_grasp"] - achieved_goal["panda_reciever_grasp"])
+            
+        # calculate distance between object and desired handover
+        distance_object_to_handover_region = np.linalg.norm(achieved_goal["object_move_handover"] - desired_goal["object_move_handover"])
         # provide relative reward based on the distance
-        combined_reward += 10 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
+        combined_reward += 5 * (1-np.tanh(distance_object_to_handover_region))
 
         # calculate distance between end effectors of reciever and object poositioin
-        distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["object_move_handover"])
+        distance_reciever_end_effector_to_handover_region = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - desired_goal["object_move_handover"])
         # provide relative reward based on the distance
-        combined_reward += 5 * (1-np.tanh(distance_reciever_end_effector_to_object))
+        combined_reward += 5 * (1-np.tanh(distance_reciever_end_effector_to_handover_region))
 
-        # if the objects current position is within the handover region
-        if distance_giver_to_reciever_end_effectors < OBJECT_HANDOVER_REGION_THRESHOLD:
+        robots_in_handover_region = True
+        if distance_object_to_handover_region < OBJECT_HANDOVER_REGION_THRESHOLD:
+            combined_reward += 10
+        else:
+            robots_in_handover_region = False
+        
+        if distance_reciever_end_effector_to_handover_region < OBJECT_HANDOVER_REGION_THRESHOLD:
+            combined_reward += 10
+        else:
+            robots_in_handover_region = False
+
+        # if the  and reciver end effector current position is within the handover region 
+        if robots_in_handover_region:
             # add the task for the objecting being in the handover position completed tasks
             self.episode_task_completions.append("panda_reciever_to_giver")
             combined_reward += 1000
@@ -410,6 +423,7 @@ class HandoverEnv(gym.Env, EzPickle):
     def robot_object_handover_reward(
         self,
         achieved_goal,
+        desired_goal,
         good_collisons,
         combined_reward,
     ):
@@ -426,18 +440,19 @@ class HandoverEnv(gym.Env, EzPickle):
             combined_reward += 1
         
         # calculate distance between end effectors of both robots
-        distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_giver_grasp"] - achieved_goal["panda_reciever_grasp"])
-        # provide relative reward based on the distance
-        combined_reward += 20 * (1-np.tanh(distance_giver_to_reciever_end_effectors))   
-
-        # calculate distance between end effectors of both robots
         distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["object_move_handover"])
         # provide relative reward based on the distance
-        combined_reward += 10 * (1-np.tanh(distance_reciever_end_effector_to_object)) 
+        combined_reward += 20 * (1-np.tanh(distance_reciever_end_effector_to_object)) 
 
+        # calculate distance between end effectors of both robots
+        distance_giver_to_reciever_end_effectors = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["panda_giver_grasp"])
+        # provide relative reward based on the distance
+        combined_reward += 10 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
+
+        distance_object_to_handover_region = np.linalg.norm(achieved_goal["object_move_handover"] - desired_goal["object_move_handover"])
         # penalize for robots moving away from eachother
-        if distance_reciever_end_effector_to_object > OBJECT_HANDOVER_REGION_THRESHOLD:
-            combined_reward -= 5 * (1-np.tanh(distance_giver_to_reciever_end_effectors))
+        if distance_object_to_handover_region > OBJECT_HANDOVER_REGION_THRESHOLD:
+            combined_reward -= 10 * (1-np.tanh(distance_object_to_handover_region))
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
@@ -445,12 +460,12 @@ class HandoverEnv(gym.Env, EzPickle):
             # add the task for the robot fetching the object to completed tasks once the object has been grasped by the reciever robot
             self.episode_task_completions.append("panda_reciever_grasp") 
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 30
+            combined_reward += 50
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 20
+            combined_reward += 40
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
-            combined_reward += 10
+            combined_reward += 20
         
         return combined_reward
 
@@ -610,12 +625,12 @@ class HandoverEnv(gym.Env, EzPickle):
         # giver robot move object to handover region reward
         elif "panda_reciever_to_giver" not in self.episode_task_completions:
             MIN_OBJECT_HEIGHT_v = 0.85
-            combined_reward += self.giver_robot_move_object_and_reciever_end_effector_together_reward(achieved_goal, good_collisons, combined_reward)
+            combined_reward += self.giver_robot_move_object_and_reciever_end_effector_together_reward(achieved_goal, desired_goal, good_collisons, combined_reward)
 
         # move robot reciever and giver robot wai to handover region reward
         elif "panda_reciever_grasp" not in self.episode_task_completions:
             MIN_OBJECT_HEIGHT_v = 0.85
-            combined_reward += self.robot_object_handover_reward(achieved_goal, good_collisons, combined_reward)
+            combined_reward += self.robot_object_handover_reward(achieved_goal, desired_goal, good_collisons, combined_reward)
 
         # giver robot retreat to start pos and reciever robot place object reward
         else:
@@ -726,12 +741,12 @@ class HandoverEnv(gym.Env, EzPickle):
     def reset(self, *, seed: Optional[int] = None, **kwargs):
         # super().reset(seed=seed, **kwargs)
         self.episode_step = 0
-        # pcikup
-        self.episode_task_completions.clear()
+        # pickup
+        # self.episode_task_completions.clear()
         # handover
-        # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # )
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         robot_obs, _ = self.robot_env.reset(seed=seed)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
