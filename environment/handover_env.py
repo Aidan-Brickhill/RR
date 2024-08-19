@@ -254,13 +254,13 @@ class HandoverEnv(gym.Env, EzPickle):
             []
         )  # Tasks completed in the current environment step
         # pickup
-        self.episode_task_completions = (
-            []
-        ) 
-        # handover
         # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # )
+        #     []
+        # ) 
+        # handover
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         # Tasks completed that have been completed in the current episode
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
@@ -456,16 +456,16 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 2000
+            combined_reward += 5000
             # add the task for the robot fetching the object to completed tasks once the object has been grasped by the reciever robot
             self.episode_task_completions.append("panda_reciever_grasp") 
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 50
+            combined_reward += 30
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 40
-        elif good_collisons.count("reciever_robot_finger_object_col") == 1:
             combined_reward += 20
+        elif good_collisons.count("reciever_robot_finger_object_col") == 1:
+            combined_reward += 10
         
         return combined_reward
 
@@ -742,11 +742,11 @@ class HandoverEnv(gym.Env, EzPickle):
         # super().reset(seed=seed, **kwargs)
         self.episode_step = 0
         # pickup
-        self.episode_task_completions.clear()
+        # self.episode_task_completions.clear()
         # handover
-        # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # )
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         robot_obs, _ = self.robot_env.reset(seed=seed)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
