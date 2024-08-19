@@ -10,7 +10,7 @@ env.reset()
 
 model = PPO.load(model_path, env=env)
 
-episodes = 10 
+episodes = 10
 for ep in range(episodes):
     obs, info = env.reset()
     terminated = False

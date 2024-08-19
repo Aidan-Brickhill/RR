@@ -639,8 +639,11 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # # calculate distance between giver robot end effector and objects current position
         # distance_giver_end_effector_to_object = np.linalg.norm(achieved_goal["panda_giver_grasp"] - achieved_goal["object_move_place"])
-        # # calculate distance between reciever robot end effector and objects current position
-        # distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["object_move_place"])
+       
+
+       
+        # calculate distance between reciever robot end effector and objects current position
+        distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["object_move_place"])
 
         end_episode = False
         # if the object is too high/low (fallen of table)
@@ -648,9 +651,15 @@ class HandoverEnv(gym.Env, EzPickle):
             end_episode = True
             combined_reward -= PENALTY_FACTOR * 1000
         
-        # elif ("panda_reciever_grasp" not in self.episode_task_completions and distance_giver_end_effector_to_object > 0.15):
-        #     end_episode = True
-        #     combined_reward -= 250
+        # if the handover is complete and has been dropped on givers tables
+        elif ("panda_reciever_grasp" in self.episode_task_completions and bad_collisons.count("object_on_giver_table") > 0):
+            end_episode = True
+            combined_reward -= PENALTY_FACTOR * 1000
+
+        # if the handover is complete and has been dropped
+        elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.5):
+            end_episode = True
+            combined_reward -= PENALTY_FACTOR * 1000
 
         # elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15):
         #     end_episode = True
