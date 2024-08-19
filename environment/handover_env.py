@@ -479,14 +479,14 @@ class HandoverEnv(gym.Env, EzPickle):
         
         # penalize the giver robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            combined_reward -= 50
+            combined_reward -= 60
         elif good_collisons.count("inside_giver_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_giver_robot_leftfinger_object_col") == 1:
-            combined_reward -= 30
+            combined_reward -= 38
         # penalize the giver robot touching the object with its fingers
         if good_collisons.count("giver_robot_finger_object_col") == 2:
-            combined_reward -= 20
+            combined_reward -= 24
         elif good_collisons.count("giver_robot_finger_object_col") == 1:
-            combined_reward -= 10
+            combined_reward -= 12
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
