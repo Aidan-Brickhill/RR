@@ -254,13 +254,13 @@ class HandoverEnv(gym.Env, EzPickle):
             []
         )  # Tasks completed in the current environment step
         # pickup
-        self.episode_task_completions = (
-            []
-        ) 
-        # handover
         # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # )
+        #     []
+        # ) 
+        # handover
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         # Tasks completed that have been completed in the current episode
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
@@ -746,11 +746,11 @@ class HandoverEnv(gym.Env, EzPickle):
         # super().reset(seed=seed, **kwargs)
         self.episode_step = 0
         # pickup
-        self.episode_task_completions.clear()
+        # self.episode_task_completions.clear()
         # handover
-        # self.episode_task_completions = (
-        #     ["object_move_lift", "panda_giver_grasp"]
-        # )
+        self.episode_task_completions = (
+            ["object_move_lift", "panda_giver_grasp"]
+        )
         robot_obs, _ = self.robot_env.reset(seed=seed)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
