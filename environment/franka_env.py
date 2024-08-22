@@ -223,8 +223,6 @@ class FrankaRobot(MujocoEnv):
                 else:
                     bad_collisons.append("reciever_robot_link_object_col")
                     continue
-
-            col = geom1 + geom2
         
         return (good_collisons, bad_collisons)
 

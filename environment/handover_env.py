@@ -21,8 +21,6 @@ OBS_ELEMENT_INDICES = {
     "panda_reciever_grasp": np.array([30, 31, 32]),
 }
 
-
-
 OBS_ELEMENT_GOALS = {
     "object_move_place": np.array([0.5, -0.3, 0.785]),
     "object_move_handover":  np.array([0, 0, 1.3]),
@@ -38,7 +36,7 @@ OBS_ELEMENT_GOALS = {
 PENALTY_FACTOR = 1
 
 OBJECT_PLACE_THRESHOLD = 0.1
-OBJECT_HANDOVER_REGION_THRESHOLD = 0.2
+OBJECT_HANDOVER_REGION_THRESHOLD = 0.15
 
 MAX_OBJECT_HEIGHT = 1.8
 # MIN_OBJECT_HEIGHT_v = 0.7

@@ -2,7 +2,7 @@ from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
 model_path = "RR/environment/models/PPO/handover"
-model_path = "RR/environment/models/PPO/test"
+model_path = "RR/environment/models/PPO/pickup"
 
 
 env = HandoverEnv(render_mode="human", tasks_to_complete = ["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp","panda_reciever_to_giver","panda_reciever_grasp"], max_episode_steps=400)
