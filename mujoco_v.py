@@ -7,6 +7,8 @@ import mujoco.viewer
 # m = mujoco.MjModel.from_xml_path('franka_emika_panda/panda.xml')
 
 m = mujoco.MjModel.from_xml_path('RR/assets/handover_assets/handover_env_model.xml')
+# m = mujoco.MjModel.from_xml_path('RR/assets/franka_assets/chain.xml')
+
 
 d = mujoco.MjData(m)
 

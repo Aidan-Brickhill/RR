@@ -456,16 +456,16 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 5000
+            combined_reward += 2000
             # add the task for the robot fetching the object to completed tasks once the object has been grasped by the reciever robot
             self.episode_task_completions.append("panda_reciever_grasp") 
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 30
+            combined_reward += 40
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 20
+            combined_reward += 30
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
-            combined_reward += 10
+            combined_reward += 20
         
         return combined_reward
 
@@ -490,14 +490,14 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 50
+            combined_reward += 60
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 30
+            combined_reward += 40
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 20
+            combined_reward += 30
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
-            combined_reward += 10
+            combined_reward += 20
 
         # get the distance between the object and the goal positon (place)
         distance_place_object = np.linalg.norm(achieved_goal["object_move_place"] - desired_goal["object_move_place"])
@@ -636,11 +636,6 @@ class HandoverEnv(gym.Env, EzPickle):
         else:
             MIN_OBJECT_HEIGHT_v = 0.7
             combined_reward += self.giver_robot_retreat_reciever_robot_place_object_reward(achieved_goal, desired_goal, good_collisons, combined_reward)                    
-
-        # # calculate distance between giver robot end effector and objects current position
-        # distance_giver_end_effector_to_object = np.linalg.norm(achieved_goal["panda_giver_grasp"] - achieved_goal["object_move_place"])
-       
-
        
         # calculate distance between reciever robot end effector and objects current position
         distance_reciever_end_effector_to_object = np.linalg.norm(achieved_goal["panda_reciever_grasp"] - achieved_goal["object_move_place"])
