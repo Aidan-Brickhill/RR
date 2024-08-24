@@ -39,7 +39,7 @@ OBJECT_PLACE_THRESHOLD = 0.1
 OBJECT_HANDOVER_REGION_THRESHOLD = 0.15
 
 MAX_OBJECT_HEIGHT = 1.8
-# MIN_OBJECT_HEIGHT_v = 0.7
+MIN_OBJECT_HEIGHT = 0.7
 
 MIN_END_EFFECTOR_HEIGHT = 0.8
 
@@ -458,12 +458,12 @@ class HandoverEnv(gym.Env, EzPickle):
             # add the task for the robot fetching the object to completed tasks once the object has been grasped by the reciever robot
             self.episode_task_completions.append("panda_reciever_grasp") 
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 24
+            combined_reward += 45
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 16
+            combined_reward += 30
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
-            combined_reward += 8
+            combined_reward += 15
         
         return combined_reward
 
@@ -488,14 +488,14 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # reward the reciever robot touching the object with the inside of its fingers (within its grip)
         if good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 and good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 40
+            combined_reward += 80
         elif good_collisons.count("inside_reciever_robot_rightfinger_object_col") == 1 or good_collisons.count("inside_reciever_robot_leftfinger_object_col") == 1:
-            combined_reward += 24
+            combined_reward += 60
         # reward the reciever robot touching the object with its fingers
         if good_collisons.count("reciever_robot_finger_object_col") == 2:
-            combined_reward += 16
+            combined_reward += 40
         elif good_collisons.count("reciever_robot_finger_object_col") == 1:
-            combined_reward += 8
+            combined_reward += 20
 
         # get the distance between the object and the goal positon (place)
         distance_place_object = np.linalg.norm(achieved_goal["object_move_place"] - desired_goal["object_move_place"])
@@ -612,27 +612,22 @@ class HandoverEnv(gym.Env, EzPickle):
 
         # fetch and grasp  reward
         if "panda_giver_grasp" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.7
             combined_reward += self.giver_robot_grasp_object_reward(achieved_goal, desired_goal, good_collisons, combined_reward)
         
          # giver robot move object lift reward
         elif "object_move_lift" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.7
             combined_reward += self.giver_robot_lift_object(achieved_goal, desired_goal, good_collisons, combined_reward)
 
         # giver robot move object to handover region reward
         elif "panda_reciever_to_giver" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.85
             combined_reward += self.giver_robot_move_object_and_reciever_end_effector_together_reward(achieved_goal, desired_goal, good_collisons, combined_reward)
 
         # move robot reciever and giver robot wai to handover region reward
         elif "panda_reciever_grasp" not in self.episode_task_completions:
-            MIN_OBJECT_HEIGHT_v = 0.85
             combined_reward += self.robot_object_handover_reward(achieved_goal, desired_goal, good_collisons, combined_reward)
 
         # giver robot retreat to start pos and reciever robot place object reward
         else:
-            MIN_OBJECT_HEIGHT_v = 0.7
             combined_reward += self.giver_robot_retreat_reciever_robot_place_object_reward(achieved_goal, desired_goal, good_collisons, combined_reward)                    
        
         # calculate distance between reciever robot end effector and objects current position
@@ -640,12 +635,7 @@ class HandoverEnv(gym.Env, EzPickle):
 
         end_episode = False
         # if the object is too high/low (fallen of table)
-        if (achieved_goal["object_move_lift"] < MIN_OBJECT_HEIGHT_v or achieved_goal["object_move_lift"] > MAX_OBJECT_HEIGHT):
-            end_episode = True
-            combined_reward -= PENALTY_FACTOR * 1000
-        
-        # if the handover is complete and has been dropped on givers tables
-        elif ("panda_reciever_grasp" in self.episode_task_completions and bad_collisons.count("object_on_giver_table") > 0):
+        if (achieved_goal["object_move_lift"] < MIN_OBJECT_HEIGHT or achieved_goal["object_move_lift"] > MAX_OBJECT_HEIGHT):
             end_episode = True
             combined_reward -= PENALTY_FACTOR * 1000
 
@@ -653,6 +643,13 @@ class HandoverEnv(gym.Env, EzPickle):
         elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.5):
             end_episode = True
             combined_reward -= PENALTY_FACTOR * 1000
+
+        # if the handover is complete and has been dropped on givers tables
+        elif ("object_move_lift" in self.episode_task_completions and (bad_collisons.count("object_on_giver_table") > 0 or bad_collisons.count("object_on_reciever_table") > 0)):
+            end_episode = True
+            combined_reward -= PENALTY_FACTOR * 500
+
+       
 
         # elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15):
         #     end_episode = True
