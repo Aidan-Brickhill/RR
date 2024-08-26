@@ -1,3 +1,4 @@
+import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
@@ -6,24 +7,41 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.callbacks import BaseCallback
 
+# class CustomWandbCallback(BaseCallback):
+#     def __init__(self, verbose=0):
+#         super().__init__(verbose)
+
+#     def _on_step(self) -> bool:
+#         episode_violations = self.training_env.get_attr("episode_violations")[0]
+#         wandb.log({"number_violations": episode_violations}, step=self.num_timesteps)
+#         return True
 class CustomWandbCallback(BaseCallback):
     def __init__(self, verbose=0):
         super().__init__(verbose)
+        self.episode_violations = []
+        self.current_episode_violations = 0
 
     def _on_step(self) -> bool:
+        # Get the current episode violations
+        current_violations = self.training_env.get_attr("episode_violations")[0]
+        
+        # If the episode has ended (current violations is 0), log the previous episode's violations
+        if current_violations == 0 and self.current_episode_violations > 0:
+            self.episode_violations.append(self.current_episode_violations)
+            self.current_episode_violations = 0
+        else:
+            self.current_episode_violations = current_violations
+
+        # Calculate and log the mean violations
+        if len(self.episode_violations) > 0:
+            mean_violations = np.mean(self.episode_violations)
+            wandb.log({"rollout/ep_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+
         return True
-
-    def _on_rollout_end(self) -> None:
-        # Log the episode violations at the end of each rollout (episode)
-        episode_violations = self.training_env.get_attr("episode_violations")[0]
-        wandb.log({"number_violations": episode_violations}, step=self.num_timesteps)
-        # Reset the episode violations
-        self.training_env.env_method("reset_episode_violations")
-
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 200,
+    "total_timesteps": 20000,
     "env_name": "HandoverEnv",
 }
 
@@ -43,8 +61,8 @@ env = DummyVecEnv([make_env] * 2)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 1000 == 0,
-    video_length=100,
+    record_video_trigger=lambda x: x % 5000 == 0,
+    video_length=300,
 )
 
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
