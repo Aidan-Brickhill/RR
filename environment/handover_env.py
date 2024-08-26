@@ -252,13 +252,13 @@ class HandoverEnv(gym.Env, EzPickle):
             []
         )  # Tasks completed in the current environment step
         # pickup
-        # self.episode_task_completions = (
-        #     []
-        # ) 
-        # handover
         self.episode_task_completions = (
-            ["object_move_lift", "panda_giver_grasp"]
-        )
+            []
+        ) 
+        # handover
+        # self.episode_task_completions = (
+        #     ["object_move_lift", "panda_giver_grasp"]
+        # )
         # Tasks completed that have been completed in the current episode
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
@@ -282,10 +282,7 @@ class HandoverEnv(gym.Env, EzPickle):
         self.prev_step_robot_qpos = np.array(18)
         self.prev_step_robot_qvel = np.array(18)
         self.object_max_height = 0.76
-        self.object_rotated = False
-        self.reciever_grasped = False
-        self.giver_grasped = False
-
+        self.episode_violations = 0
 
         EzPickle.__init__(
             self,
@@ -649,8 +646,6 @@ class HandoverEnv(gym.Env, EzPickle):
             end_episode = True
             combined_reward -= PENALTY_FACTOR * 500
 
-       
-
         # elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.15):
         #     end_episode = True
         #     combined_reward -= 250
@@ -699,6 +694,33 @@ class HandoverEnv(gym.Env, EzPickle):
 
         return observations
 
+    def record_safety_violation(self,collsions):
+        
+        good_collisons = collsions[0]
+        bad_collisons = collsions[1] 
+
+        if ("object_move_lift" in self.episode_task_completions and (bad_collisons.count("object_on_giver_table") > 0 or bad_collisons.count("object_on_reciever_table") > 0)):
+            self.episode_violations += 1
+        
+        # giver robot touching table
+        self.episode_violations += bad_collisons.count("giver_robot_table_collision")
+        self.episode_violations += bad_collisons.count("giver_robot_finger_table_collision")
+
+        # reciever robot touching table
+        self.episode_violations += bad_collisons.count("reciever_robot_table_collision")
+        self.episode_violations += bad_collisons.count("reciever_robot_finger_table_collision")
+
+        # giver robot not using fingers during handover
+        self.episode_violations += bad_collisons.count("giver_robot_hand_object_col")
+        self.episode_violations += bad_collisons.count("giver_robot_link_object_col")
+
+        # reciever robot not using fingers during handover
+        self.episode_violations += bad_collisons.count("reciever_robot_hand_object_col")
+        self.episode_violations += bad_collisons.count("reciever_robot_link_object_col")
+
+        # robots coliding
+        self.episode_violations += bad_collisons.count("robot_collision")
+
     def step(self, action):
         
         robot_obs, _, terminated, truncated, info = self.robot_env.step(action)
@@ -706,6 +728,11 @@ class HandoverEnv(gym.Env, EzPickle):
         collsions = self.robot_env._collsion_detection()
 
         self.episode_step += 1
+
+        self.record_safety_violation(collsions)
+
+        
+        info["episode_violations"] = self.episode_violations
 
         reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, collsions)
 
@@ -741,35 +768,38 @@ class HandoverEnv(gym.Env, EzPickle):
         # super().reset(seed=seed, **kwargs)
         self.episode_step = 0
         # pickup
-        # self.episode_task_completions.clear()
+        self.episode_task_completions.clear()
         # handover
-        self.episode_task_completions = (
-            ["object_move_lift", "panda_giver_grasp"]
-        )
+        # self.episode_task_completions = (
+        #     ["object_move_lift", "panda_giver_grasp"]
+        # )
         robot_obs, _ = self.robot_env.reset(seed=seed)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
         self.prev_step_robot_qvel = np.concatenate((robot_obs[12:21], robot_obs[33:42]))
-        self.reciever_grasped = False
         self.object_max_height = 0.76
-        self.giver_grasped = False
-
 
         obs = self._get_obs(robot_obs)
-
 
         self.tasks_to_complete = set(self.goal.keys())
         info = {
             "tasks_to_complete": list(self.tasks_to_complete),
             "episode_task_completions": [],
             "step_task_completions": [],
+            "episode_violations": self.episode_violations,
         }
 
+        self.episode_violations = 0
+
+
         return obs, info
+    
+    def reset_episode_violations(self):
+        self.episode_violations = 0
 
     def render(self):
         return self.robot_env.render()
 
     def close(self):
-        self.robot_env.close()
+        self.robot_env.close()        
 
