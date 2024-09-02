@@ -48,8 +48,6 @@
             <geom material="metal" name= "giver_table_leg_4" type="box" size="0.025 0.025 0.305" pos="0.565 -0.235 0.305" mass="2000" contype='1' condim='3' conaffinity='1'/>
         </body>
 
-        
-
         <!-- pickup model -->
         <!-- <body name="box" pos="-0.5 0.3 0.785">
             <freejoint name="box"/>
