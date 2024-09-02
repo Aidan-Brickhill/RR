@@ -33,7 +33,7 @@ env = VecVideoRecorder(
 )
 
 # Load the pre-trained model
-model_path = "environment/models/PPO/handoverFurther.zip"  # Adjust this path to your saved model
+model_path = "research/RR/environment/models/PPO/handoverFurther.zip"  # Adjust this path to your saved model
 if os.path.exists(model_path):
     model = PPO.load(model_path, env=env)
     print(f"Loaded pre-trained model from {model_path}")
