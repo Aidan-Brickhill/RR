@@ -1,0 +1,55 @@
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Current SDK version is 0.17.2
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Configure stats pid to 40205
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Loading settings from /home/aidan/.config/wandb/settings
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Loading settings from /home/aidan/00_Ubuntu_Honours/RR/RR/environment/wandb/settings
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Loading settings from environment variables: {}
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Applying setup settings: {'_disable_service': False}
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Inferring run settings from compute environment: {'program_relpath': 'environment/trainwandbExtension.py', 'program_abspath': '/home/aidan/00_Ubuntu_Honours/RR/RR/environment/trainwandbExtension.py', 'program': '/home/aidan/00_Ubuntu_Honours/RR/RR/environment/trainwandbExtension.py'}
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_setup.py:_flush():76] Applying login settings: {}
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_init.py:_log_setup():520] Logging user logs to /home/aidan/00_Ubuntu_Honours/RR/RR/environment/wandb/run-20240902_170343-x5yg3r6o/logs/debug.log
+2024-09-02 17:03:43,398 INFO    MainThread:40205 [wandb_init.py:_log_setup():521] Logging internal logs to /home/aidan/00_Ubuntu_Honours/RR/RR/environment/wandb/run-20240902_170343-x5yg3r6o/logs/debug-internal.log
+2024-09-02 17:03:43,399 INFO    MainThread:40205 [wandb_init.py:init():560] calling init triggers
+2024-09-02 17:03:43,399 INFO    MainThread:40205 [wandb_init.py:init():567] wandb.init called with sweep_config: {}
+config: {'policy_type': 'MlpPolicy', 'total_timesteps': 50100000, 'env_name': 'HandoverEnv'}
+2024-09-02 17:03:43,399 INFO    MainThread:40205 [wandb_init.py:init():610] starting backend
+2024-09-02 17:03:43,399 INFO    MainThread:40205 [wandb_init.py:init():614] setting up manager
+2024-09-02 17:03:43,401 INFO    MainThread:40205 [backend.py:_multiprocessing_setup():105] multiprocessing start_methods=fork,spawn,forkserver, using: spawn
+2024-09-02 17:03:43,405 INFO    MainThread:40205 [wandb_init.py:init():622] backend started and connected
+2024-09-02 17:03:43,411 INFO    MainThread:40205 [wandb_init.py:init():711] updated telemetry
+2024-09-02 17:03:43,427 INFO    MainThread:40205 [wandb_init.py:init():744] communicating run to backend with 90.0 second timeout
+2024-09-02 17:03:44,562 INFO    MainThread:40205 [wandb_run.py:_on_init():2402] communicating current version
+2024-09-02 17:03:45,391 INFO    MainThread:40205 [wandb_run.py:_on_init():2411] got version response upgrade_message: "wandb version 0.17.8 is available!  To upgrade, please run:\n $ pip install wandb --upgrade"
+
+2024-09-02 17:03:45,392 INFO    MainThread:40205 [wandb_init.py:init():795] starting run threads in backend
+2024-09-02 17:03:45,394 WARNING MainThread:40205 [wandb_init.py:init():1175] interrupted
+Traceback (most recent call last):
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 1171, in init
+    return wi.init()
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_init.py", line 800, in init
+    settings=self.settings.to_proto(), run_id=self.settings.run_id
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 1518, in to_proto
+    v = getattr(self, k)
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 1413, in __getattribute__
+    return item.value
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 528, in value
+    _value = h(_value)
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 864, in <lambda>
+    project_url={"hook": lambda _: self._project_url(), "auto_hook": True},
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 1244, in _project_url
+    query = self._get_url_query_string()
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/wandb_settings.py", line 1225, in _get_url_query_string
+    if Api().settings().get("anonymous") != "true":
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/apis/internal.py", line 98, in settings
+    return self.api.settings(*args, **kwargs)
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/apis/internal.py", line 39, in api
+    self._api = InternalApi(*self._api_args, **self._api_kwargs)
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/sdk/internal/internal_api.py", line 220, in __init__
+    self._settings = Settings(
+  File "/home/aidan/.local/lib/python3.10/site-packages/wandb/old/settings.py", line 30, in __init__
+    self._global_settings.read([global_path])
+  File "/usr/lib/python3.10/configparser.py", line 692, in read
+    if isinstance(filenames, (str, bytes, os.PathLike)):
+  File "/usr/lib/python3.10/abc.py", line 119, in __instancecheck__
+    return _abc_instancecheck(cls, instance)
+KeyboardInterrupt
+2024-09-02 17:03:48,968 WARNING MsgRouterThr:40205 [router.py:message_loop():77] message_loop has been closed
