@@ -5,13 +5,12 @@
 #SBATCH --ntasks=8
 #SBATCH --time=72:00:00
 #SBATCH --partition=bigbatch
-export MUJOCO_GL=egl
+# export MUJOCO_GL=egl
+export MUJOCO_GL=osmesa
 
 # Run 8 processes in parallel, each with its own output file
 for i in {1..8}; do
     python3 ../environment/trainwandbExtension.py $i > /home-mscluster/abrickhill/research/RR/cluster/output_$i.txt &
-
-    # python3 ../environment/trainwandbViolation.py > /home-mscluster/abrickhill/research/RR/cluster/output_$i.txt &
 done
 
 wait  # Wait for all background processes to finish
