@@ -787,9 +787,6 @@ class HandoverEnv(gym.Env, EzPickle):
 
 
         return obs, info
-    
-    def reset_episode_violations(self):
-        self.episode_violations = 0
 
     def render(self):
         return self.robot_env.render()
