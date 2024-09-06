@@ -35,7 +35,7 @@ def main(model_no):
     )
 
     # Load the pre-trained model
-    model_path = f"/home-mscluster/abrickhill/research/RR/environment/models/PPO/handoverFurther{model_no}.zip"
+    model_path = f"/home-mscluster/abrickhill/research/RR/environment/models/PPO/pickupFurther{model_no}.zip"
     if os.path.exists(model_path):
         model = PPO.load(model_path, env=env)
         print(f"Loaded pre-trained model from {model_path}")
