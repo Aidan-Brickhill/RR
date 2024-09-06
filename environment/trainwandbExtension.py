@@ -7,6 +7,7 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 import os
 
+
 def main(model_no):
     config = {
         "policy_type": "MlpPolicy",
