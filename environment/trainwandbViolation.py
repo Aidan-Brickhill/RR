@@ -7,15 +7,6 @@ import wandb
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.callbacks import BaseCallback
 
-# class CustomWandbCallback(BaseCallback):
-#     def __init__(self, verbose=0):
-#         super().__init__(verbose)
-
-#     def _on_step(self) -> bool:
-#         episode_violations = self.training_env.get_attr("episode_violations")[0]
-#         wandb.log({"number_violations": episode_violations}, step=self.num_timesteps)
-#         return True
-
 class CustomWandbCallback(BaseCallback):
     def __init__(self, verbose=0):
         super().__init__(verbose)
@@ -42,7 +33,7 @@ class CustomWandbCallback(BaseCallback):
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 20000,
+    "total_timesteps": 50100000,
     "env_name": "HandoverEnv",
 }
 
@@ -55,20 +46,19 @@ run = wandb.init(
 )
 
 def make_env():
-    return Monitor(HandoverEnv(render_mode="rgb_array", tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400))
+    return Monitor(HandoverEnv(render_mode="rgb_array",tasks_to_complete = ["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp","panda_reciever_to_giver","panda_reciever_grasp"], max_episode_steps = 400))
 
-env = DummyVecEnv([make_env] * 2)
+env= DummyVecEnv([make_env] * 4)
 
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    record_video_trigger=lambda x: x % 5000 == 0,
-    video_length=300,
+    record_video_trigger=lambda x: x % 500000 == 0,
+    video_length=600,
 )
 
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
-# Combine the custom callback with WandbCallback
 callbacks = [
     CustomWandbCallback(),
     WandbCallback(

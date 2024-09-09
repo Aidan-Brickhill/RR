@@ -21,6 +21,7 @@ def main(model_no):
         sync_tensorboard=True,
         monitor_gym=True,
         save_code=True,    
+        
     )
 
     def make_env():
