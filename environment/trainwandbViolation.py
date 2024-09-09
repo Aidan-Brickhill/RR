@@ -53,6 +53,7 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
+    # TODO: around -700 reward see timestep and log then! look at image
     record_video_trigger=lambda x: x % 500000 == 0,
     video_length=600,
 )

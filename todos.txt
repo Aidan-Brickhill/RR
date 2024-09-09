@@ -1,5 +1,6 @@
-- use 2 observations space for a asimple task (compare which is better)
-- setup weights and biases
-
-do i use stable baselines? or implement my own PPO - need safe PPO so
-do i have more of a continuous reward function or discrete (multi goal)
+- have been having problems with space and wandb, lots of runs have been crashing, slowed progress alot
+- i have safety violations logging, messed up video recorder, step/timestep problem, should be done by next week (see most recent runs on wandb)
+- found paper on optimal ppo robot arm control - should i use them and compare performance?
+- handover is working again, also experimented with extendied training, see model so far (already started woirking from lowering penalty, threshold point will be interesting)
+- on extended version, didnt retreat and place object, worth putting more time into it to get that to work? handover did work though, potnentialy could work by lowering dropping penalty/even more time
+- pickup is sorted, need to run extended version to see if it translates to handover, see model so far
