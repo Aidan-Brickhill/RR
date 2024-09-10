@@ -248,12 +248,12 @@ class HandoverEnv(gym.Env, EzPickle):
             []
         )  # Tasks completed in the current environment step
         
-        # self.episode_task_completions = (
-        #     [] # pickup
-        # ) # Tasks completed that have been completed in the current episode
         self.episode_task_completions = (
-            ["object_move_lift", "panda_giver_grasp"] # handover
-        )
+            [] # pickup
+        ) # Tasks completed that have been completed in the current episode
+        # self.episode_task_completions = (
+        #     ["object_move_lift", "panda_giver_grasp"] # handover
+        # )
         self.object_noise_ratio = (
             object_noise_ratio  # stochastic noise added to the object observations
         )
@@ -277,6 +277,10 @@ class HandoverEnv(gym.Env, EzPickle):
         self.prev_step_robot_qvel = np.array(18)
         self.object_max_height = 0.76
         self.episode_violations = 0
+        self.robot_to_robot_violations = 0
+        self.robot_to_table_violations = 0
+        self.robot_to_object_violations = 0
+        self.object_dropped_violations = 0
 
         EzPickle.__init__(
             self,
@@ -686,34 +690,44 @@ class HandoverEnv(gym.Env, EzPickle):
         # object being dropped
         if ("object_move_lift" in self.episode_task_completions and (bad_collisons.count("object_on_giver_table") > 0 or bad_collisons.count("object_on_reciever_table") > 0)):
             self.episode_violations += 1
-        
+            self.object_dropped_violations += 0
+
         # Giver robot touching table
         if bad_collisons.count("giver_robot_table_collision") > 0:
             self.episode_violations += 1
+            self.robot_to_table_violations += 1
         if bad_collisons.count("giver_robot_finger_table_collision") > 0:
             self.episode_violations += 1
+            self.robot_to_table_violations += 1
 
         # Receiver robot touching table
         if bad_collisons.count("reciever_robot_table_collision") > 0:
             self.episode_violations += 1
+            self.robot_to_table_violations += 1
         if bad_collisons.count("reciever_robot_finger_table_collision") > 0:
             self.episode_violations += 1
+            self.robot_to_table_violations += 1
 
         # Giver robot not using fingers during handover
         if bad_collisons.count("giver_robot_hand_object_col") > 0:
             self.episode_violations += 1
+            self.robot_to_object_violations += 1
         if bad_collisons.count("giver_robot_link_object_col") > 0:
             self.episode_violations += 1
+            self.robot_to_object_violations += 1
 
         # Receiver robot not using fingers during handover
         if bad_collisons.count("reciever_robot_hand_object_col") > 0:
             self.episode_violations += 1
+            self.robot_to_object_violations += 1
         if bad_collisons.count("reciever_robot_link_object_col") > 0:
             self.episode_violations += 1
+            self.robot_to_object_violations += 1
 
         # Robots colliding
         if bad_collisons.count("robot_collision") > 0:
             self.episode_violations += 1
+            self.robot_to_robot_violations += 1
 
     def step(self, action):
         
@@ -725,8 +739,11 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.record_safety_violation(collsions)
 
-        
         info["episode_violations"] = self.episode_violations
+        info["robot_to_robot_violations"] = self.robot_to_robot_violations
+        info["robot_to_table_violations"] = self.robot_to_table_violations
+        info["robot_to_object_violations"] = self.robot_to_object_violations
+        info["object_dropped_violations"] = self.object_dropped_violations
 
         reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, collsions)
 
@@ -781,10 +798,17 @@ class HandoverEnv(gym.Env, EzPickle):
             "episode_task_completions": [],
             "step_task_completions": [],
             "episode_violations": self.episode_violations,
+            "robot_to_robot_violations": self.robot_to_robot_violations,
+            "robot_to_table_violations": self.robot_to_table_violations,
+            "robot_to_object_violations": self.robot_to_object_violations,
+            "object_dropped_violations": self.object_dropped_violations,
         }
 
         self.episode_violations = 0
-
+        self.robot_to_robot_violations = 0
+        self.robot_to_table_violations = 0
+        self.robot_to_object_violations = 0
+        self.object_dropped_violations = 0
 
         return obs, info
 
