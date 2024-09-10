@@ -627,17 +627,17 @@ class HandoverEnv(gym.Env, EzPickle):
         # if the object is too high/low (fallen of table)
         if (achieved_goal["object_move_lift"] < MIN_OBJECT_HEIGHT or achieved_goal["object_move_lift"] > MAX_OBJECT_HEIGHT):
             end_episode = True
-            combined_reward -= PENALTY_FACTOR * 500
+            combined_reward -= PENALTY_FACTOR * 100
 
         # if the handover is complete and has been dropped
         elif ("panda_reciever_grasp" in self.episode_task_completions and distance_reciever_end_effector_to_object > 0.5):
             end_episode = True
-            combined_reward -= PENALTY_FACTOR * 500
+            combined_reward -= PENALTY_FACTOR * 100
 
         # if the handover is complete and has been dropped on givers tables
         elif ("object_move_lift" in self.episode_task_completions and (bad_collisons.count("object_on_giver_table") > 0 or bad_collisons.count("object_on_reciever_table") > 0)):
             end_episode = True
-            combined_reward -= PENALTY_FACTOR * 500
+            combined_reward -= PENALTY_FACTOR * 100
 
         if (end_episode):
 

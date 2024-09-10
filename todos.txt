@@ -3,7 +3,7 @@
 - i have safety violations logging, messed up video recorder, step/timestep problem, should be done by next week (see most recent runs on wandb)
     - just fix recorder (DONE) and see if i can log type of vioolations (like the seperate constaraints) (DONE)
 - found paper on optimal ppo robot arm control - should i use them and compare performance?
-    - yes, lets see how much better it performs (TODO)
+    - yes, lets see how much better it performs (DONE)
 - handover is working again, also experimented with extendied training, see model so far (already started woirking from lowering penalty, threshold point will be interesting)
 - on extended version, didnt retreat and place object, worth putting more time into it to get that to work? handover did work though, potnentialy could work by lowering dropping penalty/even more time
     - give it a day or two, see if it works (TODO)

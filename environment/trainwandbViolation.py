@@ -149,26 +149,25 @@ env= DummyVecEnv([make_env] * 4)
 env = VecVideoRecorder(
     env,
     f"videos/{run.id}",
-    # TODO: around -700 reward see timestep and log then! look at image
     record_video_trigger=lambda x: x % 500000 == 0,
     video_length=600,
 )
 
 # rovbot arm contorl hyperparamters https://arxiv.org/html/2407.02503v1
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", 
-            learning_rate=0.0153,
-            n_steps=559,
-            batch_size=193,
-            gamma=0.9657,
-            ent_coef=0.0548,
-            vf_coef=0.3999,
-            max_grad_norm=9.4229,
-            gae_lambda=0.8543,
-            clip_range=0.2865,
-        )
+# model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", 
+#             learning_rate=0.0153,
+#             n_steps=559,
+#             batch_size=193,
+#             gamma=0.9657,
+#             ent_coef=0.0548,
+#             vf_coef=0.3999,
+#             max_grad_norm=9.4229,
+#             gae_lambda=0.8543,
+#             clip_range=0.2865,
+#             )
 
 # default
-# model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
 callbacks = [
     EpisodeViolationsCallBack(),
