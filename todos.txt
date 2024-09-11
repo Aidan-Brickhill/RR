@@ -9,3 +9,6 @@
     - give it a day or two, see if it works (TODO)
 - pickup is sorted, need to run extended version to see if it translates to handover, see model so far
     - just do above (TODO)
+
+
+TODO - try run new reward 14 on normal with no violations for both, and run 13 on pickup, then run pickup furhter, then do above
