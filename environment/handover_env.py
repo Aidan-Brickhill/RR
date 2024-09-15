@@ -659,7 +659,7 @@ class HandoverEnv(gym.Env, EzPickle):
                 self.episode_task_completions.append("panda_reciever_grasp")
 
         return combined_reward
-    
+
     def _get_obs(self, robot_obs):
         obj_qpos = self.data.qpos[18:].copy()
         obj_qvel = self.data.qvel[18:].copy()
@@ -684,13 +684,13 @@ class HandoverEnv(gym.Env, EzPickle):
         return observations
 
     def record_safety_violation(self,collsions):
-        
-        bad_collisons = collsions[1] 
 
-        # object being dropped
+        bad_collisons = collsions[1]
+    
+        # Object being dropped
         if ("object_move_lift" in self.episode_task_completions and (bad_collisons.count("object_on_giver_table") > 0 or bad_collisons.count("object_on_reciever_table") > 0)):
             self.episode_violations += 1
-            self.object_dropped_violations += 0
+            self.object_dropped_violations += 1
 
         # Giver robot touching table
         if bad_collisons.count("giver_robot_table_collision") > 0:
@@ -816,5 +816,4 @@ class HandoverEnv(gym.Env, EzPickle):
         return self.robot_env.render()
 
     def close(self):
-        self.robot_env.close()        
-
+        self.robot_env.close()

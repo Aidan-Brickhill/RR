@@ -31,7 +31,19 @@ env = VecVideoRecorder(
     video_length=600,
 )
 
-model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
+# rovbot arm contorl hyperparamters https://arxiv.org/html/2407.02503v1
+model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", 
+            n_steps=559,
+            batch_size=193,
+            gamma=0.9657,
+            ent_coef=0.0548,
+            vf_coef=0.3999,
+            max_grad_norm=9.4229,
+            gae_lambda=0.8543,
+            clip_range=0.2865,
+            )
+
+# model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 model.learn(
     total_timesteps=config["total_timesteps"],
     callback=WandbCallback(
