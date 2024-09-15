@@ -1,4 +1,4 @@
-#!/bin/bash -xv
+#!/bin/bash
 #SBATCH --job-name=rl_train
 #SBATCH --output=/home-mscluster/abrickhill/research/RR/cluster/result.txt
 #SBATCH --error=/home-mscluster/abrickhill/research/RR/cluster/error.txt
