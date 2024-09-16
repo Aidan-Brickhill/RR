@@ -3,7 +3,7 @@
 #SBATCH --output=/home-mscluster/abrickhill/research/RR/cluster/result_%N_%j.txt
 #SBATCH --error=/home-mscluster/abrickhill/research/RR/cluster/error_%N_%j.txt
 #SBATCH --ntasks=10
-#SBATCH --exclude=mscluster[8,9,35,42,44,54,57,59,61,62,65,68,75,76]
+#SBATCH --exclude=mscluster[8,9,35,42,44,54,57,59,61,62,65,68,75,76,77]
 #SBATCH --time=72:00:00
 #SBATCH --partition=bigbatch
 export MUJOCO_GL="egl"
