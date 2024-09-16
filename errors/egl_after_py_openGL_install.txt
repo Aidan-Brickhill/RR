@@ -3606,7 +3606,8 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
   File "/home-mscluster/abrickhill/anaconda3/envs/handover_env/lib/python3.10/site-packages/mujoco/egl/__init__.py", line 67, in <module>
     raise ImportError(
-ImportError: Cannot initialize a EGL device display. This likely means that your EGL driver does not support the PLATFORM_DEVICE extension, which is required for creating a headless rendering context.
+ImportError: Cannot initialize a EGL device display. This likely means that your EGL driver does not support the PLATFORM_DEVICE extension, 
+which is required for creating a headless rendering context.
 
 During handling of the above exception, another exception occurred:
 
@@ -3690,7 +3691,8 @@ Traceback (most recent call last):
   File "<frozen importlib._bootstrap>", line 241, in _call_with_frames_removed
   File "/home-mscluster/abrickhill/anaconda3/envs/handover_env/lib/python3.10/site-packages/gymnasium_robotics/utils/mujoco_utils.py", line 10, in <module>
     raise error.DependencyNotInstalled(f"{e}. (HINT: you need to install mujoco")
-gymnasium.error.DependencyNotInstalled: Cannot initialize a EGL device display. This likely means that your EGL driver does not support the PLATFORM_DEVICE extension, which is required for creating a headless rendering context.. (HINT: you need to install mujoco
+gymnasium.error.DependencyNotInstalled: Cannot initialize a EGL device display. This likely means that your EGL driver
+ does not support the PLATFORM_DEVICE extension, which is required for creating a headless rendering context.. (HINT: you need to install mujoco
 # clear builtins._
 # clear sys.path
 # clear sys.argv
