@@ -146,7 +146,8 @@ config = {
 run = wandb.init(
     project="Safe_Robot_Handover",
     config=config,
-    sync_tensorboard=False,
+    sync_tensorboard=True,
+    # sync_tensorboard=False,
     monitor_gym=True,
     save_code=True,    
 )
