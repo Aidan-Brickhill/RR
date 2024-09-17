@@ -15,8 +15,8 @@ class EpisodeViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.unwrapped.episode_violations
-        # current_violations = self.training_env.get_attr("episode_violations")[0]
+        # current_violations = self.training_env.unwrapped.episode_violations
+        current_violations = self.training_env.get_attr("episode_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_episode_violations > 0:
@@ -41,8 +41,8 @@ class RobotToRobotViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.unwrapped.robot_to_robot_violations
-        # current_violations = self.training_env.get_attr("robot_to_robot_violations")[0]
+        # current_violations = self.training_env.unwrapped.robot_to_robot_violations
+        current_violations = self.training_env.get_attr("robot_to_robot_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_robot_violations > 0:
@@ -67,8 +67,8 @@ class RobotToTableViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.unwrapped.robot_to_table_violations
-        # current_violations = self.training_env.get_attr("robot_to_table_violations")[0]
+        # current_violations = self.training_env.unwrapped.robot_to_table_violations
+        current_violations = self.training_env.get_attr("robot_to_table_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_table_violations > 0:
@@ -93,8 +93,8 @@ class RobotToObjectViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.unwrapped.robot_to_object_violations
-        # current_violations = self.training_env.get_attr("robot_to_object_violations")[0]
+        # current_violations = self.training_env.unwrapped.robot_to_object_violations
+        current_violations = self.training_env.get_attr("robot_to_object_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_object_violations > 0:
@@ -119,8 +119,8 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.unwrapped.object_dropped_violations
-        # current_violations = self.training_env.get_attr("object_dropped_violations")[0]
+        # current_violations = self.training_env.unwrapped.object_dropped_violations
+        current_violations = self.training_env.get_attr("object_dropped_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_object_dropped_violations > 0:
