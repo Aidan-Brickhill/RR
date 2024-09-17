@@ -15,7 +15,8 @@ class EpisodeViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.get_attr("episode_violations")[0]
+        current_violations = self.training_env.unwrapped.episode_violations
+        # current_violations = self.training_env.get_attr("episode_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_episode_violations > 0:
@@ -27,7 +28,8 @@ class EpisodeViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.episode_violations) > 0:
             mean_violations = np.mean(self.episode_violations)
-            wandb.log({"rollout/ep_all_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            wandb.log({"global_step": self.num_timesteps, "rollout/ep_all_safety_violation_mean": mean_violations})
+            # wandb.log({"rollout/ep_all_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -39,7 +41,8 @@ class RobotToRobotViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.get_attr("robot_to_robot_violations")[0]
+        current_violations = self.training_env.unwrapped.robot_to_robot_violations
+        # current_violations = self.training_env.get_attr("robot_to_robot_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_robot_violations > 0:
@@ -51,7 +54,8 @@ class RobotToRobotViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_robot_violations) > 0:
             mean_violations = np.mean(self.robot_to_robot_violations)
-            wandb.log({"rollout/ep_robot_to_robot_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_robot_safety_violation_mean": mean_violations})
+            # wandb.log({"rollout/ep_robot_to_robot_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -63,7 +67,8 @@ class RobotToTableViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.get_attr("robot_to_table_violations")[0]
+        current_violations = self.training_env.unwrapped.robot_to_table_violations
+        # current_violations = self.training_env.get_attr("robot_to_table_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_table_violations > 0:
@@ -75,7 +80,8 @@ class RobotToTableViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_table_violations) > 0:
             mean_violations = np.mean(self.robot_to_table_violations)
-            wandb.log({"rollout/ep_robot_to_table_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_table_safety_violation_mean": mean_violations})
+            # wandb.log({"rollout/ep_robot_to_table_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -87,7 +93,8 @@ class RobotToObjectViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.get_attr("robot_to_object_violations")[0]
+        current_violations = self.training_env.unwrapped.robot_to_object_violations
+        # current_violations = self.training_env.get_attr("robot_to_object_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_robot_to_object_violations > 0:
@@ -99,7 +106,8 @@ class RobotToObjectViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_object_violations) > 0:
             mean_violations = np.mean(self.robot_to_object_violations)
-            wandb.log({"rollout/ep_robot_to_object_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_object_violation_mean": mean_violations})
+            # wandb.log({"rollout/ep_robot_to_object_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
 
@@ -111,7 +119,8 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
 
     def _on_step(self) -> bool:
         # Get the current episode violations
-        current_violations = self.training_env.get_attr("object_dropped_violations")[0]
+        current_violations = self.training_env.unwrapped.object_dropped_violations
+        # current_violations = self.training_env.get_attr("object_dropped_violations")[0]
         
         # If the episode has ended (current violations is 0), log the previous episode's violations
         if current_violations == 0 and self.current_object_dropped_violations > 0:
@@ -123,7 +132,8 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.object_dropped_violations) > 0:
             mean_violations = np.mean(self.object_dropped_violations)
-            wandb.log({"rollout/ep_robot_to_object_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            wandb.log({"global_step": self.num_timesteps, "rollout/ep_object_dropped_safety_violation_mean": mean_violations})
+            # wandb.log({"rollout/ep_object_dropped_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
 
@@ -136,7 +146,7 @@ config = {
 run = wandb.init(
     project="Safe_Robot_Handover",
     config=config,
-    sync_tensorboard=True,
+    sync_tensorboard=False,
     monitor_gym=True,
     save_code=True,    
 )
