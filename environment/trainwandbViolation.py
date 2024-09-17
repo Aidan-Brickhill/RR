@@ -28,8 +28,8 @@ class EpisodeViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.episode_violations) > 0:
             mean_violations = np.mean(self.episode_violations)
-            wandb.log({"global_step": self.num_timesteps, "rollout/ep_all_safety_violation_mean": mean_violations})
-            # wandb.log({"rollout/ep_all_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            # wandb.log({"global_step": self.num_timesteps, "rollout/ep_all_safety_violation_mean": mean_violations})
+            wandb.log({"rollout/ep_all_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -54,8 +54,8 @@ class RobotToRobotViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_robot_violations) > 0:
             mean_violations = np.mean(self.robot_to_robot_violations)
-            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_robot_safety_violation_mean": mean_violations})
-            # wandb.log({"rollout/ep_robot_to_robot_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            # wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_robot_safety_violation_mean": mean_violations})
+            wandb.log({"rollout/ep_robot_to_robot_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -80,8 +80,8 @@ class RobotToTableViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_table_violations) > 0:
             mean_violations = np.mean(self.robot_to_table_violations)
-            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_table_safety_violation_mean": mean_violations})
-            # wandb.log({"rollout/ep_robot_to_table_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            # wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_table_safety_violation_mean": mean_violations})
+            wandb.log({"rollout/ep_robot_to_table_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
     
@@ -106,8 +106,8 @@ class RobotToObjectViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.robot_to_object_violations) > 0:
             mean_violations = np.mean(self.robot_to_object_violations)
-            wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_object_violation_mean": mean_violations})
-            # wandb.log({"rollout/ep_robot_to_object_violation_mean": mean_violations}, step=self.num_timesteps)
+            # wandb.log({"global_step": self.num_timesteps, "rollout/ep_robot_to_object_violation_mean": mean_violations})
+            wandb.log({"rollout/ep_robot_to_object_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
 
@@ -132,8 +132,8 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
         # Calculate and log the mean violations
         if len(self.object_dropped_violations) > 0:
             mean_violations = np.mean(self.object_dropped_violations)
-            wandb.log({"global_step": self.num_timesteps, "rollout/ep_object_dropped_safety_violation_mean": mean_violations})
-            # wandb.log({"rollout/ep_object_dropped_safety_violation_mean": mean_violations}, step=self.num_timesteps)
+            # wandb.log({"global_step": self.num_timesteps, "rollout/ep_object_dropped_safety_violation_mean": mean_violations})
+            wandb.log({"rollout/ep_object_dropped_safety_violation_mean": mean_violations}, step=self.num_timesteps)
 
         return True
 
