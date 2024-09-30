@@ -155,11 +155,9 @@ class WandbModelSaver(BaseCallback):
             path = os.path.join(self.save_path, f"{model_name}.zip")
             self.model.save(path)
             
-            # Create a wandb Artifact
+            # Create and log a wandb Artifact
             artifact = wandb.Artifact(name=model_name, type="model")
             artifact.add_file(path)
-            
-            # Log the artifact
             wandb.log_artifact(artifact)
             
             if self.verbose > 0:
