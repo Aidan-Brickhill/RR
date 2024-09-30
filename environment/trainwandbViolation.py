@@ -151,10 +151,17 @@ class WandbModelSaver(BaseCallback):
 
     def _on_step(self) -> bool:
         if self.n_calls % self.save_freq == 0:
-            path = os.path.join(self.save_path, f"model_{self.n_calls}_steps.zip")
+            model_name = f"model_{self.n_calls}_steps"
+            path = os.path.join(self.save_path, f"{model_name}.zip")
             self.model.save(path)
-            wandb.save(path)  # This will upload the file to wandb
-            wandb.log({"model_checkpoint": wandb.Artifact(f"model_{self.n_calls}_steps", type="model")})
+            
+            # Create a wandb Artifact
+            artifact = wandb.Artifact(name=model_name, type="model")
+            artifact.add_file(path)
+            
+            # Log the artifact
+            wandb.log_artifact(artifact)
+            
             if self.verbose > 0:
                 print(f"Saving model checkpoint to {path}")
         return True
@@ -203,13 +210,16 @@ env = VecVideoRecorder(
 # default
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
+# Calculate the frequency to save the model (e.g., 5 times during training)
 save_freq = math.ceil(config["total_timesteps"] / 5)
 
+# Create an instance of the custom callback
 wandb_saver = WandbModelSaver(
     save_freq=save_freq,
     save_path=f"models/{run.name}",
     verbose=1
 )
+
 
 callbacks = [
     EpisodeViolationsCallBack(),
