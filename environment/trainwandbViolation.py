@@ -154,7 +154,6 @@ class WandbModelSaver(BaseCallback):
             path = os.path.join(self.save_path, f"model_{self.n_calls}_steps.zip")
             self.model.save(path)
             wandb.save(path)  # This will upload the file to wandb
-            wandb.log({"model_checkpoint": wandb.Artifact(f"model_{self.n_calls}_steps", type="model")})
             if self.verbose > 0:
                 print(f"Saving model checkpoint to {path}")
         return True
