@@ -10,7 +10,7 @@ penalty_factors = [0,2]
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 2
+episodes_per_model = 100
 
 # Set the number of models 
 number_of_models = 3

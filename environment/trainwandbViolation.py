@@ -1,10 +1,11 @@
+import wandb
 import math
+import os
 import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 from stable_baselines3.common.vec_env import DummyVecEnv, VecVideoRecorder
 from stable_baselines3.common.monitor import Monitor
-import wandb
 from wandb.integration.sb3 import WandbCallback
 from stable_baselines3.common.callbacks import BaseCallback
 
@@ -138,6 +139,26 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
 
         return True
 
+class WandbModelSaver(BaseCallback):
+    def __init__(self, save_freq, save_path, verbose=0):
+        super().__init__(verbose)
+        self.save_freq = save_freq
+        self.save_path = save_path
+
+    def _init_callback(self) -> None:
+        if self.save_path is not None:
+            os.makedirs(self.save_path, exist_ok=True)
+
+    def _on_step(self) -> bool:
+        if self.n_calls % self.save_freq == 0:
+            path = os.path.join(self.save_path, f"model_{self.n_calls}_steps.zip")
+            self.model.save(path)
+            wandb.save(path)  # This will upload the file to wandb
+            wandb.log({"model_checkpoint": wandb.Artifact(f"model_{self.n_calls}_steps", type="model")})
+            if self.verbose > 0:
+                print(f"Saving model checkpoint to {path}")
+        return True
+
 config = {
     "policy_type": "MlpPolicy",
     # "total_timesteps": 50100000,
@@ -182,7 +203,13 @@ env = VecVideoRecorder(
 # default
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
-model_save_freq = math.ceil(config["total_timesteps"] / 5)
+save_freq = math.ceil(config["total_timesteps"] / 5)
+
+wandb_saver = WandbModelSaver(
+    save_freq=save_freq,
+    save_path=f"models/{run.name}",
+    verbose=1
+)
 
 callbacks = [
     EpisodeViolationsCallBack(),
@@ -190,10 +217,9 @@ callbacks = [
     RobotToTableViolationsCallBack(),
     RobotToObjectViolationsCallBack(),
     ObjectDroppedViolationsCallBack(),
+    wandb_saver,
     WandbCallback(
         gradient_save_freq=100,
-        model_save_freq=model_save_freq,
-        model_save_path=f"models/{run.name}",
         verbose=2,
     )
 ]
