@@ -1,3 +1,4 @@
+import math
 import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
@@ -139,7 +140,7 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 50100000,
+    "total_timesteps": 5100000,
     "env_name": "HandoverEnv",
 }
 
@@ -180,6 +181,8 @@ env = VecVideoRecorder(
 # default
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
+model_save_freq = math.ceil(config["total_timesteps"] / 5)
+
 callbacks = [
     EpisodeViolationsCallBack(),
     RobotToRobotViolationsCallBack(),
@@ -188,7 +191,8 @@ callbacks = [
     ObjectDroppedViolationsCallBack(),
     WandbCallback(
         gradient_save_freq=100,
-        model_save_path=f"models/{run.id}",
+        model_save_freq=model_save_freq,
+        model_save_path=f"models/{run.name}",
         verbose=2,
     )
 ]

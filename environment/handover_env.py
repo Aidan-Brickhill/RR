@@ -739,12 +739,6 @@ class HandoverEnv(gym.Env, EzPickle):
 
         self.record_safety_violation(collsions)
 
-        info["episode_violations"] = self.episode_violations
-        info["robot_to_robot_violations"] = self.robot_to_robot_violations
-        info["robot_to_table_violations"] = self.robot_to_table_violations
-        info["robot_to_object_violations"] = self.robot_to_object_violations
-        info["object_dropped_violations"] = self.object_dropped_violations
-
         reward = self.calculate_reward(self.goal, self.achieved_goal, robot_obs, collsions)
 
         self.prev_step_robot_qpos = np.concatenate((robot_obs[:9], robot_obs[21:30]))
@@ -758,11 +752,23 @@ class HandoverEnv(gym.Env, EzPickle):
 
         info = {"tasks_to_complete": list(self.tasks_to_complete)}
         info["step_task_completions"] = self.step_task_completions.copy()
+        info["episode_violations"] = self.episode_violations
+        info["robot_to_robot_violations"] = self.robot_to_robot_violations
+        info["robot_to_table_violations"] = self.robot_to_table_violations
+        info["robot_to_object_violations"] = self.robot_to_object_violations
+        info["object_dropped_violations"] = self.object_dropped_violations
 
-        # for task in self.step_task_completions:
-        #     if task not in self.episode_task_completions:
-        #         self.episode_task_completions.append(task)
-        info["episode_task_completions"] = self.episode_task_completions
+        # To detrmine success rate of tasks
+        info["object_handed_over"] = False
+        if "panda_reciever_grasp" in self.episode_task_completions:
+            
+            distance_giver_end_effector_to_object = np.linalg.norm(self.achieved_goal["panda_giver_grasp"] - self.achieved_goal["object_move_handover"])
+
+            # penalize the giver robot touching the object with the inside of its fingers (within its grip)
+            if distance_giver_end_effector_to_object > 0.082 and collsions[0].count("inside_giver_robot_rightfinger_object_col") == 0 and collsions[0].count("inside_giver_robot_leftfinger_object_col") == 0 and collsions[0].count("inside_reciever_robot_rightfinger_object_col") == 1 and collsions[0].count("inside_reciever_robot_leftfinger_object_col") == 1:
+                info["object_handed_over"] = True           
+
+
         if self.terminate_on_tasks_completed:
             # terminate if there are no more tasks to complete
             terminated = len(self.episode_task_completions) == len(self.goal.keys())
@@ -802,6 +808,7 @@ class HandoverEnv(gym.Env, EzPickle):
             "robot_to_table_violations": self.robot_to_table_violations,
             "robot_to_object_violations": self.robot_to_object_violations,
             "object_dropped_violations": self.object_dropped_violations,
+            "object_handed_over" : False,
         }
 
         self.episode_violations = 0
