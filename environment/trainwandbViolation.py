@@ -140,7 +140,8 @@ class ObjectDroppedViolationsCallBack(BaseCallback):
 
 config = {
     "policy_type": "MlpPolicy",
-    "total_timesteps": 5100000,
+    # "total_timesteps": 50100000,
+    "total_timesteps": 100000,
     "env_name": "HandoverEnv",
 }
 
