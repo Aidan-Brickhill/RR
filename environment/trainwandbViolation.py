@@ -161,7 +161,7 @@ class WandbModelSaver(BaseCallback):
 config = {
     "policy_type": "MlpPolicy",
     # "total_timesteps": 50100000,
-    "total_timesteps": 100000,
+    "total_timesteps": 10000,
     "env_name": "HandoverEnv",
 }
 
