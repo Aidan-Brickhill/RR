@@ -150,8 +150,8 @@ class WandbModelSaver(BaseCallback):
             os.makedirs(self.save_path, exist_ok=True)
 
     def _on_step(self) -> bool:
-        if self.n_calls % self.save_freq == 0:
-            path = os.path.join(self.save_path, f"model_{self.n_calls}_steps.zip")
+        if self.num_timesteps % self.save_freq == 0:
+            path = os.path.join(self.save_path, f"model_{self.num_timesteps}_steps.zip")
             self.model.save(path)
             wandb.save(path)  # This will upload the file to wandb
             if self.verbose > 0:

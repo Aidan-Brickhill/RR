@@ -10,7 +10,7 @@ penalty_factors = [0,2]
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 100
+episodes_per_model = 10
 
 # Set the number of models 
 number_of_models = 3
@@ -71,7 +71,7 @@ for penalty_factor in  penalty_factors:
         model_number += 1
 
         # Increment the penalty factor success rate
-        penalty_factor_success_rate += model_success_rate
+        penalty_factor_success_rate += model_success_rate/episodes_per_model
 
     penalty_factors_success_rate.append(penalty_factor_success_rate/number_of_models*100)
 
