@@ -150,7 +150,7 @@ class WandbModelSaver(BaseCallback):
             os.makedirs(self.save_path, exist_ok=True)
 
     def _on_step(self) -> bool:
-        if self.num_timesteps % self.save_freq == 0:
+        if self.num_timesteps % self.save_freq == 0 or self.num_timesteps == 0:
             path = os.path.join(self.save_path, f"model_{self.num_timesteps}_steps.zip")
             self.model.save(path)
             wandb.save(path)  # This will upload the file to wandb
@@ -185,20 +185,7 @@ env = VecVideoRecorder(
     video_length=600,
 )
 
-# rovbot arm contorl hyperparamters https://arxiv.org/html/2407.02503v1
-# model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}", 
-#             learning_rate=0.0153,
-#             n_steps=559,
-#             batch_size=193,
-#             gamma=0.9657,
-#             ent_coef=0.0548,
-#             vf_coef=0.3999,
-#             max_grad_norm=9.4229,
-#             gae_lambda=0.8543,
-#             clip_range=0.2865,
-#             )
 
-# default
 model = PPO(config["policy_type"], env, verbose=1, tensorboard_log=f"runs/{run.id}")
 
 save_freq = math.ceil(config["total_timesteps"] / 5)
