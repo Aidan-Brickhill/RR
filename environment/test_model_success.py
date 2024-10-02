@@ -3,6 +3,11 @@ import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
+
+# 2 0s
+# 2 0.5s
+# 1 0.25
+
 # Set the penalty factors
 penalty_factors = [0,2]
 
