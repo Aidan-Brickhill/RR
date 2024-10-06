@@ -3,22 +3,17 @@ import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
-
-# 2 0s
-# 2 0.5s
-# 1 0.25
-
 # Set the penalty factors
-penalty_factors = [0,2]
-
+penalty_factors = ["1","2","5","10"]
+# [5.75, 23.0, 1.25, 7.5]
 # Set the penalty factor success rate
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 10
+episodes_per_model = 40
 
 # Set the number of models 
-number_of_models = 3
+number_of_models = 10
 
 # Set the environemnt
 env = HandoverEnv(tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400)
@@ -30,7 +25,7 @@ for penalty_factor in  penalty_factors:
     penalty_factor_success_rate = 0
 
     # Set the penalty factor path
-    model_paths = f"RR/environment/models/PPO_Final/PF_{penalty_factor}/model_"
+    model_paths = f"environment/models/PPO_Final/PF_{penalty_factor}/model_"
     print(f"Running Penality Factor {penalty_factor} ==========================")
 
     # Set the model number

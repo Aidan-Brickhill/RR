@@ -32,6 +32,8 @@ OBS_ELEMENT_GOALS = {
     "panda_giver_retreat": np.array([-0.65, -0.15, 1.87]),
 } 
 
+# TODO: order of 0.5 20, then 0 20, then 0.25 10
+
 PENALTY_FACTOR = 0.25
 
 OBJECT_PLACE_THRESHOLD = 0.1
