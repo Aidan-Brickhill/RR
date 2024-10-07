@@ -10,7 +10,7 @@ export MUJOCO_GL="egl"
 
 # Run 8 processes in parallel, each with its own output and error file
 for i in {1..10}; do
-    python3 ../environment/trainwandbViolation.py > /home-mscluster/abrickhill/research/RR/cluster/output_0_$i.txt 2> /home-mscluster/abrickhill/research/RR/cluster/error_0_$i.txt &
+    python3 ../environment/trainwandbViolation.py > /home-mscluster/abrickhill/research/RR/cluster/output_0.2_$i.txt 2> /home-mscluster/abrickhill/research/RR/cluster/error_0.2_$i.txt &
     # python3 ../environment/trainwandb.py > /home-mscluster/abrickhill/research/RR/cluster/output_parr_$i.txt 2> /home-mscluster/abrickhill/research/RR/cluster/error_parr_$i.txt &
 done
 
