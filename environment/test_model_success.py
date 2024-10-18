@@ -4,13 +4,13 @@ from stable_baselines3 import PPO
 from handover_env import HandoverEnv
 
 # Set the penalty factors
-penalty_factors = ["1","2","5","10"]
+penalty_factors = ["0","1","2","5","10"]
 # [5.75, 23.0, 1.25, 7.5]
 # Set the penalty factor success rate
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 40
+episodes_per_model = 50
 
 # Set the number of models 
 number_of_models = 10
@@ -18,24 +18,29 @@ number_of_models = 10
 # Set the environemnt
 env = HandoverEnv(tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400)
 
+# List to store success rates for each penalty factor
+penalty_factors_success_rates_violations = {}
+
 # For each penalty factor
-for penalty_factor in  penalty_factors:
-    
-    # Set the penalty factor success rate
-    penalty_factor_success_rate = 0
+for penalty_factor in penalty_factors:
+    # Initialize a list to store success rates for this penalty factor
+    success_rates = []
+    violations = []
+
 
     # Set the penalty factor path
     model_paths = f"environment/models/PPO_Final/PF_{penalty_factor}/model_"
-    print(f"Running Penality Factor {penalty_factor} ==========================")
+    print(f"Running Penalty Factor {penalty_factor} ==========================")
 
     # Set the model number
     model_number = 0
 
-    # For 10 models TODO: change to 10 once we have 10
+    # For number_of_models
     while model_number < number_of_models:
         
         # Set the model success rate
         model_success_rate = 0
+        model_violations = 0
 
         # Set the model path using the penalty factor path
         model_path = f"{model_paths}{model_number}"
@@ -57,34 +62,80 @@ for penalty_factor in  penalty_factors:
             obs, info = env.reset()
             terminated = False
 
-            # Continue until until the episode has completed
+            # Continue until the episode has completed
             while not terminated:
                 action, _states = model.predict(obs)
                 obs, reward, terminated, truncated, info = env.step(action)
 
-                # If the handover has occured, add it as a succesful run
+                # If the handover has occurred, add it as a successful run
                 if info['object_handed_over']:
                     model_success_rate += 1
                     break
 
+            model_violations += info['episode_violations']
+
         # Move to the next model
         model_number += 1
 
-        # Increment the penalty factor success rate
-        penalty_factor_success_rate += model_success_rate/episodes_per_model
+        # Store the success rate for this model
+        success_rates.append(model_success_rate / episodes_per_model * 100)
+        violations.append(model_violations / episodes_per_model)
 
-    penalty_factors_success_rate.append(penalty_factor_success_rate/number_of_models*100)
+    # Calculate the mean and standard deviation for this penalty factor
+    mean_success_rate = np.mean(success_rates)
+    std_dev_success_rate = np.std(success_rates)
+    mean_violations= np.mean(violations)
+    std_dev_violations = np.std(violations)
 
-    env.close()
+    # Store the results for the penalty factor
+    penalty_factors_success_rates_violations[penalty_factor] = {
+        'mean_reward': mean_success_rate,
+        'std_dev_reward': std_dev_success_rate,
+        'mean_violations': mean_violations,
+        'std_dev_violations': std_dev_violations
+    }
 
-print(penalty_factors_success_rate)
-# Create the bar plot
-plt.bar(penalty_factors, penalty_factors_success_rate, color='blue')
+    print(f"\nMean Success Rate for Penalty Factor {penalty_factor}: {mean_success_rate:.2f}%")
+    print(f"Standard Deviation of Success Rates for Penalty Factor {penalty_factor}: {std_dev_success_rate:.2f}%")
 
-# Add labels and title
-plt.xlabel('Penalty Factors')
-plt.ylabel('Success Rate')
-plt.title('Penalty Factor vs Success Rate')
+env.close()
 
-# Show the plot
-plt.savefig('success_rates')
+# Prepare data for plotting
+penalty_factors = list(penalty_factors_success_rates_violations.keys())
+mean_rewards = [data['mean_reward'] for data in penalty_factors_success_rates_violations.values()]
+std_dev_rewards = [data['std_dev_reward'] for data in penalty_factors_success_rates_violations.values()]
+
+mean_violations = [data['mean_violations'] for data in penalty_factors_success_rates_violations.values()]
+std_dev_violations = [data['std_dev_violations'] for data in penalty_factors_success_rates_violations.values()]
+
+# Plotting success rates
+plt.figure(figsize=(12, 6))
+
+# Bar plot for success rates
+plt.subplot(1, 2, 1)
+bars = plt.bar(penalty_factors, mean_rewards, yerr=std_dev_rewards, color='skyblue', capsize=5)
+plt.xlabel('Penalty Factor')
+plt.ylabel('Mean Success Rate (%)')
+plt.title('Mean Success Rates by Penalty Factor')
+plt.xticks(rotation=45)
+
+# Adding value labels on bars
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
+
+# Plotting safety violations
+plt.subplot(1, 2, 2)
+bars = plt.bar(penalty_factors, mean_violations, yerr=std_dev_violations, color='salmon', capsize=5)
+plt.xlabel('Penalty Factor')
+plt.ylabel('Mean Violations')
+plt.title('Mean Safety Violations by Penalty Factor')
+plt.xticks(rotation=45)
+
+# Adding value labels on bars
+for bar in bars:
+    yval = bar.get_height()
+    plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
+
+plt.tight_layout()
+plt.savefig('results')

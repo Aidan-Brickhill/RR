@@ -12,3 +12,9 @@
 
 
 TODO - try run new reward 14 on normal with no violations for both, and run 13 on pickup, then run pickup furhter, then do above
+
+DO 0 and 20 - remove 0,25 and 0,5
+On success rates do it over more runs - and log violations with it
+Get reuslts on best models
+Have tabel with these metrics
+Instead of bar graph do box and whisker
