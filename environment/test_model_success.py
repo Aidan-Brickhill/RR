@@ -2,18 +2,19 @@ from matplotlib import pyplot as plt
 import numpy as np
 from stable_baselines3 import PPO
 from handover_env import HandoverEnv
+import csv
+
 
 # Set the penalty factors
-penalty_factors = ["0","1","2","5","10"]
-# [5.75, 23.0, 1.25, 7.5]
+penalty_factors = ["0","1","2","5","10","20"]
 # Set the penalty factor success rate
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 50
+episodes_per_model = 2
 
 # Set the number of models 
-number_of_models = 10
+number_of_models = 2
 
 # Set the environemnt
 env = HandoverEnv(tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400)
@@ -29,7 +30,7 @@ for penalty_factor in penalty_factors:
 
 
     # Set the penalty factor path
-    model_paths = f"environment/models/PPO_Final/PF_{penalty_factor}/model_"
+    model_paths = f"RR/environment/models/PPO_Final/PF_{penalty_factor}/model_"
     print(f"Running Penalty Factor {penalty_factor} ==========================")
 
     # Set the model number
@@ -44,7 +45,7 @@ for penalty_factor in penalty_factors:
 
         # Set the model path using the penalty factor path
         model_path = f"{model_paths}{model_number}"
-        print(f"Running model {model_number}")
+        print(f"\nRunning model {model_number}")
         
         # Load the model
         try:
@@ -100,6 +101,7 @@ for penalty_factor in penalty_factors:
 
 env.close()
 
+
 # Prepare data for plotting
 penalty_factors = list(penalty_factors_success_rates_violations.keys())
 mean_rewards = [data['mean_reward'] for data in penalty_factors_success_rates_violations.values()]
@@ -108,12 +110,31 @@ std_dev_rewards = [data['std_dev_reward'] for data in penalty_factors_success_ra
 mean_violations = [data['mean_violations'] for data in penalty_factors_success_rates_violations.values()]
 std_dev_violations = [data['std_dev_violations'] for data in penalty_factors_success_rates_violations.values()]
 
-# Plotting success rates
-plt.figure(figsize=(12, 6))
+# Save the data to a CSV
+csv_filename = 'penalty_factors_results.csv'
+with open(csv_filename, 'w', newline='') as csvfile:
+    fieldnames = ['Penalty Factor', 'Mean Reward', 'Std Dev Reward', 'Mean Violations', 'Std Dev Violations']
+    writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+    
+    writer.writeheader()
+    for i in range(len(penalty_factors)):
+        writer.writerow({
+            'Penalty Factor': penalty_factors[i],
+            'Mean Reward': mean_rewards[i],
+            'Std Dev Reward': std_dev_rewards[i],
+            'Mean Violations': mean_violations[i],
+            'Std Dev Violations': std_dev_violations[i]
+        })
 
-# Bar plot for success rates
-plt.subplot(1, 2, 1)
-bars = plt.bar(penalty_factors, mean_rewards, yerr=std_dev_rewards, color='skyblue', capsize=5)
+# Plotting success rates
+plt.figure(figsize=(8, 6))
+
+# Make sure std dev doesn't go below 0
+reward_error_lower = np.maximum(0, np.array(mean_rewards) - np.array(std_dev_rewards))
+reward_error_upper = np.array(mean_rewards) + np.array(std_dev_rewards)
+reward_errors = [mean_rewards - reward_error_lower, reward_error_upper - mean_rewards]
+
+bars = plt.bar(penalty_factors, mean_rewards, yerr=reward_errors, color='skyblue', capsize=5)
 plt.xlabel('Penalty Factor')
 plt.ylabel('Mean Success Rate (%)')
 plt.title('Mean Success Rates by Penalty Factor')
@@ -124,9 +145,18 @@ for bar in bars:
     yval = bar.get_height()
     plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
 
-# Plotting safety violations
-plt.subplot(1, 2, 2)
-bars = plt.bar(penalty_factors, mean_violations, yerr=std_dev_violations, color='salmon', capsize=5)
+plt.tight_layout()
+plt.savefig('success_rates.png')
+
+# Plotting safety violations in a separate figure
+plt.figure(figsize=(8, 6))
+
+# Make sure std dev doesn't go below 0
+violation_error_lower = np.maximum(0, np.array(mean_violations) - np.array(std_dev_violations))
+violation_error_upper = np.array(mean_violations) + np.array(std_dev_violations)
+violation_errors = [mean_violations - violation_error_lower, violation_error_upper - mean_violations]
+
+bars = plt.bar(penalty_factors, mean_violations, yerr=violation_errors, color='salmon', capsize=5)
 plt.xlabel('Penalty Factor')
 plt.ylabel('Mean Violations')
 plt.title('Mean Safety Violations by Penalty Factor')
@@ -138,4 +168,4 @@ for bar in bars:
     plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
 
 plt.tight_layout()
-plt.savefig('results')
+plt.savefig('safety_violations.png')
