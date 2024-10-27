@@ -26,7 +26,7 @@ for penalty_factor in penalty_factors:
     violations = []
 
     # Set the penalty factor path
-    model_path = f"environment/models/PPO_Final/BEST_MODEL_PER_PF/pf_{penalty_factor}"
+    model_path = f"../environment/models/PPO_Final/BEST_MODEL_PER_PF/pf_{penalty_factor}"
     print(f"Running Penalty Factor {penalty_factor} ==========================")
     # Set the model number
     model_success_rate = 0

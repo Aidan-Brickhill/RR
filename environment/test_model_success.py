@@ -30,7 +30,7 @@ for penalty_factor in penalty_factors:
 
 
     # Set the penalty factor path
-    model_paths = f"environment/models/PPO_Final/PF_{penalty_factor}/model_"
+    model_paths = f"../environment/models/PPO_Final/PF_{penalty_factor}/model_"
     print(f"Running Penalty Factor {penalty_factor} ==========================")
 
     # Set the model number
