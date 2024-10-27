@@ -11,7 +11,7 @@ penalty_factors = ["0","1","2","5","10","20"]
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 1
+episodes_per_model = 500
 
 # Set the environemnt
 env = HandoverEnv(tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400)
