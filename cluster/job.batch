@@ -8,7 +8,7 @@
 #SBATCH --partition=bigbatch
 export MUJOCO_GL="egl"
 
-python3 ../environment/test_model_success.py > /home-mscluster/abrickhill/research/RR/cluster/test_model_success.txt 2> /home-mscluster/abrickhill/research/RR/cluster/test_model_success.txt &
+# python3 ../environment/test_model_success.py > /home-mscluster/abrickhill/research/RR/cluster/test_model_success.txt 2> /home-mscluster/abrickhill/research/RR/cluster/test_model_success.txt &
 python3 ../environment/test_best_model_success.py > /home-mscluster/abrickhill/research/RR/cluster/test_best_model_success.txt 2> /home-mscluster/abrickhill/research/RR/cluster/test_best_model_success.txt &
 
 # # Run 8 processes in parallel, each with its own output and error file
