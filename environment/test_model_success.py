@@ -11,10 +11,10 @@ penalty_factors = ["0","1","2","5","10","20"]
 penalty_factors_success_rate = []
 
 # Set the epsiodes per model
-episodes_per_model = 2
+episodes_per_model = 1
 
 # Set the number of models 
-number_of_models = 2
+number_of_models = 10
 
 # Set the environemnt
 env = HandoverEnv(tasks_to_complete=["object_move_place", "object_move_handover", "object_move_lift", "panda_giver_retreat", "panda_giver_grasp", "panda_reciever_to_giver", "panda_reciever_grasp"], max_episode_steps=400)
@@ -30,7 +30,7 @@ for penalty_factor in penalty_factors:
 
 
     # Set the penalty factor path
-    model_paths = f"RR/environment/models/PPO_Final/PF_{penalty_factor}/model_"
+    model_paths = f"environment/models/PPO_Final/PF_{penalty_factor}/model_"
     print(f"Running Penalty Factor {penalty_factor} ==========================")
 
     # Set the model number
@@ -111,7 +111,7 @@ mean_violations = [data['mean_violations'] for data in penalty_factors_success_r
 std_dev_violations = [data['std_dev_violations'] for data in penalty_factors_success_rates_violations.values()]
 
 # Save the data to a CSV
-csv_filename = 'penalty_factors_results.csv'
+csv_filename = 'normal_penalty_factors_results.csv'
 with open(csv_filename, 'w', newline='') as csvfile:
     fieldnames = ['Penalty Factor', 'Mean Reward', 'Std Dev Reward', 'Mean Violations', 'Std Dev Violations']
     writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
@@ -146,7 +146,7 @@ for bar in bars:
     plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
 
 plt.tight_layout()
-plt.savefig('success_rates.png')
+plt.savefig('normal_success_rates.png')
 
 # Plotting safety violations in a separate figure
 plt.figure(figsize=(8, 6))
@@ -168,4 +168,4 @@ for bar in bars:
     plt.text(bar.get_x() + bar.get_width()/2, yval, f'{yval:.1f}', va='bottom')  # va: vertical alignment
 
 plt.tight_layout()
-plt.savefig('safety_violations.png')
+plt.savefig('normal_safety_violations.png')
